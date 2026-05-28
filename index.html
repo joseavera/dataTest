@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Repaso · Pilas Stack&lt;T&gt; · C#</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:    #09090E;
+  --s1:    #0F0F18;
+  --s2:    #161622;
+  --bd:    #1E1E30;
+  --bd2:   #2A2A42;
+  --p:     #818CF8;   /* indigo */
+  --p2:    #4F46E5;
+  --p3:    #3730A3;
+  --acc:   #F472B6;   /* pink accent */
+  --acc2:  #EC4899;
+  --gr:    #34D399;
+  --gr2:   #059669;
+  --am:    #FBBF24;
+  --cy:    #22D3EE;
+  --tx:    #F1F5F9;
+  --tx2:   #94A3B8;
+  --tx3:   #475569;
+  --mono:  'JetBrains Mono',monospace;
+  --sans:  'Space Grotesk',sans-serif;
+  --kw:#C792EA; --tp:#82AAFF; --st:#C3E88D; --cm:#546E7A; --nm:#F78C6C; --mt:#89DDFF;
+}
+
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg)}
+body{font-family:var(--sans);color:var(--tx);user-select:none}
+
+/* ── DECK ───────────────────────────────────────── */
+.deck{
+  width:100vw;height:100vh;
+  position:relative;
+}
+
+/* ── SLIDE ──────────────────────────────────────── */
+.slide{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  padding:52px 72px 48px;
+  opacity:0;pointer-events:none;
+  transition:opacity .35s ease, transform .35s ease;
+  transform:translateX(40px);
+  overflow:hidden;
+}
+.slide.active{
+  opacity:1;pointer-events:all;transform:translateX(0);
+}
+.slide.exit-left{
+  opacity:0;transform:translateX(-40px);
+}
+
+/* Backgrounds per slide type */
+.slide-cover{background:var(--bg)}
+.slide-light{background:var(--s1)}
+.slide-dark{background:var(--bg)}
+.slide-code{background:#080810}
+.slide-split{background:var(--s1)}
+
+/* ── NOISE OVERLAY ──────────────────────────────── */
+.slide::before{
+  content:'';position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:0;
+}
+.slide>*{position:relative;z-index:1}
+
+/* ── TOP BAR ────────────────────────────────────── */
+.top-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:40px;flex-shrink:0;
+}
+.top-bar-left{display:flex;align-items:center;gap:12px}
+.tag{
+  font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 10px;border-radius:4px;font-family:var(--mono);
+}
+.tag-p{background:#4F46E515;color:var(--p);border:1px solid #4F46E530}
+.tag-g{background:#05966915;color:var(--gr);border:1px solid #05966930}
+.tag-a{background:#D9770615;color:var(--am);border:1px solid #D9770630}
+.tag-c{background:#0891B215;color:var(--cy);border:1px solid #0891B230}
+.slide-counter{
+  font-family:var(--mono);font-size:11px;color:var(--tx3);
+  display:flex;align-items:center;gap:8px;
+}
+.counter-dots{display:flex;gap:5px;align-items:center}
+.cdot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--bd2);transition:all .3s;
+}
+.cdot.active{background:var(--p);width:18px;border-radius:3px}
+.cdot.done{background:var(--p3)}
+
+/* ── HEADINGS ───────────────────────────────────── */
+.kicker{
+  font-family:var(--mono);font-size:11px;font-weight:500;
+  letter-spacing:.12em;text-transform:uppercase;
+  color:var(--p);margin-bottom:12px;
+}
+.headline{
+  font-size:clamp(28px,4.5vw,54px);font-weight:700;
+  line-height:1.1;letter-spacing:-.02em;
+  color:var(--tx);margin-bottom:16px;
+}
+.headline .hl-p{color:var(--p)}
+.headline .hl-a{color:var(--acc)}
+.headline .hl-g{color:var(--gr)}
+.headline .hl-c{color:var(--cy)}
+.sub{
+  font-size:clamp(14px,1.8vw,18px);color:var(--tx2);
+  line-height:1.65;max-width:640px;
+  font-weight:400;
+}
+
+/* ── COVER SPECIFIC ──────────────────────────────── */
+.cover-layout{
+  flex:1;display:flex;flex-direction:column;justify-content:center;
+  position:relative;
+}
+.cover-accent{
+  position:absolute;top:-80px;right:-100px;
+  width:500px;height:500px;border-radius:50%;
+  background:radial-gradient(circle, #4F46E520 0%, transparent 65%);
+  pointer-events:none;
+}
+.cover-accent2{
+  position:absolute;bottom:-120px;left:-60px;
+  width:350px;height:350px;border-radius:50%;
+  background:radial-gradient(circle, #EC489910 0%, transparent 65%);
+  pointer-events:none;
+}
+.cover-badge-row{
+  display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px;
+}
+.cover-title{
+  font-size:clamp(38px,7vw,80px);font-weight:700;
+  line-height:1;letter-spacing:-.03em;
+  margin-bottom:20px;
+}
+.cover-title .line1{
+  background:linear-gradient(120deg,var(--tx) 0%,var(--p) 60%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.cover-title .line2{
+  background:linear-gradient(120deg,var(--acc) 0%,var(--cy) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.cover-sub{
+  font-size:clamp(14px,1.8vw,20px);color:var(--tx2);
+  line-height:1.6;max-width:580px;margin-bottom:32px;
+}
+.cover-meta{
+  display:flex;gap:20px;flex-wrap:wrap;
+  font-family:var(--mono);font-size:12px;color:var(--tx3);
+}
+.cover-meta span{display:flex;align-items:center;gap:6px}
+.cover-meta em{color:var(--tx2);font-style:normal}
+
+/* ── 2-COL LAYOUT ───────────────────────────────── */
+.two-col{
+  flex:1;display:grid;grid-template-columns:1fr 1fr;
+  gap:32px;align-items:start;
+  overflow:hidden;
+}
+.col{display:flex;flex-direction:column;gap:16px}
+
+/* ── CARDS ──────────────────────────────────────── */
+.card{
+  background:var(--s2);border:1px solid var(--bd);border-radius:12px;
+  padding:18px 20px;
+}
+.card-head{
+  font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  margin-bottom:10px;font-family:var(--mono);
+}
+.card-head.cp{color:var(--p)}
+.card-head.cg{color:var(--gr)}
+.card-head.ca{color:var(--am)}
+.card-head.cc{color:var(--cy)}
+.card p{font-size:13.5px;color:var(--tx2);line-height:1.65}
+
+/* ── FEATURE LIST ───────────────────────────────── */
+.feat-list{display:flex;flex-direction:column;gap:12px}
+.feat{
+  display:flex;gap:14px;align-items:flex-start;
+  padding:14px 16px;border-radius:10px;
+  border-left:3px solid;
+}
+.feat-p{background:#4F46E50C;border-color:var(--p)}
+.feat-g{background:#05966910;border-color:var(--gr)}
+.feat-a{background:#D9770610;border-color:var(--am)}
+.feat-c{background:#0891B210;border-color:var(--cy)}
+.feat-icon{font-size:20px;flex-shrink:0;margin-top:1px}
+.feat-title{font-weight:600;font-size:14px;margin-bottom:3px}
+.feat-desc{font-size:12.5px;color:var(--tx2);line-height:1.6}
+
+/* ── CODE ───────────────────────────────────────── */
+.code-wrap{
+  background:#060609;border:1px solid var(--bd);border-radius:12px;
+  overflow:hidden;flex:1;display:flex;flex-direction:column;
+}
+.code-wrap.full{width:100%}
+.code-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 16px;border-bottom:1px solid var(--bd);
+  background:#0A0A12;flex-shrink:0;
+}
+.code-dots{display:flex;gap:6px}
+.code-dot{width:10px;height:10px;border-radius:50%}
+.code-dot:nth-child(1){background:#FF5F57}
+.code-dot:nth-child(2){background:#FFBD2E}
+.code-dot:nth-child(3){background:#28C840}
+.code-fname{font-family:var(--mono);font-size:11px;color:var(--tx3)}
+.code-body{
+  padding:18px 20px;overflow:auto;
+  font-family:var(--mono);font-size:13px;line-height:1.9;
+  flex:1;
+}
+.code-body pre{white-space:pre-wrap;word-break:break-all}
+.kw{color:var(--kw)} .tp{color:var(--tp)} .st{color:var(--st)}
+.cm{color:var(--cm);font-style:italic} .nm{color:var(--nm)}
+.mt{color:var(--mt)} .vr{color:#EEFFFF}
+
+/* ── STACK VISUAL ───────────────────────────────── */
+.stack-visual{
+  display:flex;flex-direction:column;gap:6px;
+  align-items:stretch;max-width:320px;margin:0 auto;
+}
+.sv-label{
+  font-family:var(--mono);font-size:10px;color:var(--tx3);
+  text-align:center;letter-spacing:.08em;text-transform:uppercase;
+  margin-bottom:6px;
+}
+.sv-item{
+  padding:12px 18px;border-radius:8px;
+  font-family:var(--mono);font-size:13px;font-weight:500;
+  text-align:center;border:1px solid;
+  transition:all .3s;
+}
+.sv-tope{
+  background:#4F46E518;border-color:#4F46E550;color:var(--p);
+  box-shadow:0 0 20px #4F46E520;
+}
+.sv-mid{background:var(--s2);border-color:var(--bd2);color:var(--tx2)}
+.sv-fondo{background:#09090E;border-color:var(--bd);color:var(--tx3)}
+.sv-arrow{
+  text-align:center;font-size:18px;
+  color:var(--tx3);line-height:1;
+}
+.sv-null{
+  text-align:center;font-family:var(--mono);
+  font-size:12px;color:var(--tx3);padding:6px;
+}
+
+/* ── OP TABLE ───────────────────────────────────── */
+.op-table{width:100%;border-collapse:collapse;font-size:13px}
+.op-table th{
+  text-align:left;padding:8px 12px;
+  font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--tx3);font-weight:600;
+  border-bottom:1px solid var(--bd2);font-family:var(--mono);
+}
+.op-table td{
+  padding:12px 12px;border-bottom:1px solid var(--bd);
+  vertical-align:middle;
+}
+.op-table tr:last-child td{border-bottom:none}
+.op-name{
+  font-family:var(--mono);font-weight:700;
+  font-size:14px;
+}
+.op-name.op-p{color:var(--p)}
+.op-name.op-g{color:var(--gr)}
+.op-name.op-a{color:var(--am)}
+.op-name.op-c{color:var(--cy)}
+.op-desc{color:var(--tx2);font-size:13px;line-height:1.5}
+.op-cafe{color:var(--tx3);font-size:12px;font-style:italic}
+.op-code{
+  font-family:var(--mono);font-size:11.5px;
+  color:var(--gr);background:#05966910;
+  padding:3px 8px;border-radius:4px;
+  border:1px solid #05966930;white-space:nowrap;
+}
+
+/* ── COMPARISON ─────────────────────────────────── */
+.compare-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:14px;flex:1;
+}
+.cmp-card{
+  border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:10px;
+}
+.cmp-p{background:#4F46E50C;border:1px solid #4F46E530}
+.cmp-g{background:#05966910;border:1px solid #05966930}
+.cmp-a{background:#D9770610;border:1px solid #D9770630}
+.cmp-head{
+  display:flex;align-items:center;gap:10px;
+}
+.cmp-icon{font-size:24px}
+.cmp-name{font-weight:700;font-size:15px}
+.cmp-use{
+  font-family:var(--mono);font-size:11px;color:var(--tx3);
+  padding:3px 8px;border-radius:4px;background:var(--bg);
+  align-self:flex-start;
+}
+.cmp-rows{display:flex;flex-direction:column;gap:7px}
+.cmp-row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.cmp-label{font-size:12px;color:var(--tx3)}
+.cmp-val{
+  font-family:var(--mono);font-size:11px;font-weight:600;
+  padding:2px 7px;border-radius:4px;
+}
+.v-ok{color:var(--gr);background:#05966918}
+.v-med{color:var(--am);background:#D9770618}
+.v-no{color:#F87171;background:#7F1D1D18}
+.cmp-when{
+  font-size:12px;color:var(--tx2);line-height:1.6;
+  border-top:1px solid var(--bd);padding-top:10px;
+  margin-top:2px;
+}
+
+/* ── CALLOUT ─────────────────────────────────────── */
+.callout{
+  display:flex;gap:14px;align-items:flex-start;
+  padding:14px 18px;border-radius:10px;
+  font-size:13px;line-height:1.65;flex-shrink:0;
+}
+.callout-p{background:#4F46E510;border:1px solid #4F46E530;color:#A5B4FC}
+.callout-g{background:#05966910;border:1px solid #05966930;color:#6EE7B7}
+.callout-a{background:#D9770610;border:1px solid #D9770630;color:#FCD34D}
+.callout-c{background:#0891B210;border:1px solid #0891B230;color:#67E8F9}
+.callout-icon{font-size:18px;flex-shrink:0}
+
+/* ── BOTTOM HINT ─────────────────────────────────── */
+.bottom-hint{
+  flex-shrink:0;
+  display:flex;align-items:center;justify-content:space-between;
+  padding-top:24px;
+}
+.hint-keys{
+  display:flex;align-items:center;gap:8px;
+  font-family:var(--mono);font-size:11px;color:var(--tx3);
+}
+.key{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:3px 8px;border-radius:5px;border:1px solid var(--bd2);
+  background:var(--s2);font-size:10px;color:var(--tx2);min-width:28px;
+}
+.hint-progress{
+  font-family:var(--mono);font-size:11px;color:var(--tx3);
+}
+
+/* ── TRANSITION ANIMATIONS ───────────────────────── */
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.anim-1{animation:fadeIn .4s ease .05s both}
+.anim-2{animation:fadeIn .4s ease .15s both}
+.anim-3{animation:fadeIn .4s ease .25s both}
+.anim-4{animation:fadeIn .4s ease .35s both}
+.anim-5{animation:fadeIn .4s ease .45s both}
+.anim-6{animation:fadeIn .4s ease .55s both}
+
+/* ── PROGRESS LINE ──────────────────────────────── */
+.progress-line{
+  position:fixed;top:0;left:0;height:2px;
+  background:linear-gradient(90deg,var(--p),var(--acc));
+  transition:width .4s ease;z-index:100;
+}
+</style>
+</head>
+<body>
+
+<!-- progress line -->
+<div class="progress-line" id="pLine" style="width:0%"></div>
+
+<div class="deck" id="deck">
+
+<!-- ════════════════════════════════════════
+     SLIDE 0 — PORTADA
+════════════════════════════════════════ -->
+<div class="slide slide-cover active" id="sl0">
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <span class="tag tag-p">IEDEP</span>
+      <span class="tag tag-g">Preparatoria</span>
+      <span class="tag tag-a">Clase 3</span>
+    </div>
+    <div class="slide-counter">
+      <div class="counter-dots" id="dots"></div>
+    </div>
+  </div>
+  <div class="cover-layout">
+    <div class="cover-accent"></div>
+    <div class="cover-accent2"></div>
+    <div class="cover-badge-row anim-1">
+      <span class="tag tag-p">C# · Stack&lt;T&gt;</span>
+      <span class="tag tag-g">OOP</span>
+      <span class="tag tag-c">Codespaces</span>
+      <span class="tag tag-a">GitHub</span>
+    </div>
+    <div class="cover-title anim-2">
+      <div class="line1">Pilas</div>
+      <div class="line2">Stack&lt;T&gt;</div>
+    </div>
+    <div class="cover-sub anim-3">
+      Repaso rápido antes de la dinámica. En 8 diapositivas verás todo lo que necesitas: concepto, operaciones, código y cuándo usarlo.
+    </div>
+    <div class="cover-meta anim-4">
+      <span>📍 <em>Estructura de Datos</em></span>
+      <span>⏱ <em>~10 minutos</em></span>
+      <span>🧩 <em>8 slides</em></span>
+    </div>
+  </div>
+  <div class="bottom-hint">
+    <div class="hint-keys">
+      <span class="key">→</span> o <span class="key">Space</span> para avanzar &nbsp;·&nbsp; <span class="key">←</span> para regresar
+    </div>
+    <span class="hint-progress" id="hp0">1 / 9</span>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════
+     SLIDE 1 — ¿QUÉ ES UNA PILA?
+════════════════════════════════════════ -->
+<div class="slide slide-light" id="sl1">
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <span class="tag tag-p">01</span>
+      <span class="tag tag-a">CONCEPTO</span>
+    </div>
+  </div>
+  <div class="kicker anim-1">¿Qué es una pila?</div>
+  <div class="headline anim-2">La regla es simple:<br><span class="hl-p">último en entrar,</span><br><span class="hl-a">primero en salir.</span></div>
+  <div class="two-col" style="margin-top:24px">
+    <div class="col">
+      <div class="feat feat-p anim-3">
+        <div class="feat-icon">🥞</div>
+        <div>
+          <div class="feat-title">La analogía perfecta</div>
+          <div class="feat-desc">Las <strong>charolas de la cafetería</strong>. Siempre tomas la de arriba — la última que alguien colocó. No puedes sacar la del fondo sin quitar todas las de encima.</div>
+        </div>
+      </div>
+      <div class="feat feat-a anim-4">
+        <div class="feat-icon">↩️</div>
+        <div>
+          <div class="feat-title">Ya la usas todos los días</div>
+          <div class="feat-desc"><strong>Ctrl+Z</strong> en cualquier editor. La última acción que hiciste es la primera en deshacerse. Las acciones se apilan, y deshacer las desapila.</div>
+        </div>
+      </div>
+      <div class="feat feat-c anim-5">
+        <div class="feat-icon">🌐</div>
+        <div>
+          <div class="feat-title">Botón «Atrás» del navegador</div>
+          <div class="feat-desc">Las páginas visitadas se apilan. Cada vez que regresas, sacas la última página de la pila.</div>
+        </div>
+      </div>
+    </div>
+    <div class="col anim-4" style="align-items:center;justify-content:center">
+      <div class="stack-visual">
+        <div class="sv-label">Estado de la pila →</div>
+        <div class="sv-item sv-tope">Jugo naranja ← TOPE</div>
+        <div class="sv-arrow">↕</div>
+        <div class="sv-item sv-mid">Torta de jamón</div>
+        <div class="sv-arrow">↕</div>
+        <div class="sv-item sv-mid">Agua 500ml</div>
+        <div class="sv-arrow">↕</div>
+        <div class="sv-item sv-fondo">Tacos x2 ← FONDO</div>
+        <div class="sv-null">→ null (fin)</div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-hint"><div class="hint-keys"><span class="key">→</span> continuar</div><span class="hint-progress" id="hp1">2 / 9</span></div>
+</div>
+
+
+<!-- ════════════════════════════════════════
+     SLIDE 2 — LIFO
+════════════════════════════════════════ -->
+<div class="slide slide-dark" id="sl2">
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <span class="tag tag-p">02</span>
+      <span class="tag tag-p">LIFO</span>
+    </div>
+  </div>
+  <div class="kicker anim-1">el principio fundamental</div>
+  <div class="headline anim-2"><span class="hl-p">L</span>ast <span class="hl-p">I</span>n, <span class="hl-p">F</span>irst <span class="hl-p">O</span>ut</div>
+  <div class="sub anim-3" style="margin-bottom:28px">Cada estructura de datos tiene una regla de orden. La pila usa LIFO. Entender esta regla es entender todo lo que Stack hace.</div>
+  <div class="compare-grid anim-4" style="grid-template-columns:1fr 1fr;max-height:260px">
+    <div class="cmp-card cmp-p" style="grid-column:1">
+      <div class="cmp-head"><span class="cmp-icon">📥</span><div><div class="cmp-name" style="color:var(--p)">Entraron en este orden</div></div></div>
+      <div style="font-family:var(--mono);font-size:13px;color:var(--tx2);display:flex;flex-direction:column;gap:6px;margin-top:4px">
+        <div style="display:flex;align-items:center;gap:8px"><span style="color:var(--tx3);font-size:11px">1°</span> <span>Tacos x2</span> <span style="color:var(--tx3);font-size:11px">← fondo</span></div>
+        <div style="display:flex;align-items:center;gap:8px"><span style="color:var(--tx3);font-size:11px">2°</span> <span>Agua 500ml</span></div>
+        <div style="display:flex;align-items:center;gap:8px"><span style="color:var(--tx3);font-size:11px">3°</span> <span>Torta de jamón</span></div>
+        <div style="display:flex;align-items:center;gap:8px"><span style="color:var(--tx3);font-size:11px">4°</span> <span style="color:var(--p)">Jugo naranja</span> <span style="color:var(--p);font-size:11px">← tope</span></div>
+      </div>
+    </div>
+    <div class="cmp-card" style="background:#F4726B0C;border:1px solid #F4726B30;grid-column:2">
+      <div class="cmp-head"><span class="cmp-icon">📤</span><div><div class="cmp-name" style="color:var(--acc)">Salen en este orden</div></div></div>
+      <div style="font-family:var(--mono);font-size:13px;color:var(--tx2);display:flex;flex-direction:column;gap:6px;margin-top:4px">
+        <div style="display:flex;align-items:center;gap:8px"><span style="color:var(--acc);font-size:11px">1°</span> <span style="color:var(--acc)">Jugo naranja</span> <span style="color:var(--acc);font-size:11px">← sale primero</span></div>
+        <div style="display:flex;align-items:center;gap:8px"><span style="color:var(--tx3);font-size:11px">2°</span> <span>Torta de jamón</span></div>
+        <div style="display:flex;align-items:center;gap:8px"><span style="color:var(--tx3);font-size:11px">3°</span> <span>Agua 500ml</span></div>
+        <div style="display:flex;align-items:center;gap:8px"><span style="color:var(--tx3);font-size:11px">4°</span> <span>Tacos x2</span> <span style="color:var(--tx3);font-size:11px">← sale al final</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="callout callout-p anim-5" style="margin-top:20px">
+    <span class="callout-icon">💡</span>
+    <span>El orden de entrada y el orden de salida son <strong>exactamente inversos</strong>. El primero en entrar es el último en salir. El último en entrar es el primero en salir.</span>
+  </div>
+  <div class="bottom-hint"><div class="hint-keys"><span class="key">→</span> continuar</div><span class="hint-progress" id="hp2">3 / 9</span></div>
+</div>
+
+
+<!-- ════════════════════════════════════════
+     SLIDE 3 — LAS 3 OPERACIONES
+════════════════════════════════════════ -->
+<div class="slide slide-light" id="sl3">
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <span class="tag tag-p">03</span>
+      <span class="tag tag-g">OPERACIONES</span>
+    </div>
+  </div>
+  <div class="kicker anim-1">solo necesitas tres</div>
+  <div class="headline anim-2">Push · Pop · <span class="hl-a">Peek</span></div>
+  <div class="anim-3" style="flex:1;overflow:auto">
+    <table class="op-table">
+      <thead><tr>
+        <th>Operación</th>
+        <th>¿Qué hace?</th>
+        <th>En la cafetería</th>
+        <th>Código C#</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="op-name op-p">Push()</span></td>
+          <td class="op-desc"><strong>Agrega</strong> un elemento encima del tope. La pila crece.</td>
+          <td class="op-cafe">Colocas una charola nueva encima de todas.</td>
+          <td><code class="op-code">pila.Push("Tacos");</code></td>
+        </tr>
+        <tr>
+          <td><span class="op-name op-g">Pop()</span></td>
+          <td class="op-desc"><strong>Quita y devuelve</strong> el elemento del tope. La pila encoge.</td>
+          <td class="op-cafe">Agarras la charola de arriba — ya no está en la pila.</td>
+          <td><code class="op-code">string x = pila.Pop();</code></td>
+        </tr>
+        <tr>
+          <td><span class="op-name op-a">Peek()</span></td>
+          <td class="op-desc"><strong>Solo mira</strong> el tope sin quitarlo. La pila no cambia.</td>
+          <td class="op-cafe">Miras qué charola está arriba sin tomarla.</td>
+          <td><code class="op-code">string x = pila.Peek();</code></td>
+        </tr>
+        <tr>
+          <td><span class="op-name op-c">Count</span></td>
+          <td class="op-desc"><strong>Cuántos</strong> elementos hay actualmente en la pila.</td>
+          <td class="op-cafe">Cuentas las charolas apiladas.</td>
+          <td><code class="op-code">int n = pila.Count;</code></td>
+        </tr>
+        <tr>
+          <td><span class="op-name" style="color:var(--tx2)">foreach</span></td>
+          <td class="op-desc">Recorre todos los elementos del tope al fondo. Sin modificar.</td>
+          <td class="op-cafe">Revisas todas las charolas con los ojos de arriba a abajo.</td>
+          <td><code class="op-code">foreach(var p in pila){}</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout callout-a anim-4" style="margin-top:16px">
+    <span class="callout-icon">⚠️</span>
+    <span>Pop() y Peek() en una pila vacía lanzan <strong>InvalidOperationException</strong>. Siempre verifica <code style="color:var(--am)">pila.Count &gt; 0</code> antes de llamarlos.</span>
+  </div>
+  <div class="bottom-hint"><div class="hint-keys"><span class="key">→</span> continuar</div><span class="hint-progress">4 / 9</span></div>
+</div>
+
+
+<!-- ════════════════════════════════════════
+     SLIDE 4 — CÓDIGO PASO A PASO
+════════════════════════════════════════ -->
+<div class="slide slide-code" id="sl4">
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <span class="tag tag-p">04</span>
+      <span class="tag tag-c">CÓDIGO</span>
+    </div>
+  </div>
+  <div class="kicker anim-1">el mismo código de la clase</div>
+  <div class="headline anim-2" style="font-size:clamp(22px,3vw,36px);margin-bottom:16px">Stack&lt;T&gt; en <span class="hl-c">C#</span> — Ejemplo completo</div>
+  <div class="two-col anim-3" style="gap:24px">
+    <div class="code-wrap">
+      <div class="code-bar">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <span class="code-fname">Program.cs</span>
+        <span class="code-fname">Cafetería IEDEP</span>
+      </div>
+      <div class="code-body"><pre><span class="kw">using</span> <span class="tp">System</span>;
+<span class="kw">using</span> <span class="tp">System.Collections.Generic</span>;
+
+<span class="kw">class</span> <span class="tp">Program</span>
+{
+  <span class="kw">static</span> <span class="kw">void</span> <span class="mt">Main</span>()
+  {
+    <span class="tp">Stack</span>&lt;<span class="tp">string</span>&gt; <span class="vr">pedidos</span> = <span class="kw">new</span> <span class="tp">Stack</span>&lt;<span class="tp">string</span>&gt;();
+
+    <span class="vr">pedidos</span>.<span class="mt">Push</span>(<span class="st">"Tacos x2"</span>);
+    <span class="vr">pedidos</span>.<span class="mt">Push</span>(<span class="st">"Agua 500ml"</span>);
+    <span class="vr">pedidos</span>.<span class="mt">Push</span>(<span class="st">"Torta de jamón"</span>);
+    <span class="vr">pedidos</span>.<span class="mt">Push</span>(<span class="st">"Jugo naranja"</span>);
+
+    <span class="cm">// Ver el tope sin quitarlo</span>
+    <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="vr">pedidos</span>.<span class="mt">Peek</span>());
+
+    <span class="cm">// Quitar el último pedido</span>
+    <span class="tp">string</span> <span class="vr">cancelado</span> = <span class="vr">pedidos</span>.<span class="mt">Pop</span>();
+    <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="vr">cancelado</span>);
+    <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="vr">pedidos</span>.Count);
+
+    <span class="cm">// Ver todo</span>
+    <span class="kw">foreach</span> (<span class="tp">string</span> <span class="vr">p</span> <span class="kw">in</span> <span class="vr">pedidos</span>)
+      <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="vr">p</span>);
+  }
+}</pre></div>
+    </div>
+    <div class="col" style="gap:10px">
+      <div class="card">
+        <div class="card-head cp">🖥 Salida en consola</div>
+        <div style="font-family:var(--mono);font-size:13px;line-height:1.9;color:var(--gr)">
+          Jugo naranja<br>
+          <span style="color:var(--acc)">Jugo naranja</span><br>
+          <span style="color:var(--cy)">3</span><br>
+          Torta de jamón<br>
+          Agua 500ml<br>
+          Tacos x2
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head ca">📌 Por qué esa salida</div>
+        <div style="font-size:12.5px;color:var(--tx2);line-height:1.7">
+          <strong style="color:var(--tx)">Peek()</strong> devuelve <em>Jugo naranja</em> — el tope — sin quitarlo.<br><br>
+          <strong style="color:var(--tx)">Pop()</strong> saca <em>Jugo naranja</em>. Count baja a 3.<br><br>
+          <strong style="color:var(--tx)">foreach</strong> recorre del tope al fondo: Torta → Agua → Tacos.
+        </div>
+      </div>
+      <div class="callout callout-g" style="padding:12px 14px">
+        <span class="callout-icon">💻</span>
+        <span style="font-size:12px">Puedes abrir este código en tu <strong>Codespace</strong> y agregar <code style="color:var(--gr)">Console.WriteLine</code> después de cada línea para ver el estado en tiempo real.</span>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-hint"><div class="hint-keys"><span class="key">→</span> continuar</div><span class="hint-progress">5 / 9</span></div>
+</div>
+
+
+<!-- ════════════════════════════════════════
+     SLIDE 5 — DIFERENCIAS CLAVE
+════════════════════════════════════════ -->
+<div class="slide slide-light" id="sl5">
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <span class="tag tag-p">05</span>
+      <span class="tag tag-a">DIFERENCIAS</span>
+    </div>
+  </div>
+  <div class="kicker anim-1">la pregunta más frecuente</div>
+  <div class="headline anim-2">Pop() vs <span class="hl-a">Peek()</span></div>
+  <div class="two-col anim-3" style="margin-top:20px;gap:24px">
+    <div class="col" style="gap:14px">
+      <div style="background:#4F46E50C;border:1px solid #4F46E530;border-radius:12px;padding:20px">
+        <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--p);margin-bottom:10px">Pop()</div>
+        <div style="font-size:13.5px;color:var(--tx2);line-height:1.7;margin-bottom:14px">Quita el elemento del tope y lo devuelve. <strong style="color:var(--tx)">La pila cambia</strong> — Count disminuye en 1.</div>
+        <div class="code-wrap" style="min-height:0">
+          <div class="code-bar"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div></div>
+          <div class="code-body" style="padding:12px 16px"><pre><span class="cm">// Antes: [Agua, Torta, Tacos]</span>
+<span class="tp">string</span> <span class="vr">x</span> = <span class="vr">pila</span>.<span class="mt">Pop</span>();
+<span class="cm">// x = "Agua"</span>
+<span class="cm">// Después: [Torta, Tacos]</span>
+<span class="cm">// Count: 3 → 2 ✖</span></pre></div>
+        </div>
+      </div>
+    </div>
+    <div class="col" style="gap:14px">
+      <div style="background:#D9770610;border:1px solid #D9770630;border-radius:12px;padding:20px">
+        <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--am);margin-bottom:10px">Peek()</div>
+        <div style="font-size:13.5px;color:var(--tx2);line-height:1.7;margin-bottom:14px">Solo mira el tope y lo devuelve. <strong style="color:var(--tx)">La pila NO cambia</strong> — Count sigue igual.</div>
+        <div class="code-wrap" style="min-height:0">
+          <div class="code-bar"><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div></div>
+          <div class="code-body" style="padding:12px 16px"><pre><span class="cm">// Antes: [Agua, Torta, Tacos]</span>
+<span class="tp">string</span> <span class="vr">x</span> = <span class="vr">pila</span>.<span class="mt">Peek</span>();
+<span class="cm">// x = "Agua"</span>
+<span class="cm">// Después: [Agua, Torta, Tacos]</span>
+<span class="cm">// Count: 3 → 3 ✔</span></pre></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="callout callout-c anim-4" style="margin-top:16px">
+    <span class="callout-icon">🧠</span>
+    <span>Regla práctica: si solo quieres <em>ver</em> lo que hay arriba → <code style="color:var(--cy)">Peek()</code>. Si quieres <em>sacar</em> lo que hay arriba → <code style="color:var(--cy)">Pop()</code>. Confundirlos es el error más común.</span>
+  </div>
+  <div class="bottom-hint"><div class="hint-keys"><span class="key">→</span> continuar</div><span class="hint-progress">6 / 9</span></div>
+</div>
+
+
+<!-- ════════════════════════════════════════
+     SLIDE 6 — ARREGLO vs LISTA vs STACK
+════════════════════════════════════════ -->
+<div class="slide slide-dark" id="sl6">
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <span class="tag tag-p">06</span>
+      <span class="tag tag-g">COMPARATIVA</span>
+    </div>
+  </div>
+  <div class="kicker anim-1">¿cuándo uso cuál?</div>
+  <div class="headline anim-2" style="font-size:clamp(22px,3vw,38px);margin-bottom:20px">Arreglo · LinkedList · <span class="hl-p">Stack</span></div>
+  <div class="compare-grid anim-3" style="flex:1">
+    <div class="cmp-card cmp-a">
+      <div class="cmp-head"><span class="cmp-icon">📐</span><div><div class="cmp-name" style="color:var(--am)">Array / int[]</div></div></div>
+      <span class="cmp-use">arreglo fijo</span>
+      <div class="cmp-rows">
+        <div class="cmp-row"><span class="cmp-label">Acceso por posición</span><span class="cmp-val v-ok">⚡ Directo</span></div>
+        <div class="cmp-row"><span class="cmp-label">Insertar al inicio</span><span class="cmp-val v-no">🐢 Mueve todo</span></div>
+        <div class="cmp-row"><span class="cmp-label">Tamaño</span><span class="cmp-val v-no">Fijo</span></div>
+        <div class="cmp-row"><span class="cmp-label">Accede al último</span><span class="cmp-val v-med">arr[n-1]</span></div>
+      </div>
+      <div class="cmp-when">Úsalo cuando sabes exactamente cuántos elementos habrá y necesitas acceso directo por índice.</div>
+    </div>
+    <div class="cmp-card cmp-g">
+      <div class="cmp-head"><span class="cmp-icon">🔗</span><div><div class="cmp-name" style="color:var(--gr)">LinkedList&lt;T&gt;</div></div></div>
+      <span class="cmp-use">lista enlazada</span>
+      <div class="cmp-rows">
+        <div class="cmp-row"><span class="cmp-label">Acceso por posición</span><span class="cmp-val v-no">🐢 Recorre</span></div>
+        <div class="cmp-row"><span class="cmp-label">Insertar al inicio</span><span class="cmp-val v-ok">⚡ O(1)</span></div>
+        <div class="cmp-row"><span class="cmp-label">Tamaño</span><span class="cmp-val v-ok">Flexible</span></div>
+        <div class="cmp-row"><span class="cmp-label">Accede al último</span><span class="cmp-val v-ok">.Last.Value</span></div>
+      </div>
+      <div class="cmp-when">Úsalo cuando insertas y eliminas frecuentemente en cualquier posición y no necesitas acceso por índice.</div>
+    </div>
+    <div class="cmp-card cmp-p">
+      <div class="cmp-head"><span class="cmp-icon">🥞</span><div><div class="cmp-name" style="color:var(--p)">Stack&lt;T&gt;</div></div></div>
+      <span class="cmp-use">pila LIFO</span>
+      <div class="cmp-rows">
+        <div class="cmp-row"><span class="cmp-label">Acceso por posición</span><span class="cmp-val v-no">🚫 No aplica</span></div>
+        <div class="cmp-row"><span class="cmp-label">Agregar al tope</span><span class="cmp-val v-ok">⚡ Push O(1)</span></div>
+        <div class="cmp-row"><span class="cmp-label">Tamaño</span><span class="cmp-val v-ok">Flexible</span></div>
+        <div class="cmp-row"><span class="cmp-label">Accede al último</span><span class="cmp-val v-ok">⚡ Peek O(1)</span></div>
+      </div>
+      <div class="cmp-when">Úsalo cuando SIEMPRE necesitas trabajar con el elemento más reciente. Ctrl+Z, historial, navegación.</div>
+    </div>
+  </div>
+  <div class="bottom-hint"><div class="hint-keys"><span class="key">→</span> continuar</div><span class="hint-progress">7 / 9</span></div>
+</div>
+
+
+<!-- ════════════════════════════════════════
+     SLIDE 7 — ERRORES COMUNES
+════════════════════════════════════════ -->
+<div class="slide slide-light" id="sl7">
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <span class="tag tag-p">07</span>
+      <span class="tag tag-a">ERRORES COMUNES</span>
+    </div>
+  </div>
+  <div class="kicker anim-1">aprende de los errores más frecuentes</div>
+  <div class="headline anim-2" style="font-size:clamp(22px,3vw,38px);margin-bottom:20px">Los 3 bugs más comunes con <span class="hl-p">Stack</span></div>
+  <div class="feat-list anim-3">
+    <div class="feat feat-a">
+      <div class="feat-icon">🐛</div>
+      <div>
+        <div class="feat-title">Bug 1 — Usar Pop() cuando quieres Peek()</div>
+        <div class="feat-desc">
+          <code style="color:var(--am)">string x = pila.Pop();</code> — si solo querías ver el tope, acabas de quitarlo. La pila cambió sin que quisieras. Usa <code style="color:var(--gr)">Peek()</code> para solo observar.
+        </div>
+      </div>
+    </div>
+    <div class="feat feat-p">
+      <div class="feat-icon">🐛</div>
+      <div>
+        <div class="feat-title">Bug 2 — Tipo incorrecto en Push()</div>
+        <div class="feat-desc">
+          Declaras <code style="color:var(--p)">Stack&lt;string&gt;</code> pero intentas <code style="color:var(--p)">pila.Push(42);</code>. Error de compilación. Si necesitas números, declara <code style="color:var(--gr)">Stack&lt;int&gt;</code>.
+        </div>
+      </div>
+    </div>
+    <div class="feat" style="background:#F8717110;border-left-color:#F87171">
+      <div class="feat-icon">🐛</div>
+      <div>
+        <div class="feat-title">Bug 3 — Pop() en pila vacía</div>
+        <div class="feat-desc">
+          Si la pila está vacía y llamas <code style="color:#F87171">Pop()</code> o <code style="color:#F87171">Peek()</code>: <strong style="color:#F87171">InvalidOperationException</strong>. Solución: siempre verifica primero.
+          <br><br>
+          <code style="color:var(--gr);font-family:var(--mono);font-size:12px">if (pila.Count &gt; 0) { string x = pila.Pop(); }</code>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-hint"><div class="hint-keys"><span class="key">→</span> continuar</div><span class="hint-progress">8 / 9</span></div>
+</div>
+
+
+<!-- ════════════════════════════════════════
+     SLIDE 8 — CIERRE + GITHUB
+════════════════════════════════════════ -->
+<div class="slide slide-cover" id="sl8">
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <span class="tag tag-g">08</span>
+      <span class="tag tag-g">CIERRE</span>
+    </div>
+  </div>
+  <div class="cover-accent"></div>
+  <div style="flex:1;display:grid;grid-template-columns:1.2fr 1fr;gap:40px;align-items:center">
+    <div>
+      <div class="kicker anim-1">ya tienes todo lo que necesitas</div>
+      <div class="cover-title anim-2" style="font-size:clamp(28px,4.5vw,52px)">
+        <div class="line1">¿Listo para</div>
+        <div class="line2">la dinámica?</div>
+      </div>
+      <div class="cover-sub anim-3" style="font-size:14px;margin-bottom:24px">Repasaste: concepto LIFO, Push/Pop/Peek, código completo, diferencias con Array y LinkedList, y los 3 bugs más comunes.</div>
+      <div class="feat-list anim-4" style="gap:10px">
+        <div class="feat feat-g" style="padding:10px 14px">
+          <div class="feat-icon" style="font-size:16px">✔</div>
+          <div class="feat-desc">Etapas 01 y 02 — 12 preguntas de opción múltiple sobre el código visto hoy.</div>
+        </div>
+        <div class="feat feat-a" style="padding:10px 14px">
+          <div class="feat-icon" style="font-size:16px">✔</div>
+          <div class="feat-desc">Etapa 03 — Identifica y corrige los 3 bugs de este repaso en código real.</div>
+        </div>
+        <div class="feat feat-p" style="padding:10px 14px">
+          <div class="feat-icon" style="font-size:16px">✔</div>
+          <div class="feat-desc">Etapa 04 — Diseña tu propia solución y guárdala en tu repositorio de GitHub.</div>
+        </div>
+      </div>
+    </div>
+    <div class="anim-3">
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-head cc">🐙 Workflow en GitHub</div>
+        <div style="font-family:var(--mono);font-size:12px;color:var(--tx2);line-height:2">
+          <span style="color:var(--gr)">$</span> git add actividad-stack.md<br>
+          <span style="color:var(--gr)">$</span> git commit -m <span style="color:var(--st)">"feat: actividad Stack"</span><br>
+          <span style="color:var(--gr)">$</span> git push origin main
+        </div>
+      </div>
+      <div class="callout callout-p">
+        <span class="callout-icon">💡</span>
+        <span style="font-size:12.5px">Al terminar la dinámica usa el botón <strong>"Copiar como Markdown"</strong> para generar el archivo listo para tu commit.</span>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-hint">
+    <div class="hint-keys" style="color:var(--gr)">
+      ¡Inicia la dinámica!
+    </div>
+    <span class="hint-progress">9 / 9</span>
+  </div>
+</div>
+
+</div><!-- /deck -->
+
+<script>
+const TOTAL = 9;
+let cur = 0;
+let transitioning = false;
+
+// Build dots
+function buildDots(){
+  const c = document.getElementById('dots');
+  if(!c) return;
+  c.innerHTML = '';
+  for(let i=0;i<TOTAL;i++){
+    const d = document.createElement('div');
+    d.className = 'cdot' + (i===cur?' active':i<cur?' done':'');
+    d.onclick = ()=>goTo(i);
+    d.style.cursor='pointer';
+    c.appendChild(d);
+  }
+}
+
+function updateProgress(){
+  const pct = ((cur+1)/TOTAL*100).toFixed(1);
+  document.getElementById('pLine').style.width = pct+'%';
+}
+
+function goTo(n){
+  if(transitioning || n<0 || n>=TOTAL || n===cur) return;
+  transitioning = true;
+  const from = document.getElementById('sl'+cur);
+  const to   = document.getElementById('sl'+n);
+  from.classList.add(n>cur?'exit-left':'');
+  setTimeout(()=>{
+    from.classList.remove('active','exit-left');
+    to.classList.add('active');
+    // Reset animations
+    to.querySelectorAll('[class*="anim-"]').forEach(el=>{
+      el.style.animation='none';
+      el.offsetHeight;
+      el.style.animation='';
+    });
+    cur = n;
+    buildDots();
+    updateProgress();
+    transitioning = false;
+  }, 320);
+}
+
+function next(){ goTo(cur+1) }
+function prev(){ goTo(cur-1) }
+
+// Keyboard
+document.addEventListener('keydown', e=>{
+  if(e.key==='ArrowRight'||e.key===' '||e.key==='ArrowDown'){e.preventDefault();next()}
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();prev()}
+  if(e.key==='Home'){e.preventDefault();goTo(0)}
+  if(e.key==='End'){e.preventDefault();goTo(TOTAL-1)}
+});
+
+// Touch / swipe
+let ts=0,tx=0;
+document.addEventListener('touchstart',e=>{ts=e.touches[0].clientY;tx=e.touches[0].clientX},{passive:true});
+document.addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-tx;
+  const dy=e.changedTouches[0].clientY-ts;
+  if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>40){dx<0?next():prev()}
+},{passive:true});
+
+// Click right half to advance, left half to go back
+document.addEventListener('click',e=>{
+  if(e.target.closest('.cdot')||e.target.closest('.key')||e.target.closest('a')) return;
+  e.clientX > window.innerWidth/2 ? next() : prev();
+});
+
+// Init
+buildDots();
+updateProgress();
+</script>
+</body>
+</html>

@@ -1,0 +1,1427 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dinámica: OOP + Estructuras de Datos · C#</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ── RESET & ROOT ───────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:       #0D0F14;
+  --surface:  #131720;
+  --card:     #1A1F2E;
+  --border:   #252B3A;
+  --border2:  #2E3650;
+  --purple:   #A78BFA;
+  --purple2:  #7C3AED;
+  --purple3:  #4C1D95;
+  --green:    #34D399;
+  --green2:   #065F46;
+  --amber:    #FBBF24;
+  --amber2:   #92400E;
+  --red:      #F87171;
+  --red2:     #7F1D1D;
+  --blue:     #60A5FA;
+  --blue2:    #1E3A5F;
+  --cyan:     #22D3EE;
+  --text:     #E2E8F0;
+  --text2:    #94A3B8;
+  --text3:    #475569;
+  --mono:     'JetBrains Mono', monospace;
+  --display:  'Syne', sans-serif;
+  /* code colors */
+  --kw:   #C792EA;
+  --type: #82AAFF;
+  --str:  #C3E88D;
+  --cmt:  #546E7A;
+  --num:  #F78C6C;
+  --mth:  #89DDFF;
+  --var:  #EEFFFF;
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--mono);
+  min-height:100vh;
+  overflow-x:hidden;
+  background-image:
+    radial-gradient(ellipse 80% 40% at 50% -10%, #2D1B6930 0%, transparent 60%),
+    radial-gradient(ellipse 40% 30% at 90% 80%, #1e3a5f20 0%, transparent 50%);
+}
+
+/* ── SCROLLBAR ──────────────────────────────────── */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* ── LAYOUT ─────────────────────────────────────── */
+.wrap{max-width:960px;margin:0 auto;padding:0 24px 80px}
+
+/* ── HEADER ─────────────────────────────────────── */
+.site-header{
+  padding:40px 0 32px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:40px;
+  position:relative;
+}
+.site-header::after{
+  content:'';
+  position:absolute;bottom:-1px;left:0;
+  width:120px;height:2px;
+  background:linear-gradient(90deg,var(--purple),transparent);
+}
+.breadcrumb{
+  font-size:11px;color:var(--text3);
+  letter-spacing:.12em;text-transform:uppercase;
+  margin-bottom:14px;display:flex;align-items:center;gap:8px;
+}
+.breadcrumb span{color:var(--purple);opacity:.7}
+.site-title{
+  font-family:var(--display);
+  font-size:clamp(26px,4vw,42px);
+  font-weight:800;
+  line-height:1.1;
+  letter-spacing:-.02em;
+  background:linear-gradient(135deg,#E2E8F0 0%,var(--purple) 60%,var(--cyan) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:10px;
+}
+.site-sub{
+  font-size:13px;color:var(--text2);
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+}
+.badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:3px 10px;border-radius:20px;
+  font-size:11px;letter-spacing:.06em;font-weight:500;
+  border:1px solid;
+}
+.badge-purple{color:var(--purple);border-color:#7C3AED40;background:#7C3AED10}
+.badge-green{color:var(--green);border-color:#34D39940;background:#34D39910}
+.badge-amber{color:var(--amber);border-color:#FBBF2440;background:#FBBF2410}
+.badge-blue{color:var(--blue);border-color:#60A5FA40;background:#60A5FA10}
+
+/* ── STEP INDICATOR ─────────────────────────────── */
+.steps-bar{
+  display:flex;gap:0;
+  margin-bottom:40px;
+  border:1px solid var(--border);
+  border-radius:10px;overflow:hidden;
+}
+.step-item{
+  flex:1;padding:12px 8px;
+  text-align:center;font-size:11px;
+  color:var(--text3);cursor:pointer;
+  transition:all .2s;border-right:1px solid var(--border);
+  position:relative;
+}
+.step-item:last-child{border-right:none}
+.step-item.active{color:var(--purple);background:#7C3AED15}
+.step-item.done{color:var(--green);background:#34D39908}
+.step-item.active::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:var(--purple);
+}
+.step-item.done::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:var(--green);
+}
+.step-num{
+  display:block;font-size:18px;font-weight:700;
+  font-family:var(--display);margin-bottom:2px;
+}
+
+/* ── SECTIONS ───────────────────────────────────── */
+.section{display:none;animation:fadeUp .35s ease}
+.section.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── SECTION HEADERS ────────────────────────────── */
+.sec-head{
+  display:flex;align-items:flex-start;gap:16px;
+  margin-bottom:28px;padding-bottom:20px;
+  border-bottom:1px solid var(--border);
+}
+.sec-icon{
+  width:48px;height:48px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;flex-shrink:0;
+}
+.sec-icon-purple{background:#7C3AED20;border:1px solid #7C3AED40}
+.sec-icon-green{background:#34D39920;border:1px solid #34D39940}
+.sec-icon-amber{background:#FBBF2420;border:1px solid #FBBF2440}
+.sec-icon-blue{background:#60A5FA20;border:1px solid #60A5FA40}
+.sec-icon-cyan{background:#22D3EE20;border:1px solid #22D3EE40}
+.sec-title{font-family:var(--display);font-size:22px;font-weight:700;margin-bottom:4px}
+.sec-desc{font-size:12px;color:var(--text2);line-height:1.7}
+
+/* ── ID FORM ─────────────────────────────────────── */
+.id-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.id-grid.full{grid-template-columns:1fr 1fr}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{
+  font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--text3);font-weight:500;
+}
+.field label span{color:var(--red);margin-left:3px}
+.field input,.field select{
+  background:var(--card);
+  border:1px solid var(--border2);
+  border-radius:8px;
+  padding:10px 14px;
+  color:var(--text);
+  font-family:var(--mono);
+  font-size:13px;
+  outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+.field input:focus,.field select:focus{
+  border-color:var(--purple);
+  box-shadow:0 0 0 3px #7C3AED18;
+}
+.field input::placeholder{color:var(--text3)}
+
+/* ── CODE BLOCK ─────────────────────────────────── */
+.code-block{
+  background:#0A0C12;
+  border:1px solid var(--border);
+  border-radius:12px;
+  overflow:hidden;
+  margin:20px 0;
+  position:relative;
+}
+.code-block::before{
+  content:'';position:absolute;top:0;left:0;right:0;
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--purple),transparent);
+}
+.code-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 16px;
+  border-bottom:1px solid var(--border);
+  background:#0D0F18;
+}
+.code-dots{display:flex;gap:6px}
+.code-dot{width:10px;height:10px;border-radius:50%}
+.code-dot:nth-child(1){background:#FF5F57}
+.code-dot:nth-child(2){background:#FFBD2E}
+.code-dot:nth-child(3){background:#28C840}
+.code-label{font-size:11px;color:var(--text3);letter-spacing:.06em}
+.code-body{padding:18px 20px;overflow-x:auto;font-size:12.5px;line-height:1.8}
+.code-body pre{white-space:pre-wrap;word-break:break-word}
+.kw{color:var(--kw)}
+.tp{color:var(--type)}
+.st{color:var(--str)}
+.cm{color:var(--cmt);font-style:italic}
+.nm{color:var(--num)}
+.mt{color:var(--mth)}
+.vr{color:var(--var)}
+.pu{color:var(--purple)}
+
+/* ── CALLOUT ─────────────────────────────────────── */
+.callout{
+  display:flex;gap:14px;align-items:flex-start;
+  padding:14px 16px;border-radius:10px;
+  margin:16px 0;font-size:12.5px;line-height:1.7;
+}
+.callout-purple{background:#7C3AED12;border:1px solid #7C3AED30;color:#C4B5FD}
+.callout-green{background:#34D39912;border:1px solid #34D39930;color:#6EE7B7}
+.callout-amber{background:#FBBF2412;border:1px solid #FBBF2430;color:#FCD34D}
+.callout-red{background:#F8717112;border:1px solid #F8717130;color:#FCA5A5}
+.callout-blue{background:#60A5FA12;border:1px solid #60A5FA30;color:#93C5FD}
+.callout-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+
+/* ── QUESTION CARDS ──────────────────────────────── */
+.q-list{display:flex;flex-direction:column;gap:20px}
+.q-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  overflow:hidden;
+  transition:border-color .2s;
+}
+.q-card:hover{border-color:var(--border2)}
+.q-card.answered-ok{border-color:#34D39940;background:#34D39906}
+.q-card.answered-err{border-color:#F8717140;background:#F8717106}
+.q-num-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 16px 0;
+}
+.q-num{
+  font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--text3);font-weight:600;
+}
+.q-pts{
+  font-size:10px;color:var(--amber);
+  background:#FBBF2415;border:1px solid #FBBF2430;
+  padding:2px 8px;border-radius:10px;
+}
+.q-text{
+  padding:12px 16px 14px;
+  font-size:13.5px;line-height:1.7;
+  font-family:var(--display);font-weight:600;
+  color:var(--text);
+}
+.q-hint{
+  margin:0 16px 12px;
+  font-size:11.5px;color:var(--text2);line-height:1.6;
+  font-family:var(--mono);
+}
+/* Options */
+.options{padding:0 16px 16px;display:flex;flex-direction:column;gap:8px}
+.opt{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 14px;border-radius:8px;
+  border:1px solid var(--border);
+  cursor:pointer;font-size:12.5px;
+  transition:all .18s;
+  background:var(--surface);
+}
+.opt:hover{border-color:var(--purple);background:#7C3AED0D;color:var(--purple)}
+.opt.selected-ok{
+  border-color:var(--green)!important;
+  background:#34D39915!important;
+  color:var(--green)!important;
+}
+.opt.selected-err{
+  border-color:var(--red)!important;
+  background:#F8717115!important;
+  color:var(--red)!important;
+}
+.opt.show-correct{
+  border-color:#34D39950;
+  background:#34D39910;
+  color:#6EE7B7;
+}
+.opt-letter{
+  width:22px;height:22px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;flex-shrink:0;
+  border:1px solid var(--border2);
+  background:var(--bg);color:var(--text2);
+  transition:all .18s;
+}
+.opt:hover .opt-letter{border-color:var(--purple);color:var(--purple);background:#7C3AED15}
+.opt.selected-ok .opt-letter{border-color:var(--green);color:var(--green);background:#34D39920}
+.opt.selected-err .opt-letter{border-color:var(--red);color:var(--red);background:#F8717120}
+.opt.show-correct .opt-letter{border-color:var(--green);color:var(--green);background:#34D39920}
+.opt-icon{margin-left:auto;font-size:14px}
+
+/* Text answers */
+.textarea-wrap{padding:0 16px 16px}
+textarea{
+  width:100%;min-height:90px;
+  background:var(--surface);
+  border:1px solid var(--border2);
+  border-radius:8px;
+  padding:12px 14px;
+  color:var(--text);
+  font-family:var(--mono);
+  font-size:12.5px;
+  line-height:1.7;
+  resize:vertical;
+  outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+textarea:focus{
+  border-color:var(--purple);
+  box-shadow:0 0 0 3px #7C3AED15;
+}
+textarea::placeholder{color:var(--text3)}
+
+/* Feedback bubble */
+.feedback{
+  margin:0 16px 14px;
+  padding:10px 14px;
+  border-radius:8px;
+  font-size:12px;line-height:1.6;
+  display:none;
+}
+.feedback.show{display:block;animation:fadeUp .2s ease}
+.feedback-ok{background:#34D39910;border:1px solid #34D39940;color:#6EE7B7}
+.feedback-err{background:#F8717110;border:1px solid #F8717140;color:#FCA5A5}
+.feedback-neutral{background:#60A5FA10;border:1px solid #60A5FA40;color:#93C5FD}
+
+/* ── REFLECTION AREA ─────────────────────────────── */
+.reflect-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:20px;
+  margin:16px 0;
+}
+.reflect-title{
+  font-family:var(--display);font-size:14px;font-weight:700;
+  margin-bottom:8px;color:var(--text);
+}
+.reflect-sub{font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.6}
+.char-count{font-size:10px;color:var(--text3);text-align:right;margin-top:4px}
+
+/* ── GH PANEL ────────────────────────────────────── */
+.gh-panel{
+  background:var(--card);
+  border:1px solid var(--border2);
+  border-radius:12px;
+  padding:20px;
+  margin:20px 0;
+}
+.gh-title{
+  display:flex;align-items:center;gap:10px;
+  font-family:var(--display);font-size:15px;font-weight:700;
+  margin-bottom:14px;
+}
+.gh-title svg{opacity:.7}
+.commit-list{display:flex;flex-direction:column;gap:8px}
+.commit-row{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 14px;border-radius:8px;
+  background:var(--surface);border:1px solid var(--border);
+  font-size:12px;
+}
+.commit-hash{
+  color:var(--purple);font-size:11px;letter-spacing:.06em;
+  font-weight:600;flex-shrink:0;
+}
+.commit-msg{color:var(--text2);flex:1}
+.commit-check{
+  width:20px;height:20px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;flex-shrink:0;
+}
+.commit-done{background:#34D39920;color:var(--green)}
+.commit-todo{background:#FBBF2420;color:var(--amber)}
+
+/* ── BUTTONS ─────────────────────────────────────── */
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:11px 22px;border-radius:8px;
+  font-family:var(--mono);font-size:13px;font-weight:500;
+  border:none;cursor:pointer;
+  transition:all .18s;letter-spacing:.02em;
+}
+.btn-primary{
+  background:linear-gradient(135deg,var(--purple2),#6D28D9);
+  color:#fff;
+  box-shadow:0 4px 16px #7C3AED30;
+}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px #7C3AED45}
+.btn-primary:active{transform:translateY(0)}
+.btn-ghost{
+  background:transparent;color:var(--text2);
+  border:1px solid var(--border2);
+}
+.btn-ghost:hover{border-color:var(--purple);color:var(--purple);background:#7C3AED0D}
+.btn-green{
+  background:linear-gradient(135deg,#059669,#047857);
+  color:#fff;box-shadow:0 4px 16px #34D39930;
+}
+.btn-green:hover{transform:translateY(-1px);box-shadow:0 6px 20px #34D39945}
+.btn-row{display:flex;gap:12px;justify-content:flex-end;margin-top:24px;flex-wrap:wrap}
+
+/* ── PROGRESS BAR ────────────────────────────────── */
+.progress-wrap{margin:24px 0}
+.progress-label{
+  display:flex;justify-content:space-between;
+  font-size:11px;color:var(--text3);margin-bottom:6px;
+}
+.progress-track{
+  height:4px;background:var(--border);border-radius:2px;overflow:hidden;
+}
+.progress-fill{
+  height:100%;border-radius:2px;
+  background:linear-gradient(90deg,var(--purple),var(--cyan));
+  transition:width .5s ease;
+}
+
+/* ── SCORE SCREEN ────────────────────────────────── */
+.score-hero{
+  text-align:center;padding:40px 20px;
+}
+.score-circle{
+  width:140px;height:140px;border-radius:50%;
+  margin:0 auto 24px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  border:3px solid var(--purple);
+  background:#7C3AED15;
+  position:relative;
+}
+.score-circle::before{
+  content:'';position:absolute;inset:-8px;
+  border-radius:50%;
+  border:1px solid #7C3AED30;
+}
+.score-num{
+  font-family:var(--display);font-size:52px;font-weight:800;
+  background:linear-gradient(135deg,var(--purple),var(--cyan));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  line-height:1;
+}
+.score-den{font-size:14px;color:var(--text3)}
+.score-title{font-family:var(--display);font-size:26px;font-weight:700;margin-bottom:10px}
+.score-msg{font-size:13px;color:var(--text2);max-width:480px;margin:0 auto 28px;line-height:1.7}
+.score-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:14px;margin:28px 0;
+}
+.score-stat{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:10px;padding:16px;
+}
+.score-stat-num{
+  font-family:var(--display);font-size:28px;font-weight:800;
+  margin-bottom:4px;
+}
+.score-stat-lbl{font-size:11px;color:var(--text3);letter-spacing:.06em;text-transform:uppercase}
+.c-purple{color:var(--purple)}
+.c-green{color:var(--green)}
+.c-amber{color:var(--amber)}
+
+/* ── SUMMARY TABLE ───────────────────────────────── */
+.summary-table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:20px}
+.summary-table th{
+  text-align:left;padding:8px 12px;
+  font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--text3);border-bottom:1px solid var(--border);
+}
+.summary-table td{
+  padding:10px 12px;border-bottom:1px solid var(--border);
+  vertical-align:top;line-height:1.5;
+}
+.summary-table tr:last-child td{border-bottom:none}
+.result-ok{color:var(--green)}
+.result-err{color:var(--red)}
+.result-open{color:var(--amber)}
+
+/* ── DIVIDER ─────────────────────────────────────── */
+.divider{
+  height:1px;background:var(--border);
+  margin:28px 0;position:relative;
+}
+.divider::before{
+  content:attr(data-label);
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  background:var(--bg);padding:0 12px;
+  font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--text3);
+}
+
+/* ── RESPONSIVE ──────────────────────────────────── */
+@media(max-width:600px){
+  .id-grid{grid-template-columns:1fr}
+  .score-grid{grid-template-columns:1fr 1fr}
+  .steps-bar{display:none}
+}
+
+/* ── CURSOR BLINK ────────────────────────────────── */
+.cursor{
+  display:inline-block;width:2px;height:1em;
+  background:var(--purple);margin-left:2px;
+  animation:blink 1s step-end infinite;vertical-align:text-bottom;
+}
+@keyframes blink{50%{opacity:0}}
+
+/* ── PRINT STYLES ────────────────────────────────── */
+@media print{
+  body{background:#fff;color:#000}
+  .btn-row,.steps-bar{display:none}
+  .section{display:block!important}
+  .code-block{border:1px solid #ccc;background:#f9f9f9}
+  .code-body pre,.kw,.tp,.st,.cm,.nm,.mt,.vr,.pu{color:#333!important}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ── HEADER ──────────────────────────────────── -->
+<header class="site-header">
+  <div class="breadcrumb">
+    <span>IEDEP</span> / Estructura de Datos /
+    <span>Dinámica OOP + Estructuras</span>
+  </div>
+  <h1 class="site-title">
+    Pensamiento OOP &amp;<br>Estructuras de Datos<span class="cursor"></span>
+  </h1>
+  <div class="site-sub">
+    <span class="badge badge-purple">C# · Codespaces</span>
+    <span class="badge badge-green">GitHub</span>
+    <span class="badge badge-amber">Stack · LinkedList · Array</span>
+    <span class="badge badge-blue">Preparatoria · Clase 3</span>
+  </div>
+</header>
+
+<!-- ── STEP BAR ────────────────────────────────── -->
+<nav class="steps-bar" id="stepsBar">
+  <div class="step-item active" onclick="goTo(0)">
+    <span class="step-num">00</span>Identificación
+  </div>
+  <div class="step-item" onclick="goTo(1)">
+    <span class="step-num">01</span>Calentamiento
+  </div>
+  <div class="step-item" onclick="goTo(2)">
+    <span class="step-num">02</span>Stack vivo
+  </div>
+  <div class="step-item" onclick="goTo(3)">
+    <span class="step-num">03</span>Bugs &amp; Fix
+  </div>
+  <div class="step-item" onclick="goTo(4)">
+    <span class="step-num">04</span>Diseña
+  </div>
+  <div class="step-item" onclick="goTo(5)">
+    <span class="step-num">05</span>Resultados
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════
+     SECTION 0 — IDENTIFICACIÓN
+═════════════════════════════════════════════════ -->
+<section class="section active" id="sec0">
+  <div class="sec-head">
+    <div class="sec-icon sec-icon-purple">🪪</div>
+    <div>
+      <div class="sec-title">Antes de comenzar</div>
+      <div class="sec-desc">Registra tus datos. Esta información aparecerá en tu hoja de resultados y en el resumen de actividad.</div>
+    </div>
+  </div>
+
+  <div class="id-grid">
+    <div class="field">
+      <label>Nombre completo <span>*</span></label>
+      <input type="text" id="fNombre" placeholder="Ej. Ana Lucía Ramírez Torres">
+    </div>
+    <div class="field">
+      <label>Grupo <span>*</span></label>
+      <input type="text" id="fGrupo" placeholder="Ej. 3°B · Sistemas">
+    </div>
+    <div class="field">
+      <label>Materia <span>*</span></label>
+      <input type="text" id="fMateria" placeholder="Ej. Estructura de Datos">
+    </div>
+    <div class="field">
+      <label>Fecha <span>*</span></label>
+      <input type="date" id="fFecha">
+    </div>
+  </div>
+
+  <div class="callout callout-purple">
+    <span class="callout-icon">💡</span>
+    <span>Esta dinámica tiene <strong>4 etapas</strong>. En las dos primeras elegirás respuestas de opción múltiple. En la tercera detectarás errores en código. En la cuarta diseñarás tu propia solución. Todo basado en los ejemplos vistos en clase.</span>
+  </div>
+
+  <div class="callout callout-green">
+    <span class="callout-icon">🐙</span>
+    <span>Al terminar tendrás un resumen completo. Puedes copiar tus respuestas y hacer commit en tu repositorio de GitHub como evidencia de la actividad. Nombre sugerido del archivo: <code style="color:var(--green)">actividad-stack.md</code></span>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="startActivity()">
+      Iniciar dinámica &rarr;
+    </button>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SECTION 1 — CALENTAMIENTO (OPM)
+═════════════════════════════════════════════════ -->
+<section class="section" id="sec1">
+  <div class="sec-head">
+    <div class="sec-icon sec-icon-purple">🔥</div>
+    <div>
+      <div class="sec-title">Etapa 01 — Calentamiento conceptual</div>
+      <div class="sec-desc">6 preguntas de opción múltiple. El feedback aparece al instante. <span style="color:var(--amber)">No puedes cambiar tu respuesta una vez elegida.</span></div>
+    </div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span>Progreso</span><span id="prog1Txt">0 / 6</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="prog1Bar" style="width:0%"></div></div>
+  </div>
+
+  <div class="callout callout-blue">
+    <span class="callout-icon">📄</span>
+    <span>Código de referencia — exactamente el mismo que viste en Codespaces durante la clase:</span>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+      <span class="code-label">Program.cs — Cafetería IEDEP</span>
+      <span class="code-label">C#</span>
+    </div>
+    <div class="code-body"><pre><span class="kw">using</span> <span class="tp">System</span>;
+<span class="kw">using</span> <span class="tp">System.Collections.Generic</span>;
+
+<span class="kw">class</span> <span class="tp">Program</span>
+{
+    <span class="kw">static</span> <span class="kw">void</span> <span class="mt">Main</span>()
+    {
+        <span class="tp">Stack</span>&lt;<span class="tp">string</span>&gt; <span class="vr">historial</span> = <span class="kw">new</span> <span class="tp">Stack</span>&lt;<span class="tp">string</span>&gt;();
+
+        <span class="vr">historial</span>.<span class="mt">Push</span>(<span class="st">"Tacos x2"</span>);           <span class="cm">// línea A</span>
+        <span class="vr">historial</span>.<span class="mt">Push</span>(<span class="st">"Agua 500ml"</span>);          <span class="cm">// línea B</span>
+        <span class="vr">historial</span>.<span class="mt">Push</span>(<span class="st">"Torta de jamón"</span>);       <span class="cm">// línea C</span>
+        <span class="vr">historial</span>.<span class="mt">Push</span>(<span class="st">"Jugo naranja"</span>);          <span class="cm">// línea D</span>
+
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="vr">historial</span>.<span class="mt">Peek</span>());    <span class="cm">// línea E</span>
+        <span class="tp">string</span> <span class="vr">cancelado</span> = <span class="vr">historial</span>.<span class="mt">Pop</span>();     <span class="cm">// línea F</span>
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="vr">historial</span>.Count);    <span class="cm">// línea G</span>
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="vr">historial</span>.<span class="mt">Peek</span>());    <span class="cm">// línea H</span>
+    }
+}</pre></div>
+  </div>
+
+  <div class="q-list" id="qList1"></div>
+
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="goTo(0)">&larr; Atrás</button>
+    <button class="btn btn-primary" id="btnNext1" onclick="goTo(2)" disabled>
+      Siguiente etapa &rarr;
+    </button>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SECTION 2 — STACK EN VIVO (OPM)
+═════════════════════════════════════════════════ -->
+<section class="section" id="sec2">
+  <div class="sec-head">
+    <div class="sec-icon sec-icon-green">🥞</div>
+    <div>
+      <div class="sec-title">Etapa 02 — Stack en vivo</div>
+      <div class="sec-desc">Sigue la ejecución línea por línea. ¿Qué está pasando exactamente en la memoria?</div>
+    </div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span>Progreso</span><span id="prog2Txt">0 / 6</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="prog2Bar" style="width:0%"></div></div>
+  </div>
+
+  <div class="callout callout-green">
+    <span class="callout-icon">🧠</span>
+    <span>Ahora el reto es diferente: tienes que <strong>predecir el estado</strong> de la pila o el valor de una variable en un momento específico de la ejecución. Piensa paso a paso como si fueras el compilador.</span>
+  </div>
+
+  <div class="q-list" id="qList2"></div>
+
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="goTo(1)">&larr; Atrás</button>
+    <button class="btn btn-primary" id="btnNext2" onclick="goTo(3)" disabled>
+      Siguiente etapa &rarr;
+    </button>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SECTION 3 — BUGS & FIX (análisis)
+═════════════════════════════════════════════════ -->
+<section class="section" id="sec3">
+  <div class="sec-head">
+    <div class="sec-icon sec-icon-amber">🐛</div>
+    <div>
+      <div class="sec-title">Etapa 03 — Encuentra el bug</div>
+      <div class="sec-desc">Tres fragmentos de código, cada uno con un error. Identifícalo y describe cómo lo corregirías.</div>
+    </div>
+  </div>
+
+  <div class="callout callout-amber">
+    <span class="callout-icon">⚠️</span>
+    <span>Estos errores son reales — los cometen todos los programadores al aprender. Leer código roto y diagnosticarlo es una de las habilidades más valiosas que desarrollarás en Codespaces.</span>
+  </div>
+
+  <!-- BUG 1 -->
+  <div class="reflect-card">
+    <div class="reflect-title">🐛 Bug #1 — ¿Qué está mal aquí?</div>
+    <div class="reflect-sub">Analiza este fragmento. El programador quería ver el pedido más reciente sin quitarlo de la pila.</div>
+    <div class="code-block" style="margin:12px 0">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <span class="code-label">bug1.cs</span>
+      </div>
+      <div class="code-body"><pre><span class="tp">Stack</span>&lt;<span class="tp">string</span>&gt; <span class="vr">pedidos</span> = <span class="kw">new</span> <span class="tp">Stack</span>&lt;<span class="tp">string</span>&gt;();
+<span class="vr">pedidos</span>.<span class="mt">Push</span>(<span class="st">"Tacos"</span>);
+<span class="vr">pedidos</span>.<span class="mt">Push</span>(<span class="st">"Agua"</span>);
+
+<span class="cm">// Quiero VER el pedido más reciente sin quitarlo</span>
+<span class="tp">string</span> <span class="vr">ultimo</span> = <span class="vr">pedidos</span>.<span class="mt">Pop</span>();       <span class="cm">// ← ¿está bien esto?</span>
+<span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="vr">ultimo</span>);
+<span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="vr">pedidos</span>.Count);    <span class="cm">// espera 2, obtiene 1</span></pre>
+      </div>
+    </div>
+    <div class="reflect-sub">¿Cuál es el error? ¿Cómo lo corregirías? Escribe tu análisis:</div>
+    <textarea id="bug1" placeholder="Describe el error y escribe el código corregido aquí..." oninput="countChars('bug1','cc1')"></textarea>
+    <div class="char-count" id="cc1">0 caracteres</div>
+  </div>
+
+  <!-- BUG 2 -->
+  <div class="reflect-card">
+    <div class="reflect-title">🐛 Bug #2 — Error de tipo</div>
+    <div class="reflect-sub">El programador declaró la pila como Stack&lt;string&gt; pero intentó hacer algo incompatible.</div>
+    <div class="code-block" style="margin:12px 0">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <span class="code-label">bug2.cs</span>
+      </div>
+      <div class="code-body"><pre><span class="tp">Stack</span>&lt;<span class="tp">string</span>&gt; <span class="vr">precios</span> = <span class="kw">new</span> <span class="tp">Stack</span>&lt;<span class="tp">string</span>&gt;();
+
+<span class="vr">precios</span>.<span class="mt">Push</span>(<span class="nm">25</span>);        <span class="cm">// ← ¿qué pasa aquí?</span>
+<span class="vr">precios</span>.<span class="mt">Push</span>(<span class="nm">40</span>);
+<span class="vr">precios</span>.<span class="mt">Push</span>(<span class="nm">15</span>);
+
+<span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="vr">precios</span>.<span class="mt">Pop</span>());</pre>
+      </div>
+    </div>
+    <div class="reflect-sub">¿Cuál es el error? ¿Cuáles son las dos formas correctas de solucionarlo?</div>
+    <textarea id="bug2" placeholder="Explica el error y da las dos soluciones posibles..." oninput="countChars('bug2','cc2')"></textarea>
+    <div class="char-count" id="cc2">0 caracteres</div>
+  </div>
+
+  <!-- BUG 3 -->
+  <div class="reflect-card">
+    <div class="reflect-title">🐛 Bug #3 — La pila vacía</div>
+    <div class="reflect-sub">Este código fallará en tiempo de ejecución. ¿Puedes ver dónde y por qué?</div>
+    <div class="code-block" style="margin:12px 0">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <span class="code-label">bug3.cs</span>
+      </div>
+      <div class="code-body"><pre><span class="tp">Stack</span>&lt;<span class="tp">string</span>&gt; <span class="vr">historial</span> = <span class="kw">new</span> <span class="tp">Stack</span>&lt;<span class="tp">string</span>&gt;();
+<span class="vr">historial</span>.<span class="mt">Push</span>(<span class="st">"Acción 1"</span>);
+<span class="vr">historial</span>.<span class="mt">Push</span>(<span class="st">"Acción 2"</span>);
+
+<span class="cm">// El usuario presionó Ctrl+Z tres veces</span>
+<span class="vr">historial</span>.<span class="mt">Pop</span>();   <span class="cm">// deshacer 1 — ok</span>
+<span class="vr">historial</span>.<span class="mt">Pop</span>();   <span class="cm">// deshacer 2 — ok</span>
+<span class="vr">historial</span>.<span class="mt">Pop</span>();   <span class="cm">// ← ¿qué pasa aquí?</span></pre>
+      </div>
+    </div>
+    <div class="reflect-sub">¿Qué error lanza C#? ¿Cómo lo prevenirías con una condición? Escribe el código corregido:</div>
+    <textarea id="bug3" placeholder="Nombra el error, explica por qué ocurre y escribe cómo lo corregirías con un if..." oninput="countChars('bug3','cc3')"></textarea>
+    <div class="char-count" id="cc3">0 caracteres</div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="goTo(2)">&larr; Atrás</button>
+    <button class="btn btn-primary" onclick="goTo(4)">
+      Siguiente etapa &rarr;
+    </button>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SECTION 4 — DISEÑA TU SOLUCIÓN
+═════════════════════════════════════════════════ -->
+<section class="section" id="sec4">
+  <div class="sec-head">
+    <div class="sec-icon sec-icon-cyan">🏗️</div>
+    <div>
+      <div class="sec-title">Etapa 04 — Diseña tu solución</div>
+      <div class="sec-desc">Aquí ya no hay respuestas correctas únicas. El objetivo es que <strong>pienses como ingeniero</strong>.</div>
+    </div>
+  </div>
+
+  <div class="callout callout-purple">
+    <span class="callout-icon">🚀</span>
+    <span>Elige <strong>uno</strong> de los tres retos. Diseña la solución en pseudocódigo o en C# (como lo harías en tu Codespace). Luego reflexiona sobre por qué elegiste esa estructura de datos.</span>
+  </div>
+
+  <!-- Challenge selector -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0" id="challengeGrid">
+    <div class="q-card" id="ch0" onclick="selectChallenge(0)" style="cursor:pointer;padding:16px">
+      <div style="font-size:28px;margin-bottom:8px">🎵</div>
+      <div style="font-family:var(--display);font-weight:700;font-size:13px;margin-bottom:6px">App de música</div>
+      <div style="font-size:11.5px;color:var(--text2);line-height:1.6">Lista de reproducción donde el usuario agrega y elimina canciones. La última canción agregada se reproduce primero.</div>
+      <div style="margin-top:10px"><span class="badge badge-purple">Stack</span></div>
+    </div>
+    <div class="q-card" id="ch1" onclick="selectChallenge(1)" style="cursor:pointer;padding:16px">
+      <div style="font-size:28px;margin-bottom:8px">🎟️</div>
+      <div style="font-family:var(--display);font-weight:700;font-size:13px;margin-bottom:6px">Sistema de turnos</div>
+      <div style="font-size:11.5px;color:var(--text2);line-height:1.6">La cafetería atiende en orden de llegada. El primero en llegar es el primero en ser atendido. Puede haber alta rotación.</div>
+      <div style="margin-top:10px"><span class="badge badge-green">LinkedList</span></div>
+    </div>
+    <div class="q-card" id="ch2" onclick="selectChallenge(2)" style="cursor:pointer;padding:16px">
+      <div style="font-size:28px;margin-bottom:8px">🎓</div>
+      <div style="font-family:var(--display);font-weight:700;font-size:13px;margin-bottom:6px">Calificaciones fijas</div>
+      <div style="font-size:11.5px;color:var(--text2);line-height:1.6">Registro de las 5 calificaciones de un alumno en el cuatrimestre. Siempre exactamente 5, sin insertar ni eliminar.</div>
+      <div style="margin-top:10px"><span class="badge badge-amber">Array</span></div>
+    </div>
+  </div>
+
+  <div id="challengeWork" style="display:none">
+    <div class="divider" data-label="tu solución"></div>
+    <div class="reflect-card">
+      <div class="reflect-title" id="challengeTitle">Reto seleccionado</div>
+      <div class="reflect-sub" id="challengeDesc"></div>
+      <textarea id="solutionCode" placeholder="Escribe aquí tu pseudocódigo o código C#..." style="min-height:160px;font-family:var(--mono)" oninput="countChars('solutionCode','ccSol')"></textarea>
+      <div class="char-count" id="ccSol">0 caracteres</div>
+    </div>
+
+    <div class="reflect-card">
+      <div class="reflect-title">🤔 Reflexión — ¿Por qué elegiste esa estructura?</div>
+      <div class="reflect-sub">Responde: ¿Cuál era la operación más frecuente en el problema (acceso, inserción, eliminación)? ¿Por qué la estructura elegida es la más eficiente para eso? ¿Qué pasaría si usaras otra?</div>
+      <textarea id="solutionReflect" placeholder="Escribe tu reflexión aquí..." style="min-height:110px" oninput="countChars('solutionReflect','ccRef')"></textarea>
+      <div class="char-count" id="ccRef">0 caracteres</div>
+    </div>
+
+    <!-- GitHub commit panel -->
+    <div class="gh-panel">
+      <div class="gh-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        Checklist para tu commit en GitHub
+      </div>
+      <div class="commit-list" id="commitList">
+        <div class="commit-row"><span class="commit-hash">a1b2c3</span><span class="commit-msg">actividad-stack.md — Etapas 01 y 02 completadas</span><span class="commit-check commit-todo">○</span></div>
+        <div class="commit-row"><span class="commit-hash">d4e5f6</span><span class="commit-msg">actividad-stack.md — Bugs identificados y corregidos</span><span class="commit-check commit-todo">○</span></div>
+        <div class="commit-row"><span class="commit-hash">g7h8i9</span><span class="commit-msg">actividad-stack.md — Solución propia documentada</span><span class="commit-check commit-todo">○</span></div>
+        <div class="commit-row"><span class="commit-hash">j0k1l2</span><span class="commit-msg">actividad-stack.md — Reflexión final agregada</span><span class="commit-check commit-todo">○</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="goTo(3)">&larr; Atrás</button>
+    <button class="btn btn-green" onclick="finishActivity()">
+      Ver mis resultados ✓
+    </button>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SECTION 5 — RESULTADOS
+═════════════════════════════════════════════════ -->
+<section class="section" id="sec5">
+  <div class="score-hero">
+    <div class="score-circle">
+      <div class="score-num" id="scoreNum">0</div>
+      <div class="score-den" id="scoreDen">/ 12</div>
+    </div>
+    <div class="score-title" id="scoreTitle">¡Dinámica completada!</div>
+    <div class="score-msg" id="scoreMsg"></div>
+    <div class="score-grid">
+      <div class="score-stat">
+        <div class="score-stat-num c-purple" id="statCorr">0</div>
+        <div class="score-stat-lbl">Correctas</div>
+      </div>
+      <div class="score-stat">
+        <div class="score-stat-num c-amber" id="statOpen">3</div>
+        <div class="score-stat-lbl">Abiertas (bugs + diseño)</div>
+      </div>
+      <div class="score-stat">
+        <div class="score-stat-num c-green" id="statPct">0%</div>
+        <div class="score-stat-lbl">Opción múltiple</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="summaryBlock"></div>
+
+  <div class="callout callout-green" style="margin-top:28px">
+    <span class="callout-icon">🐙</span>
+    <div>
+      <strong>Siguiente paso — guarda tu evidencia en GitHub</strong><br>
+      <span style="font-size:12px">Crea un archivo <code style="color:var(--green)">actividad-stack.md</code> en tu repositorio y pega el contenido de esta actividad. Haz commit con el mensaje: <code style="color:var(--green)">feat: actividad OOP + estructuras de datos</code></span>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="window.print()">🖨 Imprimir</button>
+    <button class="btn btn-ghost" onclick="copyMarkdown()">📋 Copiar como Markdown</button>
+    <button class="btn btn-primary" onclick="goTo(0);resetAll()">↺ Reiniciar</button>
+  </div>
+</section>
+
+</div><!-- /wrap -->
+
+<script>
+/* ══════════════════════════════════════════════════
+   DATA
+═══════════════════════════════════════════════════ */
+const Q1 = [
+  {
+    text: "Después de ejecutar las líneas A, B, C y D ¿cuántos elementos tiene la pila?",
+    opts: ["2","3","4","5"],
+    ans: 2,
+    feedback: {
+      ok: "✔ Correcto. Se hicieron 4 llamadas a Push(), por lo tanto hay 4 elementos en la pila.",
+      err: "✖ Cuenta los Push: Tacos(A), Agua(B), Torta(C), Jugo(D) → 4 elementos."
+    }
+  },
+  {
+    text: "¿Qué imprime la línea E? (historial.Peek())",
+    opts: ["Tacos x2","Agua 500ml","Torta de jamón","Jugo naranja"],
+    ans: 3,
+    feedback: {
+      ok: "✔ Correcto. Peek() devuelve el TOPE, que es el último elemento en entrar: 'Jugo naranja'.",
+      err: "✖ Peek() siempre devuelve el elemento más reciente (tope). El último Push fue 'Jugo naranja'."
+    }
+  },
+  {
+    text: "¿Cuántos elementos quedan en la pila después de la línea F? (historial.Pop())",
+    opts: ["4","3","2","0"],
+    ans: 1,
+    feedback: {
+      ok: "✔ Correcto. Pop() quita un elemento, así que de 4 queda 3.",
+      err: "✖ Había 4 elementos. Pop() quita exactamente 1. Resultado: 3."
+    }
+  },
+  {
+    text: "¿Qué imprime la línea G? (historial.Count)",
+    opts: ["4","3","2","1"],
+    ans: 1,
+    feedback: {
+      ok: "✔ Correcto. Después del Pop de la línea F, Count vale 3.",
+      err: "✖ La línea F hizo Pop, quitando 'Jugo naranja'. Quedan 3 elementos."
+    }
+  },
+  {
+    text: "¿Qué imprime la línea H? (historial.Peek() después del Pop)",
+    opts: ["Jugo naranja","Torta de jamón","Agua 500ml","Tacos x2"],
+    ans: 1,
+    feedback: {
+      ok: "✔ Correcto. Después de sacar 'Jugo naranja', el nuevo tope es 'Torta de jamón'.",
+      err: "✖ Pop quitó 'Jugo naranja'. El siguiente en la pila (el nuevo tope) es 'Torta de jamón'."
+    }
+  },
+  {
+    text: "Si declaras Stack<string> y llamas Push(42), ¿qué ocurre?",
+    opts: [
+      "Se convierte el 42 a string automáticamente",
+      "Error de compilación — Stack<string> solo acepta textos",
+      "Se guarda como null",
+      "Se guarda el valor 42 sin problemas"
+    ],
+    ans: 1,
+    feedback: {
+      ok: "✔ Correcto. C# es fuertemente tipado. Stack<string> solo acepta string — un int genera error en compilación.",
+      err: "✖ C# es fuertemente tipado. No puedes meter un int en un Stack<string>. Daría error de compilación."
+    }
+  }
+];
+
+const Q2 = [
+  {
+    text: "Tienes una pila con: Torta (tope) → Agua → Tacos (fondo). Llamas Pop() dos veces. ¿Qué queda en la pila?",
+    opts: ["Solo Tacos","Solo Torta","Agua y Tacos","La pila queda vacía"],
+    ans: 0,
+    feedback: {
+      ok: "✔ Correcto. Pop() 1 quita Torta. Pop() 2 quita Agua. Queda solo Tacos en el fondo.",
+      err: "✖ Pop() siempre quita el tope. Primero sale Torta, luego Agua. Queda Tacos."
+    }
+  },
+  {
+    text: "¿En qué orden imprime el foreach una pila con: A (tope) → B → C (fondo)?",
+    opts: ["C, B, A","A, B, C","B, A, C","En orden aleatorio"],
+    ans: 1,
+    feedback: {
+      ok: "✔ Correcto. foreach en Stack siempre recorre del TOPE al FONDO: A primero, C último.",
+      err: "✖ foreach en Stack recorre de tope a fondo. Si A es el tope, imprime: A, B, C."
+    }
+  },
+  {
+    text: "¿Cuál es la DIFERENCIA real entre Peek() y Pop()?",
+    opts: [
+      "No hay diferencia — hacen lo mismo",
+      "Peek() mira el tope sin quitarlo; Pop() lo quita y lo devuelve",
+      "Pop() mira el tope sin quitarlo; Peek() lo quita",
+      "Peek() agrega elementos; Pop() los quita"
+    ],
+    ans: 1,
+    feedback: {
+      ok: "✔ Exacto. Peek = solo mirar. Pop = quitar y devolver. La pila solo cambia con Pop.",
+      err: "✖ Peek solo observa el tope (Count no cambia). Pop extrae el tope (Count disminuye en 1)."
+    }
+  },
+  {
+    text: "¿Qué error lanza C# si llamas Pop() en una pila vacía?",
+    opts: [
+      "IndexOutOfRangeException",
+      "NullReferenceException",
+      "InvalidOperationException",
+      "StackOverflowException"
+    ],
+    ans: 2,
+    feedback: {
+      ok: "✔ Correcto. InvalidOperationException es el error que lanza Stack cuando intentas Pop o Peek en vacío.",
+      err: "✖ El error específico es InvalidOperationException. No es IndexOutOfRange (eso es para arreglos) ni Null."
+    }
+  },
+  {
+    text: "¿Por qué Stack<T> es la estructura ideal para implementar Ctrl+Z?",
+    opts: [
+      "Porque usa menos memoria que un arreglo",
+      "Porque permite acceder a cualquier posición",
+      "Porque siempre expone el último elemento agregado — LIFO coincide con 'deshacer lo más reciente'",
+      "Porque no necesita using System.Collections.Generic"
+    ],
+    ans: 2,
+    feedback: {
+      ok: "✔ Exacto. LIFO es perfecto para deshacer: la última acción realizada es la primera en deshacerse.",
+      err: "✖ La clave es LIFO: deshacer siempre opera sobre lo más reciente, que es exactamente el tope de la pila."
+    }
+  },
+  {
+    text: "¿Cuál de estas declaraciones es correcta para una pila de números enteros?",
+    opts: [
+      "Stack<int> pila = new Stack<int>();",
+      "Stack pila = new int[];",
+      "int[] pila = new Stack<int>();",
+      "Stack<int> pila = new int[10];"
+    ],
+    ans: 0,
+    feedback: {
+      ok: "✔ Correcto. Stack<int> pila = new Stack<int>(); es la sintaxis válida en C#.",
+      err: "✖ La forma correcta es: Stack<int> pila = new Stack<int>();  — tipo genérico en ambos lados."
+    }
+  }
+];
+
+/* ══════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════ */
+let currentSection = 0;
+let answers1 = new Array(Q1.length).fill(null);
+let answers2 = new Array(Q2.length).fill(null);
+let answered1 = 0, answered2 = 0;
+let selectedChallenge = -1;
+const letters = ['A','B','C','D'];
+
+/* ══════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('fFecha').value = new Date().toISOString().split('T')[0];
+  renderQuestions('qList1', Q1, answers1, 1);
+  renderQuestions('qList2', Q2, answers2, 2);
+});
+
+/* ══════════════════════════════════════════════════
+   RENDER QUESTIONS
+═══════════════════════════════════════════════════ */
+function renderQuestions(containerId, questions, answersArr, section) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  questions.forEach((q, qi) => {
+    const div = document.createElement('div');
+    div.className = 'q-card';
+    div.id = `q${section}_${qi}`;
+    div.innerHTML = `
+      <div class="q-num-bar">
+        <span class="q-num">Pregunta ${qi+1} de ${questions.length}</span>
+        <span class="q-pts">+1 punto</span>
+      </div>
+      <div class="q-text">${q.text}</div>
+      <div class="options" id="opts${section}_${qi}">
+        ${q.opts.map((opt, oi) => `
+          <div class="opt" id="opt${section}_${qi}_${oi}" onclick="selectOpt(${section},${qi},${oi})">
+            <span class="opt-letter">${letters[oi]}</span>
+            <span>${opt}</span>
+            <span class="opt-icon" id="icon${section}_${qi}_${oi}"></span>
+          </div>`).join('')}
+      </div>
+      <div class="feedback" id="fb${section}_${qi}"></div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+/* ══════════════════════════════════════════════════
+   SELECT OPTION
+═══════════════════════════════════════════════════ */
+function selectOpt(section, qi, oi) {
+  const questions = section === 1 ? Q1 : Q2;
+  const answersArr = section === 1 ? answers1 : answers2;
+  if (answersArr[qi] !== null) return; // already answered
+
+  const q = questions[qi];
+  answersArr[qi] = oi;
+
+  // Style all options
+  q.opts.forEach((_, optIdx) => {
+    const el = document.getElementById(`opt${section}_${qi}_${optIdx}`);
+    const icon = document.getElementById(`icon${section}_${qi}_${optIdx}`);
+    if (optIdx === oi) {
+      if (oi === q.ans) {
+        el.className = 'opt selected-ok';
+        icon.textContent = '✔';
+      } else {
+        el.className = 'opt selected-err';
+        icon.textContent = '✖';
+      }
+    } else if (optIdx === q.ans && oi !== q.ans) {
+      el.className = 'opt show-correct';
+      icon.textContent = '✔';
+    }
+  });
+
+  // Card color
+  const card = document.getElementById(`q${section}_${qi}`);
+  card.className = 'q-card ' + (oi === q.ans ? 'answered-ok' : 'answered-err');
+
+  // Feedback
+  const fb = document.getElementById(`fb${section}_${qi}`);
+  fb.className = 'feedback show ' + (oi === q.ans ? 'feedback-ok' : 'feedback-err');
+  fb.textContent = oi === q.ans ? q.feedback.ok : q.feedback.err;
+
+  // Update progress
+  if (section === 1) {
+    answered1 = answersArr.filter(a => a !== null).length;
+    updateProgress('prog1Bar','prog1Txt', answered1, Q1.length);
+    if (answered1 === Q1.length) document.getElementById('btnNext1').disabled = false;
+  } else {
+    answered2 = answersArr.filter(a => a !== null).length;
+    updateProgress('prog2Bar','prog2Txt', answered2, Q2.length);
+    if (answered2 === Q2.length) document.getElementById('btnNext2').disabled = false;
+  }
+}
+
+function updateProgress(barId, txtId, done, total) {
+  document.getElementById(barId).style.width = (done/total*100) + '%';
+  document.getElementById(txtId).textContent = `${done} / ${total}`;
+}
+
+/* ══════════════════════════════════════════════════
+   CHALLENGE SELECT
+═══════════════════════════════════════════════════ */
+const challenges = [
+  {
+    title: "🎵 App de música — Lista de reproducción LIFO",
+    desc: "Diseña una solución para una app de música donde el usuario agrega canciones y la última en agregarse se reproduce primero. Usa Stack<string>. Muestra cómo agregar 3 canciones, reproducir la primera (tope) y mostrar cuántas quedan.",
+    hint: "Stack<string>"
+  },
+  {
+    title: "🎟️ Sistema de turnos de la cafetería — FIFO",
+    desc: "Diseña una solución para la cafetería donde los alumnos se atienden en orden de llegada. El primero en llegar es el primero en ser atendido. Usa LinkedList<string>. Muestra cómo registrar 3 alumnos y atender al primero.",
+    hint: "LinkedList<string>"
+  },
+  {
+    title: "🎓 Registro de calificaciones fijas — Array",
+    desc: "Diseña una solución para guardar exactamente 5 calificaciones de un alumno (siempre serán 5, no más, no menos). Usa int[]. Muestra cómo declararlas, recorrerlas con foreach y calcular el promedio.",
+    hint: "int[]"
+  }
+];
+
+function selectChallenge(i) {
+  selectedChallenge = i;
+  [0,1,2].forEach(j => {
+    const card = document.getElementById(`ch${j}`);
+    card.style.borderColor = j === i ? 'var(--purple)' : 'var(--border)';
+    card.style.background  = j === i ? '#7C3AED12' : 'var(--card)';
+  });
+  const work = document.getElementById('challengeWork');
+  work.style.display = 'block';
+  document.getElementById('challengeTitle').textContent = challenges[i].title;
+  document.getElementById('challengeDesc').textContent = challenges[i].desc;
+  // Update commit checklist
+  const cl = document.getElementById('commitList');
+  cl.children[2].querySelector('.commit-check').className = 'commit-check commit-done';
+  cl.children[2].querySelector('.commit-check').textContent = '✔';
+  work.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* ══════════════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════════════ */
+function startActivity() {
+  const nombre = document.getElementById('fNombre').value.trim();
+  const grupo  = document.getElementById('fGrupo').value.trim();
+  const mat    = document.getElementById('fMateria').value.trim();
+  const fecha  = document.getElementById('fFecha').value;
+  if (!nombre || !grupo || !mat || !fecha) {
+    alert('Por favor completa todos los datos de identificación antes de continuar.');
+    return;
+  }
+  goTo(1);
+}
+
+function goTo(n) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(`sec${n}`).classList.add('active');
+  const items = document.querySelectorAll('.step-item');
+  items.forEach((item, i) => {
+    item.classList.remove('active','done');
+    if (i === n) item.classList.add('active');
+    else if (i < n) item.classList.add('done');
+  });
+  currentSection = n;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ══════════════════════════════════════════════════
+   FINISH
+═══════════════════════════════════════════════════ */
+function finishActivity() {
+  // Mark commits done
+  const cl = document.getElementById('commitList');
+  [0,1,3].forEach(i => {
+    cl.children[i].querySelector('.commit-check').className = 'commit-check commit-done';
+    cl.children[i].querySelector('.commit-check').textContent = '✔';
+  });
+
+  const correct1 = answers1.filter((a,i) => a === Q1[i].ans).length;
+  const correct2 = answers2.filter((a,i) => a === Q2[i].ans).length;
+  const total    = correct1 + correct2;
+  const max      = Q1.length + Q2.length;
+
+  document.getElementById('scoreNum').textContent = total;
+  document.getElementById('scoreDen').textContent = `/ ${max}`;
+  document.getElementById('statCorr').textContent = total;
+  document.getElementById('statPct').textContent  = Math.round(total/max*100) + '%';
+
+  const pct = total / max;
+  let title, msg;
+  if (pct === 1) {
+    title = '¡Pila perfecta! 🏆';
+    msg = 'Excelente trabajo. Dominaste todos los conceptos de Stack, LIFO, Push, Pop y Peek. Tu lógica es sólida — estás listo para la siguiente estructura.';
+  } else if (pct >= 0.75) {
+    title = '¡Muy bien ejecutado! ✔';
+    msg = 'Tienes un entendimiento sólido de las pilas. Revisa las preguntas donde te equivocaste — los errores de tipo y los casos de pila vacía son los más comunes al principio.';
+  } else if (pct >= 0.5) {
+    title = 'Buen comienzo 🔧';
+    msg = 'Vas por buen camino. Te recomiendo releer los ejemplos de código de la clase y ejecutarlos en tu Codespace para ver el comportamiento en tiempo real.';
+  } else {
+    title = 'Sigue practicando 💪';
+    msg = 'La lógica de pilas requiere práctica. Regresa a los ejemplos del Ejemplo 1, 2 y 3 de la clase, cópialo en tu Codespace y agrega Console.WriteLine después de cada operación para ver el estado.';
+  }
+  document.getElementById('scoreTitle').textContent = title;
+  document.getElementById('scoreMsg').textContent   = msg;
+
+  // Summary table
+  const allQ = [...Q1.map((q,i) => ({...q, userAns: answers1[i], sect: 'Etapa 01'})),
+                ...Q2.map((q,i) => ({...q, userAns: answers2[i], sect: 'Etapa 02'}))];
+  let tableHtml = `
+    <div class="divider" data-label="resumen de respuestas"></div>
+    <table class="summary-table">
+      <thead><tr>
+        <th>Etapa</th><th>Pregunta</th><th>Tu respuesta</th><th>Resultado</th>
+      </tr></thead><tbody>`;
+  allQ.forEach((q, i) => {
+    const correct = q.userAns === q.ans;
+    const userText = q.userAns !== null ? q.opts[q.userAns] : 'Sin responder';
+    tableHtml += `<tr>
+      <td style="color:var(--text3);white-space:nowrap">${q.sect}</td>
+      <td>${q.text}</td>
+      <td style="font-size:12px">${userText}</td>
+      <td class="${correct ? 'result-ok' : 'result-err'}">${correct ? '✔' : '✖'}</td>
+    </tr>`;
+  });
+  tableHtml += `</tbody></table>`;
+
+  // Open questions summary
+  tableHtml += `
+    <div class="divider" data-label="preguntas abiertas"></div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:16px;line-height:1.7">
+      Las siguientes respuestas requieren revisión del profesor. Se guardan aquí para tu evidencia en GitHub.
+    </div>`;
+
+  const openQs = [
+    { label: '🐛 Bug #1 — Peek vs Pop', id: 'bug1' },
+    { label: '🐛 Bug #2 — Error de tipo', id: 'bug2' },
+    { label: '🐛 Bug #3 — Pila vacía', id: 'bug3' },
+    { label: '🏗️ Solución — ' + (selectedChallenge >= 0 ? challenges[selectedChallenge].title : 'No seleccionado'), id: 'solutionCode' },
+    { label: '🤔 Reflexión — Elección de estructura', id: 'solutionReflect' },
+  ];
+  openQs.forEach(oq => {
+    const val = document.getElementById(oq.id)?.value?.trim() || '';
+    tableHtml += `
+      <div class="reflect-card" style="margin-bottom:12px">
+        <div class="reflect-title">${oq.label}</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.7;white-space:pre-wrap">${val || '<span style="color:var(--text3);font-style:italic">Sin respuesta</span>'}</div>
+      </div>`;
+  });
+
+  document.getElementById('summaryBlock').innerHTML = tableHtml;
+  goTo(5);
+}
+
+/* ══════════════════════════════════════════════════
+   UTILITIES
+═══════════════════════════════════════════════════ */
+function countChars(inputId, countId) {
+  const len = document.getElementById(inputId).value.length;
+  document.getElementById(countId).textContent = `${len} caracteres`;
+}
+
+function resetAll() {
+  answers1.fill(null); answers2.fill(null);
+  answered1 = 0; answered2 = 0; selectedChallenge = -1;
+  document.getElementById('fNombre').value = '';
+  document.getElementById('fGrupo').value  = '';
+  document.getElementById('fMateria').value = '';
+  renderQuestions('qList1', Q1, answers1, 1);
+  renderQuestions('qList2', Q2, answers2, 2);
+  document.getElementById('btnNext1').disabled = true;
+  document.getElementById('btnNext2').disabled = true;
+  document.getElementById('challengeWork').style.display = 'none';
+  [0,1,2].forEach(i => {
+    const c = document.getElementById(`ch${i}`);
+    c.style.borderColor = 'var(--border)';
+    c.style.background  = 'var(--card)';
+  });
+  ['bug1','bug2','bug3','solutionCode','solutionReflect'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  updateProgress('prog1Bar','prog1Txt', 0, Q1.length);
+  updateProgress('prog2Bar','prog2Txt', 0, Q2.length);
+}
+
+function copyMarkdown() {
+  const nombre  = document.getElementById('fNombre').value;
+  const grupo   = document.getElementById('fGrupo').value;
+  const materia = document.getElementById('fMateria').value;
+  const fecha   = document.getElementById('fFecha').value;
+  const correct1 = answers1.filter((a,i) => a !== null && a === Q1[i].ans).length;
+  const correct2 = answers2.filter((a,i) => a !== null && a === Q2[i].ans).length;
+  const total = correct1 + correct2;
+  const max   = Q1.length + Q2.length;
+
+  let md = `# Actividad — OOP + Estructuras de Datos · C#\n\n`;
+  md += `| Campo | Dato |\n|---|---|\n`;
+  md += `| Nombre | ${nombre} |\n| Grupo | ${grupo} |\n`;
+  md += `| Materia | ${materia} |\n| Fecha | ${fecha} |\n\n`;
+  md += `## Puntaje opción múltiple\n**${total} / ${max}** (${Math.round(total/max*100)}%)\n\n`;
+
+  md += `## Etapa 01 — Calentamiento\n\n`;
+  Q1.forEach((q, i) => {
+    const ok = answers1[i] === q.ans;
+    md += `**${i+1}. ${q.text}**\n`;
+    md += `Respuesta: ${answers1[i] !== null ? q.opts[answers1[i]] : 'Sin responder'} — ${ok ? '✔ Correcto' : '✖ Incorrecto'}\n\n`;
+  });
+
+  md += `## Etapa 02 — Stack en vivo\n\n`;
+  Q2.forEach((q, i) => {
+    const ok = answers2[i] === q.ans;
+    md += `**${i+1}. ${q.text}**\n`;
+    md += `Respuesta: ${answers2[i] !== null ? q.opts[answers2[i]] : 'Sin responder'} — ${ok ? '✔ Correcto' : '✖ Incorrecto'}\n\n`;
+  });
+
+  md += `## Etapa 03 — Bugs\n\n`;
+  ['bug1','bug2','bug3'].forEach((id, i) => {
+    md += `**Bug #${i+1}:**\n${document.getElementById(id)?.value || 'Sin respuesta'}\n\n`;
+  });
+
+  md += `## Etapa 04 — Diseño\n\n`;
+  if (selectedChallenge >= 0) md += `**Reto elegido:** ${challenges[selectedChallenge].title}\n\n`;
+  md += `**Solución:**\n${document.getElementById('solutionCode')?.value || ''}\n\n`;
+  md += `**Reflexión:**\n${document.getElementById('solutionReflect')?.value || ''}\n`;
+
+  navigator.clipboard.writeText(md).then(() => {
+    alert('✔  Markdown copiado. Pégalo en tu archivo actividad-stack.md en GitHub.');
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = md; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    alert('✔  Markdown copiado.');
+  });
+}
+</script>
+</body>
+</html>
