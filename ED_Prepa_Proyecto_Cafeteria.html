@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proyecto · Cafetería Digital · C#</title>
+<link href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@300;400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&display=swap" rel="stylesheet">
+<style>
+/* ───────────────────────────────────────────────────
+   BLUEPRINT THEME — engineering grid paper aesthetic
+   Primary: deep navy + blueprint blue
+   Accent: amber technical ink
+──────────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:   #0B1929;
+  --navy2:  #102235;
+  --navy3:  #163048;
+  --ink:    #1B4F8A;
+  --ink2:   #2563EB;
+  --ink3:   #3B82F6;
+  --ink4:   #93C5FD;
+  --grid:   #1B4F8A18;
+  --amber:  #F59E0B;
+  --amber2: #FCD34D;
+  --green:  #10B981;
+  --green2: #6EE7B7;
+  --red:    #EF4444;
+  --red2:   #FCA5A5;
+  --white:  #F0F6FF;
+  --tx:     #E2EEFF;
+  --tx2:    #94A3B8;
+  --tx3:    #475569;
+  --bd:     #1B4F8A30;
+  --bd2:    #1B4F8A55;
+  --card:   #102235;
+  --mono:   'Azeret Mono',monospace;
+  --serif:  'Fraunces',serif;
+  --kw:#C4B5FD; --tp:#93C5FD; --st:#86EFAC; --cm:#4B5E7A; --nm:#FCA5A5; --mt:#67E8F9;
+}
+
+html{scroll-behavior:smooth}
+body{
+  background:var(--navy);
+  color:var(--tx);
+  font-family:var(--mono);
+  min-height:100vh;
+  /* Blueprint grid */
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px),
+    linear-gradient(var(--grid) .25px, transparent .25px),
+    linear-gradient(90deg, var(--grid) .25px, transparent .25px),
+    radial-gradient(ellipse 70% 50% at 50% 0%, #1B4F8A22 0%, transparent 70%);
+  background-size: 48px 48px, 48px 48px, 12px 12px, 12px 12px, 100% 100%;
+}
+
+/* ── SCROLLBAR ─────────────────────────────────── */
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--navy)}
+::-webkit-scrollbar-thumb{background:var(--ink);border-radius:2px}
+
+/* ── WRAP ──────────────────────────────────────── */
+.wrap{max-width:900px;margin:0 auto;padding:0 28px 100px}
+
+/* ── PROGRESS RAIL ─────────────────────────────── */
+.rail{
+  position:fixed;top:0;left:0;right:0;
+  height:3px;z-index:200;
+  background:var(--navy2);
+}
+.rail-fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--ink2),var(--amber));
+  transition:width .4s ease;
+  width:0%;
+}
+
+/* ── TOP STAMP ─────────────────────────────────── */
+.top-stamp{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  padding:32px 0 24px;
+  border-bottom:1px solid var(--bd2);
+  margin-bottom:48px;
+  flex-wrap:wrap;gap:16px;
+}
+.stamp-left{}
+.stamp-proj{
+  font-size:9px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--ink3);margin-bottom:6px;
+}
+.stamp-title{
+  font-family:var(--serif);
+  font-size:clamp(26px,4vw,44px);
+  font-weight:700;
+  color:var(--white);
+  line-height:1.1;
+  letter-spacing:-.01em;
+}
+.stamp-title em{
+  color:var(--amber);font-style:normal;
+}
+.stamp-sub{
+  font-size:12px;color:var(--tx2);margin-top:8px;line-height:1.6;
+}
+.stamp-right{
+  display:flex;flex-direction:column;gap:8px;align-items:flex-end;
+}
+.stamp-box{
+  border:1px solid var(--bd2);padding:10px 14px;
+  font-size:11px;color:var(--tx2);
+  background:var(--navy2);min-width:200px;
+}
+.stamp-box-label{
+  font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink3);margin-bottom:4px;
+}
+.stamp-box input,.stamp-box select{
+  background:transparent;border:none;outline:none;
+  color:var(--tx);font-family:var(--mono);font-size:12px;
+  width:100%;border-bottom:1px solid var(--bd2);
+  padding:2px 0;margin-top:2px;
+}
+.stamp-box input::placeholder{color:var(--tx3)}
+
+/* ── SECTION ───────────────────────────────────── */
+.phase{
+  margin-bottom:64px;
+  opacity:0;transform:translateY(24px);
+  transition:opacity .5s ease, transform .5s ease;
+}
+.phase.visible{opacity:1;transform:translateY(0)}
+
+/* ── PHASE HEADER ──────────────────────────────── */
+.phase-header{
+  display:flex;align-items:flex-start;gap:20px;
+  margin-bottom:28px;
+  padding:20px 24px;
+  border:1px solid var(--bd2);
+  border-left:4px solid var(--ink2);
+  background:var(--navy2);
+  position:relative;overflow:hidden;
+}
+.phase-header::before{
+  content:'';position:absolute;top:0;right:0;
+  width:200px;height:100%;
+  background:linear-gradient(270deg,var(--ink2)06,transparent);
+  pointer-events:none;
+}
+.phase-num{
+  font-family:var(--serif);
+  font-size:48px;font-weight:700;
+  color:var(--ink2);opacity:.4;
+  line-height:1;flex-shrink:0;min-width:56px;
+  font-variant-numeric:tabular-nums;
+}
+.phase-meta{}
+.phase-tag{
+  font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:4px;
+  display:flex;align-items:center;gap:8px;
+}
+.phase-tag::before{content:'●';font-size:7px}
+.phase-name{
+  font-family:var(--serif);font-size:clamp(18px,2.5vw,26px);
+  font-weight:600;color:var(--white);margin-bottom:6px;
+  line-height:1.2;
+}
+.phase-desc{font-size:12.5px;color:var(--tx2);line-height:1.65}
+.phase-time{
+  margin-left:auto;flex-shrink:0;
+  font-size:10px;color:var(--ink4);
+  border:1px solid var(--bd2);padding:4px 10px;
+  align-self:flex-start;
+}
+
+/* ── CONTEXT BOX ───────────────────────────────── */
+.context{
+  background:var(--navy3);
+  border:1px solid var(--bd2);
+  border-radius:0;
+  padding:20px 22px;
+  margin-bottom:24px;
+  position:relative;
+}
+.context::before{
+  content:'CONTEXTO';
+  position:absolute;top:-1px;left:20px;
+  font-size:9px;letter-spacing:.14em;
+  color:var(--navy3);
+  background:var(--ink);
+  padding:2px 8px;
+  font-weight:600;
+}
+.context p{font-size:13px;color:var(--tx2);line-height:1.75;margin-bottom:10px}
+.context p:last-child{margin-bottom:0}
+.context strong{color:var(--tx)}
+.context em{color:var(--amber);font-style:normal}
+
+/* ── STEP ──────────────────────────────────────── */
+.step{
+  margin-bottom:28px;
+  border:1px solid var(--bd);
+  background:var(--card);
+}
+.step-num-bar{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 16px;
+  border-bottom:1px solid var(--bd);
+  background:var(--navy2);
+}
+.step-bubble{
+  width:24px;height:24px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;flex-shrink:0;
+  border:1.5px solid;
+}
+.sb-ink{border-color:var(--ink2);color:var(--ink2);background:var(--ink2)15}
+.sb-amber{border-color:var(--amber);color:var(--amber);background:var(--amber)15}
+.sb-green{border-color:var(--green);color:var(--green);background:var(--green)15}
+.step-label{
+  font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--tx3);flex:1;
+}
+.step-type{
+  font-size:9px;padding:2px 8px;
+  border:1px solid;letter-spacing:.06em;text-transform:uppercase;
+}
+.st-reflect{border-color:var(--amber)50;color:var(--amber)}
+.st-code{border-color:var(--ink3)50;color:var(--ink3)}
+.st-analyze{border-color:var(--green)50;color:var(--green)}
+.step-body{padding:18px 20px}
+
+/* ── INSTRUCTION ───────────────────────────────── */
+.instruction{
+  font-size:13px;color:var(--tx);line-height:1.75;
+  margin-bottom:16px;
+}
+.instruction strong{color:var(--amber)}
+.instruction code{
+  color:var(--ink4);background:var(--ink)18;
+  padding:1px 5px;font-size:12px;
+  border:1px solid var(--bd2);
+}
+
+/* ── CODE BLOCK ────────────────────────────────── */
+.cb{
+  background:#060B14;
+  border:1px solid var(--bd2);
+  margin:14px 0;overflow:hidden;
+}
+.cb-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 14px;border-bottom:1px solid var(--bd);
+  background:#080E1A;
+}
+.cb-dots{display:flex;gap:5px}
+.cb-dot{width:9px;height:9px;border-radius:50%}
+.cb-dot:nth-child(1){background:#FF5F57}
+.cb-dot:nth-child(2){background:#FFBD2E}
+.cb-dot:nth-child(3){background:#28C840}
+.cb-fname{font-size:10px;color:var(--tx3);letter-spacing:.06em}
+.cb-lang{font-size:9px;color:var(--ink3);padding:1px 6px;border:1px solid var(--bd2)}
+.cb-body{
+  padding:16px 18px;font-size:12.5px;line-height:1.9;
+  overflow-x:auto;
+}
+.cb-body pre{white-space:pre-wrap;word-break:break-word}
+.kw{color:var(--kw)} .tp{color:var(--tp)} .st{color:var(--st)}
+.cm{color:var(--cm);font-style:italic} .nm{color:var(--nm)}
+.mt{color:var(--mt)} .vr{color:#DDEEFF}
+
+/* ── ANSWER AREA ───────────────────────────────── */
+.answer-wrap{margin-top:14px}
+.answer-label{
+  font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink3);margin-bottom:6px;
+  display:flex;align-items:center;gap:8px;
+}
+.answer-label::before{content:'▶';font-size:8px}
+textarea,.ans-input{
+  width:100%;
+  background:var(--navy);
+  border:1px solid var(--bd2);
+  border-left:3px solid var(--ink2);
+  padding:12px 14px;
+  color:var(--tx);
+  font-family:var(--mono);
+  font-size:12.5px;
+  line-height:1.7;
+  resize:vertical;
+  outline:none;
+  transition:border-color .2s;
+  min-height:80px;
+}
+textarea:focus,.ans-input:focus{border-color:var(--ink2);border-left-color:var(--amber)}
+textarea::placeholder,.ans-input::placeholder{color:var(--tx3)}
+.ans-row{display:flex;gap:10px;align-items:flex-start;margin-top:10px}
+.ans-label-inline{
+  font-size:10px;color:var(--tx3);padding-top:12px;flex-shrink:0;min-width:28px;
+}
+
+/* ── MCQ ───────────────────────────────────────── */
+.mcq{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.mcq-opt{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 14px;border:1px solid var(--bd2);
+  cursor:pointer;font-size:12.5px;
+  transition:all .15s;background:var(--navy2);
+}
+.mcq-opt:hover{border-color:var(--ink2);background:var(--ink2)0D}
+.mcq-opt.ok{border-color:var(--green)!important;background:var(--green)0D!important;color:var(--green)!important}
+.mcq-opt.err{border-color:var(--red)!important;background:var(--red)0D!important;color:var(--red)!important}
+.mcq-opt.reveal-ok{border-color:var(--green)44;background:var(--green)08;color:var(--green2)}
+.mcq-letter{
+  width:22px;height:22px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;
+  border:1px solid var(--bd2);color:var(--tx3);
+  transition:all .15s;
+}
+.mcq-opt:hover .mcq-letter{border-color:var(--ink2);color:var(--ink2)}
+.mcq-opt.ok .mcq-letter{border-color:var(--green);color:var(--green);background:var(--green)15}
+.mcq-opt.err .mcq-letter{border-color:var(--red);color:var(--red);background:var(--red)15}
+.mcq-feedback{
+  display:none;margin-top:10px;padding:10px 14px;
+  font-size:12px;line-height:1.6;
+  border-left:3px solid;
+}
+.fb-ok{background:var(--green)0A;border-color:var(--green);color:var(--green2)}
+.fb-err{background:var(--red)0A;border-color:var(--red);color:var(--red2)}
+.mcq-feedback.show{display:block}
+
+/* ── FILL IN ───────────────────────────────────── */
+.fill-line{
+  display:flex;align-items:center;gap:0;flex-wrap:wrap;
+  font-family:var(--mono);font-size:12.5px;
+  padding:14px 16px;background:#060B14;
+  border:1px solid var(--bd2);margin:12px 0;line-height:2.2;
+}
+.fill-line span{color:var(--tx)}
+.fill-blank{
+  display:inline-block;
+  min-width:120px;padding:2px 6px;
+  border:none;border-bottom:2px solid var(--amber);
+  background:transparent;color:var(--amber);
+  font-family:var(--mono);font-size:12.5px;
+  outline:none;text-align:center;
+}
+.fill-blank:focus{border-bottom-color:var(--ink2)}
+.fill-blank.ok{border-bottom-color:var(--green);color:var(--green)}
+.fill-blank.err{border-bottom-color:var(--red);color:var(--red)}
+
+/* ── TRACE TABLE ───────────────────────────────── */
+.trace-table{width:100%;border-collapse:collapse;font-size:12px;margin:14px 0}
+.trace-table th{
+  padding:8px 12px;text-align:center;
+  background:var(--navy2);color:var(--ink4);
+  font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+  border:1px solid var(--bd2);font-weight:600;
+}
+.trace-table td{
+  padding:10px 12px;border:1px solid var(--bd);
+  text-align:center;vertical-align:middle;
+}
+.trace-table tr:nth-child(even) td{background:var(--navy2)}
+.trace-input{
+  width:100%;background:transparent;border:none;
+  color:var(--amber);font-family:var(--mono);font-size:12px;
+  text-align:center;outline:none;padding:2px;
+}
+.trace-input:focus{background:var(--amber)08}
+.trace-input.ok{color:var(--green)}
+.trace-input.err{color:var(--red)}
+.trace-code{color:var(--ink3);font-family:var(--mono)}
+.trace-hint{color:var(--tx3);font-size:11px}
+
+/* ── CALLOUT ───────────────────────────────────── */
+.callout{
+  display:flex;gap:14px;padding:14px 16px;
+  margin:14px 0;font-size:12.5px;line-height:1.65;
+  border-left:3px solid;
+}
+.co-ink{background:var(--ink)0C;border-color:var(--ink2);color:var(--ink4)}
+.co-amber{background:var(--amber)0A;border-color:var(--amber);color:var(--amber2)}
+.co-green{background:var(--green)0A;border-color:var(--green);color:var(--green2)}
+.co-red{background:var(--red)0A;border-color:var(--red);color:var(--red2)}
+.co-icon{font-size:16px;flex-shrink:0}
+
+/* ── STRUCTURE CARDS ───────────────────────────── */
+.struct-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:14px;
+  margin:16px 0;
+}
+.struct-card{
+  border:1px solid var(--bd2);padding:16px;
+  background:var(--navy2);
+  cursor:pointer;transition:all .2s;
+}
+.struct-card:hover{border-color:var(--ink2);background:var(--ink2)0A}
+.struct-card.selected{border-color:var(--amber);background:var(--amber)0C}
+.sc-icon{font-size:28px;margin-bottom:8px}
+.sc-name{font-size:13px;font-weight:600;color:var(--tx);margin-bottom:4px}
+.sc-type{font-size:10px;color:var(--ink3);font-family:var(--mono);margin-bottom:8px}
+.sc-desc{font-size:11.5px;color:var(--tx3);line-height:1.5}
+
+/* ── DIAGRAM ───────────────────────────────────── */
+.diagram{
+  background:#060B14;border:1px solid var(--bd2);
+  padding:20px;margin:14px 0;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+}
+.diag-label{
+  font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--tx3);margin-bottom:8px;
+}
+.diag-node{
+  padding:10px 32px;border:1px solid;
+  font-family:var(--mono);font-size:13px;font-weight:500;
+  text-align:center;min-width:200px;
+}
+.dn-tope{border-color:var(--ink2);color:var(--ink4);background:var(--ink2)12;box-shadow:0 0 16px var(--ink2)20}
+.dn-mid{border-color:var(--bd2);color:var(--tx2)}
+.dn-fondo{border-color:var(--bd);color:var(--tx3)}
+.dn-empty{border-color:var(--bd);color:var(--tx3);border-style:dashed}
+.diag-arrow{color:var(--tx3);font-size:12px;line-height:1}
+
+/* ── BTN ───────────────────────────────────────── */
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:10px 20px;font-family:var(--mono);font-size:12px;
+  border:1px solid;cursor:pointer;
+  transition:all .15s;letter-spacing:.04em;text-transform:uppercase;
+  font-weight:500;background:transparent;
+}
+.btn-primary{
+  border-color:var(--ink2);color:var(--ink2);
+}
+.btn-primary:hover{background:var(--ink2);color:var(--white)}
+.btn-amber{border-color:var(--amber);color:var(--amber)}
+.btn-amber:hover{background:var(--amber);color:var(--navy)}
+.btn-green{border-color:var(--green);color:var(--green)}
+.btn-green:hover{background:var(--green);color:var(--navy)}
+.btn-ghost{border-color:var(--bd2);color:var(--tx3)}
+.btn-ghost:hover{border-color:var(--tx3);color:var(--tx)}
+.btn-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
+
+/* ── SCORE RING ────────────────────────────────── */
+.score-section{
+  text-align:center;padding:48px 20px;
+  border:1px solid var(--bd2);background:var(--navy2);
+  margin-top:48px;
+}
+.score-ring{
+  width:140px;height:140px;border-radius:50%;
+  margin:0 auto 24px;
+  border:2px solid var(--ink2);
+  background:var(--navy);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  position:relative;
+}
+.score-ring::before{
+  content:'';position:absolute;inset:-8px;border-radius:50%;
+  border:1px dashed var(--bd2);
+}
+.score-big{
+  font-family:var(--serif);font-size:52px;font-weight:700;
+  color:var(--amber);line-height:1;
+}
+.score-den{font-size:12px;color:var(--tx3)}
+.score-title{
+  font-family:var(--serif);font-size:28px;font-weight:700;
+  color:var(--white);margin-bottom:10px;
+}
+.score-msg{font-size:13px;color:var(--tx2);max-width:500px;margin:0 auto 24px;line-height:1.7}
+.score-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:12px;
+  max-width:600px;margin:24px auto;
+}
+.score-stat{
+  border:1px solid var(--bd2);padding:16px 12px;
+  background:var(--navy);
+}
+.ss-num{
+  font-family:var(--serif);font-size:28px;font-weight:700;
+  margin-bottom:4px;
+}
+.ss-lbl{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--tx3)}
+
+/* ── DIVIDER ───────────────────────────────────── */
+.divider{
+  display:flex;align-items:center;gap:16px;
+  margin:40px 0 32px;font-size:9px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--tx3);
+}
+.divider::before,.divider::after{
+  content:'';flex:1;height:1px;background:var(--bd2);
+}
+
+/* ── REFLECTION ────────────────────────────────── */
+.reflect-prompt{
+  font-size:13px;color:var(--tx2);line-height:1.75;
+  margin-bottom:12px;font-family:var(--serif);font-style:italic;
+}
+
+/* ── FINAL PROJECT VIEWER ──────────────────────── */
+.project-preview{
+  border:1px solid var(--ink2)50;
+  background:#040810;
+  margin:20px 0;overflow:hidden;
+}
+.pp-header{
+  background:var(--ink2)15;
+  border-bottom:1px solid var(--ink2)30;
+  padding:12px 16px;
+  font-size:11px;color:var(--ink4);
+  display:flex;align-items:center;gap:8px;
+  letter-spacing:.06em;
+}
+.pp-body{padding:20px;font-size:12.5px;color:var(--tx2);line-height:1.8}
+
+/* ── CHAR COUNT ────────────────────────────────── */
+.char-c{font-size:9px;color:var(--tx3);text-align:right;margin-top:3px}
+
+/* ── BADGE ─────────────────────────────────────── */
+.badge{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:2px 8px;font-size:9px;letter-spacing:.08em;text-transform:uppercase;
+  border:1px solid;font-weight:600;
+}
+.bg-ink{border-color:var(--ink2)50;color:var(--ink3);background:var(--ink2)10}
+.bg-amber{border-color:var(--amber)50;color:var(--amber);background:var(--amber)10}
+.bg-green{border-color:var(--green)50;color:var(--green);background:var(--green)10}
+
+/* ── ANIM ──────────────────────────────────────── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.anim{animation:fadeUp .4s ease both}
+@media(prefers-reduced-motion:reduce){.anim,.phase{animation:none!important;opacity:1!important;transform:none!important}}
+</style>
+</head>
+<body>
+<div class="rail"><div class="rail-fill" id="railFill"></div></div>
+<div class="wrap">
+
+<!-- ══════════════════════════════════════════════
+     HEADER
+═══════════════════════════════════════════════ -->
+<header class="top-stamp anim">
+  <div class="stamp-left">
+    <div class="stamp-proj">Estructura de Datos · Preparatoria · Proyecto de Evaluación</div>
+    <h1 class="stamp-title">Cafetería<br><em>Digital</em></h1>
+    <div class="stamp-sub">Sistema de gestión estudiantil · C# · ~100 minutos · Estructuras de datos aplicadas</div>
+  </div>
+  <div class="stamp-right">
+    <div class="stamp-box">
+      <div class="stamp-box-label">Nombre del alumno</div>
+      <input type="text" id="fNombre" placeholder="Tu nombre completo">
+    </div>
+    <div class="stamp-box">
+      <div class="stamp-box-label">Grupo · Materia · Fecha</div>
+      <input type="text" id="fGrupo" placeholder="Ej. 3°B · Estructura de Datos · 23/05/26">
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════════
+     BRIEF
+═══════════════════════════════════════════════ -->
+<div class="context anim" style="margin-bottom:48px">
+  <p>
+    <strong>Bienvenido al equipo de desarrollo de la Cafetería Digital.</strong> Eres un desarrollador junior recién contratado. La cafetería maneja cientos de pedidos al día y necesita un sistema de software para organizarlos.
+  </p>
+  <p>
+    Tu misión es construir ese sistema <em>paso a paso</em>, tomando decisiones técnicas reales en cada fase. El cliente (el director de la cafetería) te va dando los requerimientos conforme avanzan las semanas. Al final del proyecto tendrás un sistema funcional en C# que usa tres estructuras de datos diferentes, cada una elegida por una razón concreta.
+  </p>
+  <p>
+    <strong>Reglas del proyecto:</strong> Lee cada fase con calma. Responde las preguntas antes de ver el código. Escribe tus reflexiones con honestidad — no hay respuestas perfectas en las preguntas abiertas.
+  </p>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     FASE 1 — MENÚ FIJO
+═══════════════════════════════════════════════ -->
+<section class="phase" id="p1">
+  <div class="phase-header">
+    <div class="phase-num">01</div>
+    <div class="phase-meta">
+      <div class="phase-tag">Semana 1 del proyecto</div>
+      <div class="phase-name">El menú — datos fijos que nunca cambian</div>
+      <div class="phase-desc">El director te entrega el menú de la cafetería. Siempre serán exactamente 6 platillos. Nunca se agregan ni eliminan.</div>
+    </div>
+    <div class="phase-time">⏱ ~15 min</div>
+  </div>
+
+  <div class="context">
+    <p>El director dice: <em>"Necesito que el sistema guarde los 6 platillos del menú con su nombre y precio. El menú no cambia — siempre serán los mismos 6. Eso sí, quiero poder ver cuál es el platillo más caro y el más barato."</em></p>
+    <p>Antes de escribir código, tienes que elegir la estructura correcta. Esta decisión importa.</p>
+  </div>
+
+  <!-- STEP 1.1 -->
+  <div class="step">
+    <div class="step-num-bar">
+      <div class="step-bubble sb-amber">1</div>
+      <span class="step-label">Decisión de diseño</span>
+      <span class="step-type st-reflect">reflexión</span>
+    </div>
+    <div class="step-body">
+      <div class="instruction">El director dijo que el menú <strong>siempre tendrá exactamente 6 platillos</strong> y nunca cambiará. ¿Cuál estructura de datos es la más adecuada para guardarlos?</div>
+      <div class="struct-grid" id="sg1">
+        <div class="struct-card" onclick="selectStruct('sg1',0,'ok')">
+          <div class="sc-icon">📐</div>
+          <div class="sc-name">Arreglo (Array)</div>
+          <div class="sc-type">string[] / double[]</div>
+          <div class="sc-desc">Tamaño fijo, acceso directo por índice. No crece ni encoge.</div>
+        </div>
+        <div class="struct-card" onclick="selectStruct('sg1',1,'err')">
+          <div class="sc-icon">🔗</div>
+          <div class="sc-name">LinkedList&lt;T&gt;</div>
+          <div class="sc-type">LinkedList&lt;string&gt;</div>
+          <div class="sc-desc">Tamaño flexible, inserción dinámica. Los nodos apuntan al siguiente.</div>
+        </div>
+        <div class="struct-card" onclick="selectStruct('sg1',2,'err')">
+          <div class="sc-icon">🥞</div>
+          <div class="sc-name">Stack&lt;T&gt;</div>
+          <div class="sc-type">Stack&lt;string&gt;</div>
+          <div class="sc-desc">LIFO — el último en entrar es el primero en salir.</div>
+        </div>
+      </div>
+      <div class="mcq-feedback" id="fb_sg1_ok" style="display:none;background:var(--green)0A;border-left:3px solid var(--green);padding:10px 14px;font-size:12px;color:var(--green2);margin-top:8px">
+        ✔ Correcto. Si el tamaño es fijo y nunca cambia, el <strong>arreglo</strong> es la elección ideal: ocupa exactamente la memoria que necesita, permite acceso directo por índice [i] y no tiene el overhead de nodos con punteros.
+      </div>
+      <div class="mcq-feedback" id="fb_sg1_err" style="display:none;background:var(--red)0A;border-left:3px solid var(--red);padding:10px 14px;font-size:12px;color:var(--red2);margin-top:8px">
+        ✖ Piénsalo de nuevo. Si el menú siempre tiene exactamente 6 platillos y nunca cambia, no necesitas una estructura que crezca o que trabaje en orden específico. ¿Cuál es la más simple para datos fijos?
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 1.2 -->
+  <div class="step">
+    <div class="step-num-bar">
+      <div class="step-bubble sb-ink">2</div>
+      <span class="step-label">Lee y analiza el código</span>
+      <span class="step-type st-code">código</span>
+    </div>
+    <div class="step-body">
+      <div class="instruction">El código para el módulo del menú está listo. Léelo con calma — cada comentario explica por qué se tomó esa decisión.</div>
+      <div class="cb">
+        <div class="cb-bar">
+          <div class="cb-dots"><div class="cb-dot"></div><div class="cb-dot"></div><div class="cb-dot"></div></div>
+          <span class="cb-fname">Menu.cs — Módulo 1</span>
+          <span class="cb-lang">C#</span>
+        </div>
+        <div class="cb-body"><pre><span class="kw">using</span> <span class="tp">System</span>;
+
+<span class="kw">class</span> <span class="tp">ModuloMenu</span>
+{
+    <span class="cm">// Arreglo de tamaño fijo = 6. El menú nunca cambia.</span>
+    <span class="cm">// No usamos List<T> porque no necesitamos que crezca.</span>
+    <span class="kw">static</span> <span class="tp">string</span>[] <span class="vr">platillos</span> = {
+        <span class="st">"Tacos x2"</span>, <span class="st">"Torta de jamón"</span>, <span class="st">"Agua 500ml"</span>,
+        <span class="st">"Jugo naranja"</span>, <span class="st">"Café americano"</span>, <span class="st">"Arroz con leche"</span>
+    };
+
+    <span class="kw">static</span> <span class="tp">double</span>[] <span class="vr">precios</span> = {
+        <span class="nm">35.0</span>, <span class="nm">45.0</span>, <span class="nm">18.0</span>,
+        <span class="nm">25.0</span>, <span class="nm">22.0</span>, <span class="nm">20.0</span>
+    };
+    <span class="cm">// ↑ Arreglos PARALELOS: platillos[i] ↔ precios[i]</span>
+
+    <span class="kw">public static void</span> <span class="mt">MostrarMenu</span>()
+    {
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">"=== MENÚ CAFETERÍA ==="</span>);
+        <span class="kw">for</span> (<span class="tp">int</span> <span class="vr">i</span> = <span class="nm">0</span>; <span class="vr">i</span> &lt; <span class="vr">platillos</span>.Length; <span class="vr">i</span>++)
+        {
+            <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"[{</span><span class="vr">i</span><span class="st">}] {</span><span class="vr">platillos</span><span class="st">[i],-20} ${</span><span class="vr">precios</span><span class="st">[i]:F2}"</span>);
+        }
+    }
+
+    <span class="kw">public static void</span> <span class="mt">MostrarExtremos</span>()
+    {
+        <span class="tp">double</span> <span class="vr">max</span> = <span class="vr">precios</span>[<span class="nm">0</span>], <span class="vr">min</span> = <span class="vr">precios</span>[<span class="nm">0</span>];
+        <span class="tp">int</span> <span class="vr">iMax</span> = <span class="nm">0</span>, <span class="vr">iMin</span> = <span class="nm">0</span>;
+
+        <span class="kw">for</span> (<span class="tp">int</span> <span class="vr">i</span> = <span class="nm">1</span>; <span class="vr">i</span> &lt; <span class="vr">precios</span>.Length; <span class="vr">i</span>++)
+        {
+            <span class="kw">if</span> (<span class="vr">precios</span>[<span class="vr">i</span>] &gt; <span class="vr">max</span>) { <span class="vr">max</span> = <span class="vr">precios</span>[<span class="vr">i</span>]; <span class="vr">iMax</span> = <span class="vr">i</span>; }
+            <span class="kw">if</span> (<span class="vr">precios</span>[<span class="vr">i</span>] &lt; <span class="vr">min</span>) { <span class="vr">min</span> = <span class="vr">precios</span>[<span class="vr">i</span>]; <span class="vr">iMin</span> = <span class="vr">i</span>; }
+        }
+
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"Más caro:  {</span><span class="vr">platillos</span><span class="st">[iMax]} (${</span><span class="vr">max</span><span class="st">:F2})"</span>);
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"Más barato: {</span><span class="vr">platillos</span><span class="st">[iMin]} (${</span><span class="vr">min</span><span class="st">:F2})"</span>);
+    }
+}</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 1.3 — TRACE -->
+  <div class="step">
+    <div class="step-num-bar">
+      <div class="step-bubble sb-green">3</div>
+      <span class="step-label">Traza y predice la salida</span>
+      <span class="step-type st-analyze">análisis</span>
+    </div>
+    <div class="step-body">
+      <div class="instruction">Sin ejecutar el código, responde:</div>
+      <div class="callout co-ink">
+        <span class="co-icon">🔍</span>
+        <span>El bucle <code>for</code> en <code>MostrarExtremos()</code> empieza en <code>i=1</code>, no en <code>i=0</code>. ¿Por qué crees que empieza en 1 y no en 0?</span>
+      </div>
+      <div class="answer-wrap">
+        <div class="answer-label">Tu explicación</div>
+        <textarea id="a1_3" placeholder="Escribe tu explicación aquí..." oninput="cc(this,'c1_3')"></textarea>
+        <div class="char-c" id="c1_3">0 caracteres</div>
+      </div>
+      <div class="callout co-green" style="margin-top:10px">
+        <span class="co-icon">💡</span>
+        <span><strong>Pista de verificación:</strong> Ya antes del bucle escribimos <code>max = precios[0]</code> y <code>min = precios[0]</code>. El índice 0 ya fue considerado como punto de partida.</span>
+      </div>
+      <div class="answer-wrap" style="margin-top:16px">
+        <div class="answer-label">¿Qué imprime MostrarExtremos()? — escribe las 2 líneas de salida</div>
+        <textarea id="a1_3b" placeholder="Más caro:  ...\nMás barato: ..." style="min-height:60px" oninput="cc(this,'c1_3b')"></textarea>
+        <div class="char-c" id="c1_3b">0 caracteres</div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<div class="divider">Fase 2 — El sistema crece</div>
+
+<!-- ══════════════════════════════════════════════
+     FASE 2 — LISTA DE ALUMNOS INSCRITOS
+═══════════════════════════════════════════════ -->
+<section class="phase" id="p2">
+  <div class="phase-header">
+    <div class="phase-num">02</div>
+    <div class="phase-meta">
+      <div class="phase-tag">Semana 2 del proyecto</div>
+      <div class="phase-name">Lista de alumnos — datos que cambian constantemente</div>
+      <div class="phase-desc">El director quiere registrar los alumnos que pagan con su credencial. Se inscriben y se dan de baja todo el tiempo.</div>
+    </div>
+    <div class="phase-time">⏱ ~20 min</div>
+  </div>
+
+  <div class="context">
+    <p>El director dice: <em>"Cada semana hay alumnos nuevos que se registran para pagar con su credencial. Y otros se van o se dan de baja. Necesito agregar y quitar alumnos fácilmente. A veces se inscriben al inicio de la lista, a veces al final."</em></p>
+    <p>Ahora el requerimiento es diferente al del menú: los datos <em>cambian constantemente</em>. Esto cambia todo.</p>
+  </div>
+
+  <!-- STEP 2.1 -->
+  <div class="step">
+    <div class="step-num-bar">
+      <div class="step-bubble sb-amber">1</div>
+      <span class="step-label">¿Por qué NO usamos arreglo aquí?</span>
+      <span class="step-type st-reflect">reflexión</span>
+    </div>
+    <div class="step-body">
+      <div class="instruction">El director quiere <strong>insertar y eliminar alumnos frecuentemente</strong>. Marca la opción que mejor explica por qué un arreglo sería una mala elección:</div>
+      <div class="mcq" id="mcq21">
+        <div class="mcq-opt" onclick="mcq('mcq21',0,'err','fb21')">
+          <span class="mcq-letter">A</span>
+          <span>Porque los arreglos no pueden guardar nombres (strings)</span>
+        </div>
+        <div class="mcq-opt" onclick="mcq('mcq21',1,'ok','fb21')">
+          <span class="mcq-letter">B</span>
+          <span>Porque el arreglo tiene tamaño fijo — si se inscribe un alumno nuevo, tendríamos que crear un arreglo más grande y copiar todo</span>
+        </div>
+        <div class="mcq-opt" onclick="mcq('mcq21',2,'err','fb21')">
+          <span class="mcq-letter">C</span>
+          <span>Porque los arreglos son más lentos que las listas enlazadas en cualquier operación</span>
+        </div>
+        <div class="mcq-opt" onclick="mcq('mcq21',3,'err','fb21')">
+          <span class="mcq-letter">D</span>
+          <span>Porque C# no permite eliminar elementos de un arreglo</span>
+        </div>
+      </div>
+      <div class="mcq-feedback" id="fb21">
+        <span id="fb21_text"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2.2 — LINKEDLIST CODE -->
+  <div class="step">
+    <div class="step-num-bar">
+      <div class="step-bubble sb-ink">2</div>
+      <span class="step-label">El módulo con LinkedList</span>
+      <span class="step-type st-code">código</span>
+    </div>
+    <div class="step-body">
+      <div class="instruction">Aquí está el módulo de alumnos inscritos usando <code>LinkedList&lt;string&gt;</code>. Nota los comentarios que explican <em>por qué</em> cada operación es eficiente.</div>
+      <div class="cb">
+        <div class="cb-bar">
+          <div class="cb-dots"><div class="cb-dot"></div><div class="cb-dot"></div><div class="cb-dot"></div></div>
+          <span class="cb-fname">Alumnos.cs — Módulo 2</span>
+          <span class="cb-lang">C#</span>
+        </div>
+        <div class="cb-body"><pre><span class="kw">using</span> <span class="tp">System</span>;
+<span class="kw">using</span> <span class="tp">System.Collections.Generic</span>;
+
+<span class="kw">class</span> <span class="tp">ModuloAlumnos</span>
+{
+    <span class="cm">// LinkedList porque la lista CAMBIA constantemente.</span>
+    <span class="cm">// Insertar/eliminar NO requiere mover otros elementos.</span>
+    <span class="kw">static</span> <span class="tp">LinkedList</span>&lt;<span class="tp">string</span>&gt; <span class="vr">inscritos</span> = <span class="kw">new</span> <span class="tp">LinkedList</span>&lt;<span class="tp">string</span>&gt;();
+
+    <span class="kw">public static void</span> <span class="mt">Inscribir</span>(<span class="tp">string</span> <span class="vr">nombre</span>)
+    {
+        <span class="vr">inscritos</span>.<span class="mt">AddLast</span>(<span class="vr">nombre</span>); <span class="cm">// O(1) — no mueve a nadie</span>
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"✔ {</span><span class="vr">nombre</span><span class="st">} inscrito. Total: {</span><span class="vr">inscritos</span>.<span class="mt">Count</span><span class="st">}"</span>);
+    }
+
+    <span class="kw">public static void</span> <span class="mt">DarDeBaja</span>(<span class="tp">string</span> <span class="vr">nombre</span>)
+    {
+        <span class="kw">if</span> (<span class="vr">inscritos</span>.<span class="mt">Contains</span>(<span class="vr">nombre</span>))
+        {
+            <span class="vr">inscritos</span>.<span class="mt">Remove</span>(<span class="vr">nombre</span>); <span class="cm">// Solo redirige punteros</span>
+            <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"✖ {</span><span class="vr">nombre</span><span class="st">} dado de baja."</span>);
+        }
+        <span class="kw">else</span>
+            <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"⚠ {</span><span class="vr">nombre</span><span class="st">} no está inscrito."</span>);
+    }
+
+    <span class="kw">public static void</span> <span class="mt">MostrarInscritos</span>()
+    {
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">"=== ALUMNOS INSCRITOS ==="</span>);
+        <span class="kw">foreach</span> (<span class="tp">string</span> <span class="vr">a</span> <span class="kw">in</span> <span class="vr">inscritos</span>)
+            <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"  · {</span><span class="vr">a</span><span class="st">}"</span>);
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"Total: {</span><span class="vr">inscritos</span>.<span class="mt">Count</span><span class="st">}"</span>);
+    }
+}</pre></div>
+      </div>
+
+      <!-- Trace table -->
+      <div class="instruction" style="margin-top:16px">Sigue la ejecución de estas llamadas en orden y completa la tabla:</div>
+      <div class="cb" style="padding:14px 18px;margin-bottom:12px">
+        <div class="cb-body" style="padding:0"><pre><span class="tp">ModuloAlumnos</span>.<span class="mt">Inscribir</span>(<span class="st">"Ana"</span>);
+<span class="tp">ModuloAlumnos</span>.<span class="mt">Inscribir</span>(<span class="st">"Luis"</span>);
+<span class="tp">ModuloAlumnos</span>.<span class="mt">Inscribir</span>(<span class="st">"Sofía"</span>);
+<span class="tp">ModuloAlumnos</span>.<span class="mt">DarDeBaja</span>(<span class="st">"Luis"</span>);
+<span class="tp">ModuloAlumnos</span>.<span class="mt">Inscribir</span>(<span class="st">"Marco"</span>);</pre></div>
+      </div>
+      <table class="trace-table">
+        <thead><tr>
+          <th>Llamada</th><th>Estado de la lista</th><th>Count</th>
+        </tr></thead>
+        <tbody>
+          <tr><td class="trace-code">Inscribir("Ana")</td>
+            <td><input class="trace-input" id="t2_1s" placeholder="ej. Ana" oninput="checkTrace('t2_1s','Ana')"></td>
+            <td><input class="trace-input" id="t2_1c" style="width:60px" placeholder="#" oninput="checkTrace('t2_1c','1')"></td>
+          </tr>
+          <tr><td class="trace-code">Inscribir("Luis")</td>
+            <td><input class="trace-input" id="t2_2s" placeholder="" oninput="checkTrace('t2_2s','Ana → Luis')"></td>
+            <td><input class="trace-input" id="t2_2c" style="width:60px" placeholder="#" oninput="checkTrace('t2_2c','2')"></td>
+          </tr>
+          <tr><td class="trace-code">Inscribir("Sofía")</td>
+            <td><input class="trace-input" id="t2_3s" placeholder="" oninput="checkTrace('t2_3s','Ana → Luis → Sofía')"></td>
+            <td><input class="trace-input" id="t2_3c" style="width:60px" placeholder="#" oninput="checkTrace('t2_3c','3')"></td>
+          </tr>
+          <tr><td class="trace-code">DarDeBaja("Luis")</td>
+            <td><input class="trace-input" id="t2_4s" placeholder="" oninput="checkTrace('t2_4s','Ana → Sofía')"></td>
+            <td><input class="trace-input" id="t2_4c" style="width:60px" placeholder="#" oninput="checkTrace('t2_4c','2')"></td>
+          </tr>
+          <tr><td class="trace-code">Inscribir("Marco")</td>
+            <td><input class="trace-input" id="t2_5s" placeholder="" oninput="checkTrace('t2_5s','Ana → Sofía → Marco')"></td>
+            <td><input class="trace-input" id="t2_5c" style="width:60px" placeholder="#" oninput="checkTrace('t2_5c','3')"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- STEP 2.3 — REFLECT -->
+  <div class="step">
+    <div class="step-num-bar">
+      <div class="step-bubble sb-green">3</div>
+      <span class="step-label">Reflexión técnica</span>
+      <span class="step-type st-reflect">reflexión</span>
+    </div>
+    <div class="step-body">
+      <div class="reflect-prompt">"¿Qué habría pasado si usáramos un arreglo de tamaño fijo (por ejemplo, 30 lugares) para guardar la lista de alumnos inscritos? ¿Cuál sería el problema si un día se inscriben 31 alumnos? ¿Y si solo hay 3 inscritos?"</div>
+      <div class="answer-wrap">
+        <textarea id="a2_3" placeholder="Describe los dos problemas con un arreglo fijo en este caso..." oninput="cc(this,'c2_3')"></textarea>
+        <div class="char-c" id="c2_3">0 caracteres</div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<div class="divider">Fase 3 — El caos del mediodía</div>
+
+<!-- ══════════════════════════════════════════════
+     FASE 3 — COLA DE PEDIDOS + STACK HISTORIAL
+═══════════════════════════════════════════════ -->
+<section class="phase" id="p3">
+  <div class="phase-header">
+    <div class="phase-num">03</div>
+    <div class="phase-meta">
+      <div class="phase-tag">Semana 3 del proyecto</div>
+      <div class="phase-name">Pedidos e historial — el corazón del sistema</div>
+      <div class="phase-desc">A mediodía llegan decenas de alumnos. Necesitamos manejar el orden de atención Y poder cancelar el último pedido registrado.</div>
+    </div>
+    <div class="phase-time">⏱ ~30 min</div>
+  </div>
+
+  <div class="context">
+    <p>El director dice: <em>"Los alumnos hacen fila. El primero en llegar debe ser el primero en ser atendido — sin excepciones. Pero a veces el cajero se equivoca y necesita cancelar el último pedido que registró. Solo el último, no cualquiera."</em></p>
+    <p>Tienes <em>dos problemas distintos</em> en el mismo módulo. Y cada uno pide una estructura diferente. Esta es la parte más importante del proyecto.</p>
+  </div>
+
+  <!-- STEP 3.1 — DESIGN DECISION -->
+  <div class="step">
+    <div class="step-num-bar">
+      <div class="step-bubble sb-amber">1</div>
+      <span class="step-label">Dos problemas, dos estructuras</span>
+      <span class="step-type st-reflect">reflexión</span>
+    </div>
+    <div class="step-body">
+      <div class="instruction">Antes de ver el código, razona: ¿qué estructura usarías para cada necesidad?</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:14px 0">
+        <div>
+          <div class="callout co-amber" style="margin:0 0 10px 0">
+            <span class="co-icon">🎟️</span>
+            <span><strong>Problema A:</strong> Los alumnos hacen fila. El primero en llegar es el primero en ser atendido.</span>
+          </div>
+          <div class="answer-wrap">
+            <div class="answer-label">¿Qué estructura? ¿Por qué?</div>
+            <textarea id="a3_1a" style="min-height:70px" placeholder="Escribe la estructura y tu justificación..." oninput="cc(this,'c3_1a')"></textarea>
+            <div class="char-c" id="c3_1a">0 caracteres</div>
+          </div>
+        </div>
+        <div>
+          <div class="callout co-ink" style="margin:0 0 10px 0">
+            <span class="co-icon">↩️</span>
+            <span><strong>Problema B:</strong> El cajero solo puede cancelar el <em>último</em> pedido registrado. Como un Ctrl+Z.</span>
+          </div>
+          <div class="answer-wrap">
+            <div class="answer-label">¿Qué estructura? ¿Por qué?</div>
+            <textarea id="a3_1b" style="min-height:70px" placeholder="Escribe la estructura y tu justificación..." oninput="cc(this,'c3_1b')"></textarea>
+            <div class="char-c" id="c3_1b">0 caracteres</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3.2 — FULL CODE -->
+  <div class="step">
+    <div class="step-num-bar">
+      <div class="step-bubble sb-ink">2</div>
+      <span class="step-label">El módulo completo — las dos estructuras juntas</span>
+      <span class="step-type st-code">código</span>
+    </div>
+    <div class="step-body">
+      <div class="instruction">Aquí está el módulo más complejo del sistema. Usa <code>Queue&lt;T&gt;</code> para la fila y <code>Stack&lt;T&gt;</code> para el historial. Léelo con atención.</div>
+      <div class="cb">
+        <div class="cb-bar">
+          <div class="cb-dots"><div class="cb-dot"></div><div class="cb-dot"></div><div class="cb-dot"></div></div>
+          <span class="cb-fname">Pedidos.cs — Módulo 3</span>
+          <span class="cb-lang">C#</span>
+        </div>
+        <div class="cb-body"><pre><span class="kw">using</span> <span class="tp">System</span>;
+<span class="kw">using</span> <span class="tp">System.Collections.Generic</span>;
+
+<span class="kw">class</span> <span class="tp">ModuloPedidos</span>
+{
+    <span class="cm">// FIFO: el primero en llegar es el primero en ser atendido</span>
+    <span class="kw">static</span> <span class="tp">Queue</span>&lt;<span class="tp">string</span>&gt; <span class="vr">fila</span> = <span class="kw">new</span> <span class="tp">Queue</span>&lt;<span class="tp">string</span>&gt;();
+
+    <span class="cm">// LIFO: para cancelar el último pedido registrado</span>
+    <span class="kw">static</span> <span class="tp">Stack</span>&lt;<span class="tp">string</span>&gt; <span class="vr">historial</span> = <span class="kw">new</span> <span class="tp">Stack</span>&lt;<span class="tp">string</span>&gt;();
+
+    <span class="kw">public static void</span> <span class="mt">RegistrarPedido</span>(<span class="tp">string</span> <span class="vr">alumno</span>, <span class="tp">string</span> <span class="vr">platillo</span>)
+    {
+        <span class="tp">string</span> <span class="vr">pedido</span> = <span class="st">$"{</span><span class="vr">alumno</span><span class="st">}: {</span><span class="vr">platillo</span><span class="st">}"</span>;
+        <span class="vr">fila</span>.<span class="mt">Enqueue</span>(<span class="vr">pedido</span>);      <span class="cm">// entra al final de la fila</span>
+        <span class="vr">historial</span>.<span class="mt">Push</span>(<span class="vr">pedido</span>);    <span class="cm">// se apila en el historial</span>
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"✔ Pedido registrado: {</span><span class="vr">pedido</span><span class="st">}"</span>);
+    }
+
+    <span class="kw">public static void</span> <span class="mt">AtenderSiguiente</span>()
+    {
+        <span class="kw">if</span> (<span class="vr">fila</span>.Count == <span class="nm">0</span>)
+        {
+            <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">"⚠ No hay pedidos en espera."</span>);
+            <span class="kw">return</span>;
+        }
+        <span class="tp">string</span> <span class="vr">siguiente</span> = <span class="vr">fila</span>.<span class="mt">Dequeue</span>(); <span class="cm">// sale del frente de la fila</span>
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"🍽 Atendiendo: {</span><span class="vr">siguiente</span><span class="st">}"</span>);
+    }
+
+    <span class="kw">public static void</span> <span class="mt">CancelarUltimo</span>()
+    {
+        <span class="kw">if</span> (<span class="vr">historial</span>.Count == <span class="nm">0</span>)
+        {
+            <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">"⚠ No hay pedidos en el historial."</span>);
+            <span class="kw">return</span>;
+        }
+        <span class="cm">// Pop saca el último pedido registrado</span>
+        <span class="tp">string</span> <span class="vr">cancelado</span> = <span class="vr">historial</span>.<span class="mt">Pop</span>();
+        <span class="vr">fila</span> = <span class="kw">new</span> <span class="tp">Queue</span>&lt;<span class="tp">string</span>&gt;(<span class="vr">historial</span>); <span class="cm">// reconstruye sin él</span>
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"✖ Cancelado: {</span><span class="vr">cancelado</span><span class="st">}"</span>);
+    }
+
+    <span class="kw">public static void</span> <span class="mt">VerEstado</span>()
+    {
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"En fila: {</span><span class="vr">fila</span>.Count<span class="st">} · Historial: {</span><span class="vr">historial</span>.Count<span class="st">}"</span>);
+        <span class="kw">if</span> (<span class="vr">fila</span>.Count > <span class="nm">0</span>)
+            <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"  Siguiente a atender: {</span><span class="vr">fila</span>.<span class="mt">Peek</span>()<span class="st">}"</span>);
+    }
+}</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3.3 — PREDICT OUTPUT -->
+  <div class="step">
+    <div class="step-num-bar">
+      <div class="step-bubble sb-green">3</div>
+      <span class="step-label">Predice la salida exacta</span>
+      <span class="step-type st-analyze">análisis</span>
+    </div>
+    <div class="step-body">
+      <div class="instruction">Se ejecutan estas llamadas en orden. Sin ejecutar el código, escribe exactamente qué imprime cada una.</div>
+      <div class="cb" style="margin-bottom:14px">
+        <div class="cb-body" style="padding:14px 18px"><pre><span class="tp">ModuloPedidos</span>.<span class="mt">RegistrarPedido</span>(<span class="st">"Ana"</span>, <span class="st">"Tacos x2"</span>);
+<span class="tp">ModuloPedidos</span>.<span class="mt">RegistrarPedido</span>(<span class="st">"Luis"</span>, <span class="st">"Agua 500ml"</span>);
+<span class="tp">ModuloPedidos</span>.<span class="mt">RegistrarPedido</span>(<span class="st">"Sofía"</span>, <span class="st">"Torta de jamón"</span>);
+<span class="tp">ModuloPedidos</span>.<span class="mt">AtenderSiguiente</span>();
+<span class="tp">ModuloPedidos</span>.<span class="mt">CancelarUltimo</span>();
+<span class="tp">ModuloPedidos</span>.<span class="mt">VerEstado</span>();</pre></div>
+      </div>
+      <div class="answer-wrap">
+        <div class="answer-label">Salida esperada — escribe cada línea</div>
+        <textarea id="a3_3" style="min-height:140px;font-family:var(--mono);font-size:12px" placeholder="✔ Pedido registrado: Ana: Tacos x2&#10;✔ Pedido registrado: Luis: Agua 500ml&#10;..." oninput="cc(this,'c3_3')"></textarea>
+        <div class="char-c" id="c3_3">0 caracteres</div>
+      </div>
+      <div class="callout co-amber" style="margin-top:12px">
+        <span class="co-icon">🧠</span>
+        <span>Piensa bien en <code>CancelarUltimo()</code>: el historial es un Stack (LIFO), entonces cancela <em>el último pedido registrado</em>, que es "Sofía: Torta de jamón". Pero la fila (Queue/FIFO) ya atendió a Ana. ¿Quién queda en la fila después de todo?</span>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<div class="divider">Fase 4 — El sistema integrado</div>
+
+<!-- ══════════════════════════════════════════════
+     FASE 4 — INTEGRACIÓN
+═══════════════════════════════════════════════ -->
+<section class="phase" id="p4">
+  <div class="phase-header">
+    <div class="phase-num">04</div>
+    <div class="phase-meta">
+      <div class="phase-tag">Semana 4 — Integración final</div>
+      <div class="phase-name">Sistema completo — todo junto en un programa</div>
+      <div class="phase-desc">Los tres módulos se combinan en un solo programa. Aquí verás por qué cada estructura fue la decisión correcta.</div>
+    </div>
+    <div class="phase-time">⏱ ~20 min</div>
+  </div>
+
+  <div class="context">
+    <p>Ha llegado el momento de ver el sistema completo corriendo. Los tres módulos que construiste — menú con arreglos, alumnos con LinkedList, pedidos con Queue y Stack — ahora trabajan juntos.</p>
+    <p>Lee el código de integración y responde las preguntas finales. Esta es la fase de <em>revisión de arquitectura</em>.</p>
+  </div>
+
+  <!-- STEP 4.1 — FULL SYSTEM -->
+  <div class="step">
+    <div class="step-num-bar">
+      <div class="step-bubble sb-ink">1</div>
+      <span class="step-label">El programa principal</span>
+      <span class="step-type st-code">código</span>
+    </div>
+    <div class="step-body">
+      <div class="cb">
+        <div class="cb-bar">
+          <div class="cb-dots"><div class="cb-dot"></div><div class="cb-dot"></div><div class="cb-dot"></div></div>
+          <span class="cb-fname">Program.cs — Sistema completo</span>
+          <span class="cb-lang">C#</span>
+        </div>
+        <div class="cb-body"><pre><span class="kw">using</span> <span class="tp">System</span>;
+<span class="kw">using</span> <span class="tp">System.Collections.Generic</span>;
+
+<span class="kw">class</span> <span class="tp">Program</span>
+{
+    <span class="kw">static void</span> <span class="mt">Main</span>()
+    {
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">"╔══════════════════════════════════╗"</span>);
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">"║  CAFETERÍA DIGITAL v1.0   ║"</span>);
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">"╚══════════════════════════════════╝\n"</span>);
+
+        <span class="cm">// ── MÓDULO 1: Menú (Array — fijo, nunca cambia) ──────────</span>
+        <span class="tp">ModuloMenu</span>.<span class="mt">MostrarMenu</span>();
+        <span class="tp">ModuloMenu</span>.<span class="mt">MostrarExtremos</span>();
+
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>();
+
+        <span class="cm">// ── MÓDULO 2: Alumnos (LinkedList — crece y encoge) ──────</span>
+        <span class="tp">ModuloAlumnos</span>.<span class="mt">Inscribir</span>(<span class="st">"Ana Ramírez"</span>);
+        <span class="tp">ModuloAlumnos</span>.<span class="mt">Inscribir</span>(<span class="st">"Luis Torres"</span>);
+        <span class="tp">ModuloAlumnos</span>.<span class="mt">Inscribir</span>(<span class="st">"Sofía Gómez"</span>);
+        <span class="tp">ModuloAlumnos</span>.<span class="mt">DarDeBaja</span>(<span class="st">"Luis Torres"</span>);
+        <span class="tp">ModuloAlumnos</span>.<span class="mt">MostrarInscritos</span>();
+
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>();
+
+        <span class="cm">// ── MÓDULO 3: Pedidos (Queue + Stack — orden + historial) ─</span>
+        <span class="tp">ModuloPedidos</span>.<span class="mt">RegistrarPedido</span>(<span class="st">"Ana Ramírez"</span>, <span class="st">"Tacos x2"</span>);
+        <span class="tp">ModuloPedidos</span>.<span class="mt">RegistrarPedido</span>(<span class="st">"Sofía Gómez"</span>, <span class="st">"Café americano"</span>);
+        <span class="tp">ModuloPedidos</span>.<span class="mt">RegistrarPedido</span>(<span class="st">"Marco Díaz"</span>,  <span class="st">"Torta de jamón"</span>);
+
+        <span class="tp">ModuloPedidos</span>.<span class="mt">VerEstado</span>();
+        <span class="tp">ModuloPedidos</span>.<span class="mt">AtenderSiguiente</span>();
+        <span class="tp">ModuloPedidos</span>.<span class="mt">AtenderSiguiente</span>();
+        <span class="tp">ModuloPedidos</span>.<span class="mt">CancelarUltimo</span>();
+        <span class="tp">ModuloPedidos</span>.<span class="mt">VerEstado</span>();
+    }
+}</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 4.2 — ARCHITECTURE REFLECTION -->
+  <div class="step">
+    <div class="step-num-bar">
+      <div class="step-bubble sb-amber">2</div>
+      <span class="step-label">Revisión de arquitectura</span>
+      <span class="step-type st-reflect">reflexión</span>
+    </div>
+    <div class="step-body">
+      <div class="instruction">Responde cada pregunta de forma razonada. Estas preguntas son las que un entrevistador técnico te haría.</div>
+
+      <div style="margin-bottom:20px">
+        <div class="callout co-amber"><span class="co-icon">❓</span><span><strong>Pregunta 1:</strong> El sistema usa tres estructuras distintas para tres módulos. ¿Podrías haber usado LinkedList para todo y funcionar? ¿Por qué sí o por qué no sería una mala decisión?</span></div>
+        <div class="answer-wrap">
+          <textarea id="a4_2a" placeholder="Razona tu respuesta..." oninput="cc(this,'c4_2a')"></textarea>
+          <div class="char-c" id="c4_2a">0 caracteres</div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:20px">
+        <div class="callout co-ink"><span class="co-icon">❓</span><span><strong>Pregunta 2:</strong> Si la cafetería creciera y el menú pasara a tener 100 platillos que cambian cada semana, ¿seguirías usando Array para el módulo del menú? ¿Qué cambiarías y por qué?</span></div>
+        <div class="answer-wrap">
+          <textarea id="a4_2b" placeholder="Razona tu respuesta..." oninput="cc(this,'c4_2b')"></textarea>
+          <div class="char-c" id="c4_2b">0 caracteres</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="callout co-green"><span class="co-icon">❓</span><span><strong>Pregunta 3:</strong> ¿Qué fue lo más difícil de este proyecto para ti? ¿Qué parte te generó más dudas? ¿Qué harías diferente si lo empezaras de nuevo?</span></div>
+        <div class="answer-wrap">
+          <textarea id="a4_2c" placeholder="Reflexión personal..." oninput="cc(this,'c4_2c')"></textarea>
+          <div class="char-c" id="c4_2c">0 caracteres</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 4.3 — EXTENSION -->
+  <div class="step">
+    <div class="step-num-bar">
+      <div class="step-bubble sb-green">3</div>
+      <span class="step-label">Extensión opcional — Versión 2.0</span>
+      <span class="step-type st-code">diseño</span>
+    </div>
+    <div class="step-body">
+      <div class="callout co-amber">
+        <span class="co-icon">🚀</span>
+        <span>Esta sección es opcional pero suma puntos adicionales. El director tiene una nueva petición para la versión 2.0 del sistema.</span>
+      </div>
+      <div class="context" style="margin:14px 0">
+        <p>El director dice: <em>"Quiero que el sistema guarde los últimos 10 pedidos del día para generar un reporte. Necesito saber cuál fue el platillo más pedido. También quiero que si un alumno pide el mismo platillo dos veces, el sistema lo avise."</em></p>
+      </div>
+      <div class="instruction">Diseña en pseudocódigo o en C# cómo resolverías esto. ¿Qué estructura usarías para guardar los últimos 10 pedidos? ¿Y para detectar duplicados?</div>
+      <div class="answer-wrap">
+        <div class="answer-label">Tu propuesta de diseño (pseudocódigo o C#)</div>
+        <textarea id="a4_3" style="min-height:160px;font-family:var(--mono);font-size:12px" placeholder="// Describe tu propuesta aquí...&#10;// ¿Qué estructura usarías para los 10 últimos pedidos?&#10;// ¿Qué estructura para detectar duplicados?" oninput="cc(this,'c4_3')"></textarea>
+        <div class="char-c" id="c4_3">0 caracteres</div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<div class="divider">Resultados del proyecto</div>
+
+<!-- ══════════════════════════════════════════════
+     SCORE SECTION
+═══════════════════════════════════════════════ -->
+<div class="score-section" id="scoreSection">
+  <div class="score-ring">
+    <div class="score-big" id="scoreNum">—</div>
+    <div class="score-den">puntos</div>
+  </div>
+  <div class="score-title" id="scoreTitle">Calcula tu resultado</div>
+  <div class="score-msg" id="scoreMsg">Presiona el botón para ver tu puntaje en las preguntas objetivas y el resumen de tus respuestas abiertas.</div>
+  <div class="score-grid" id="scoreGrid" style="display:none">
+    <div class="score-stat"><div class="ss-num" id="ss1" style="color:var(--ink3)">0</div><div class="ss-lbl">Estructura correcta</div></div>
+    <div class="score-stat"><div class="ss-num" id="ss2" style="color:var(--amber)">0</div><div class="ss-lbl">Opción múltiple</div></div>
+    <div class="score-stat"><div class="ss-num" id="ss3" style="color:var(--green)">0</div><div class="ss-lbl">Trazas completadas</div></div>
+    <div class="score-stat"><div class="ss-num" id="ss4" style="color:var(--ink4)">0</div><div class="ss-lbl">Reflexiones escritas</div></div>
+  </div>
+  <div class="btn-row" style="justify-content:center;margin-top:20px">
+    <button class="btn btn-amber" onclick="calcScore()">Calcular resultado</button>
+    <button class="btn btn-ghost" onclick="window.print()">🖨 Imprimir</button>
+    <button class="btn btn-ghost" onclick="copyMD()">📋 Copiar para GitHub</button>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+// ── INTERSECTION OBSERVER — phase reveal ────────────
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting) e.target.classList.add('visible');
+  });
+}, {threshold:0.08});
+document.querySelectorAll('.phase').forEach(p => observer.observe(p));
+
+// ── PROGRESS RAIL ────────────────────────────────────
+window.addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = h > 0 ? (window.scrollY / h * 100) : 0;
+  document.getElementById('railFill').style.width = pct + '%';
+});
+
+// ── CHAR COUNT ───────────────────────────────────────
+function cc(el, cid) {
+  document.getElementById(cid).textContent = el.value.length + ' caracteres';
+}
+
+// ── STRUCT SELECT ─────────────────────────────────────
+function selectStruct(gridId, idx, result) {
+  const grid = document.getElementById(gridId);
+  if(grid.dataset.answered) return;
+  grid.dataset.answered = '1';
+  const cards = grid.querySelectorAll('.struct-card');
+  cards.forEach((c, i) => {
+    c.style.pointerEvents = 'none';
+    if(result === 'ok' && i === idx) {
+      c.style.borderColor = 'var(--green)';
+      c.style.background = 'var(--green)0D';
+    } else if(result === 'err' && i === idx) {
+      c.style.borderColor = 'var(--red)';
+      c.style.background = 'var(--red)0D';
+    } else if(result === 'err' && i === 0) {
+      c.style.borderColor = 'var(--green)50';
+      c.style.background = 'var(--green)08';
+    }
+  });
+  document.getElementById('fb_' + gridId + '_' + result).style.display = 'block';
+}
+
+// ── MCQ ───────────────────────────────────────────────
+const MCQ_CORRECT = {
+  mcq21: 1
+};
+const MCQ_FB = {
+  mcq21: {
+    ok: '✔ Correcto. El arreglo tiene tamaño fijo declarado al momento de crearlo. Si los datos crecen más de ese límite, el arreglo no puede aceptarlos. Además, si solo hay 3 inscritos en un arreglo de 30, los 27 espacios restantes desperdician memoria.',
+    err: '✖ Revisa la diferencia entre arreglo y LinkedList. El problema específico aquí es el tamaño: el arreglo no puede cambiar su capacidad una vez declarado.'
+  }
+};
+function mcq(groupId, idx, result, fbId) {
+  const group = document.getElementById(groupId);
+  if(group.dataset.answered) return;
+  group.dataset.answered = '1';
+  const opts = group.querySelectorAll('.mcq-opt');
+  opts.forEach((o, i) => {
+    o.style.pointerEvents = 'none';
+    if(i === idx) o.classList.add(result === 'ok' ? 'ok' : 'err');
+    else if(result === 'err' && i === MCQ_CORRECT[groupId]) o.classList.add('reveal-ok');
+  });
+  const fb = document.getElementById(fbId);
+  const correct = result === 'ok';
+  fb.className = 'mcq-feedback show ' + (correct ? 'fb-ok' : 'fb-err');
+  document.getElementById(fbId + '_text').textContent =
+    correct ? MCQ_FB[groupId].ok : MCQ_FB[groupId].err;
+}
+
+// ── TRACE CHECK ───────────────────────────────────────
+const TRACE_ANS = {
+  t2_1s:'Ana', t2_1c:'1',
+  t2_2s:'Ana → Luis', t2_2c:'2',
+  t2_3s:'Ana → Luis → Sofía', t2_3c:'3',
+  t2_4s:'Ana → Sofía', t2_4c:'2',
+  t2_5s:'Ana → Sofía → Marco', t2_5c:'3'
+};
+function checkTrace(id, correct) {
+  const el = document.getElementById(id);
+  const val = el.value.trim();
+  if(!val) { el.className = 'trace-input'; return; }
+  const norm = s => s.toLowerCase().replace(/\s+/g,'').replace(/[→\-]/g,'');
+  const isOk = norm(val) === norm(correct) ||
+               norm(val) === norm(correct.replace(/→/g,'->'));
+  el.className = 'trace-input ' + (isOk ? 'ok' : 'err');
+}
+
+// ── SCORE ─────────────────────────────────────────────
+function calcScore() {
+  let pts = 0, max = 0;
+
+  // Struct select
+  const sg1 = document.getElementById('sg1');
+  max += 2;
+  if(sg1.dataset.answered) {
+    const selected = sg1.querySelectorAll('.struct-card')[0];
+    if(selected.style.borderColor.includes('green') ||
+       document.getElementById('fb_sg1_ok').style.display !== 'none') pts += 2;
+  }
+
+  // MCQ
+  max += 2;
+  const mcq21 = document.getElementById('mcq21');
+  if(mcq21.dataset.answered) {
+    const opts = mcq21.querySelectorAll('.mcq-opt');
+    if(opts[MCQ_CORRECT.mcq21].classList.contains('ok') ||
+       opts[MCQ_CORRECT.mcq21].classList.contains('reveal-ok') &&
+       !opts[MCQ_CORRECT.mcq21].classList.contains('err')) pts += 2;
+    if(opts[MCQ_CORRECT.mcq21].classList.contains('ok')) pts += 0; // already counted
+  }
+
+  // Fix: check correctly
+  pts = 0; max = 10;
+  let structOk = document.getElementById('fb_sg1_ok').style.display !== 'none';
+  let mcqOk = false;
+  const opts21 = document.getElementById('mcq21').querySelectorAll('.mcq-opt');
+  opts21.forEach((o,i) => { if(i===MCQ_CORRECT.mcq21 && o.classList.contains('ok')) mcqOk = true; });
+
+  if(structOk) pts += 2;
+  if(mcqOk) pts += 2;
+
+  // Traces
+  let traceOk = 0;
+  Object.keys(TRACE_ANS).forEach(id => {
+    const el = document.getElementById(id);
+    if(el && el.className.includes('ok')) traceOk++;
+  });
+  pts += Math.min(traceOk, 10) > 8 ? 2 : traceOk > 5 ? 1 : 0;
+
+  // Reflections
+  const reflFields = ['a1_3','a1_3b','a2_3','a3_1a','a3_1b','a3_3','a4_2a','a4_2b','a4_2c'];
+  let reflFilled = 0;
+  reflFields.forEach(id => {
+    const el = document.getElementById(id);
+    if(el && el.value.trim().length > 40) reflFilled++;
+  });
+  pts += reflFilled >= 7 ? 4 : reflFilled >= 5 ? 3 : reflFilled >= 3 ? 2 : reflFilled >= 1 ? 1 : 0;
+
+  document.getElementById('scoreNum').textContent = pts;
+  document.getElementById('ss1').textContent = structOk ? '✔' : '✖';
+  document.getElementById('ss2').textContent = mcqOk ? '✔' : '✖';
+  document.getElementById('ss3').textContent = traceOk + '/10';
+  document.getElementById('ss4').textContent = reflFilled + '/9';
+  document.getElementById('scoreGrid').style.display = 'grid';
+
+  const pct = pts / max;
+  let title, msg;
+  if(pct >= .9) { title='Sistema entregado ✔'; msg='Excelente trabajo. Comprendes por qué cada estructura de datos existe y cuándo aplicarla. Tu lógica de diseño es sólida.'; }
+  else if(pct >= .7) { title='Buen desarrollo 🔧'; msg='Vas muy bien. Revisa las trazas que marcaron rojo y las reflexiones donde escribiste menos — ahí están las oportunidades de mejora.'; }
+  else if(pct >= .5) { title='En construcción 🏗️'; msg='Tienes la base. Las preguntas conceptuales muestran comprensión. Practica más las trazas paso a paso en tu Codespace.'; }
+  else { title='Sigue construyendo 💪'; msg='Regresa al repaso, copia cada módulo en tu Codespace y agrégale Console.WriteLine después de cada operación. Ver el estado en tiempo real cambia todo.'; }
+
+  document.getElementById('scoreTitle').textContent = title;
+  document.getElementById('scoreMsg').textContent = msg;
+}
+
+// ── COPY MARKDOWN ─────────────────────────────────────
+function copyMD() {
+  const n = document.getElementById('fNombre').value;
+  const g = document.getElementById('fGrupo').value;
+  let md = `# Proyecto: Cafetería Digital\n\n`;
+  md += `**Alumno:** ${n}\n**Grupo/Fecha:** ${g}\n\n`;
+  md += `## Fase 1 — Menú\n\n`;
+  md += `**¿Por qué empieza en i=1?**\n${document.getElementById('a1_3').value}\n\n`;
+  md += `**Salida MostrarExtremos:**\n${document.getElementById('a1_3b').value}\n\n`;
+  md += `## Fase 2 — Alumnos\n\n`;
+  md += `**Reflexión arreglo fijo:**\n${document.getElementById('a2_3').value}\n\n`;
+  md += `## Fase 3 — Pedidos\n\n`;
+  md += `**Estructura para fila:** ${document.getElementById('a3_1a').value}\n\n`;
+  md += `**Estructura para historial:** ${document.getElementById('a3_1b').value}\n\n`;
+  md += `**Salida predicha:** \n${document.getElementById('a3_3').value}\n\n`;
+  md += `## Fase 4 — Arquitectura\n\n`;
+  md += `**P1 — ¿LinkedList para todo?**\n${document.getElementById('a4_2a').value}\n\n`;
+  md += `**P2 — ¿Qué cambiar si el menú crece?**\n${document.getElementById('a4_2b').value}\n\n`;
+  md += `**P3 — Reflexión personal:**\n${document.getElementById('a4_2c').value}\n\n`;
+  if(document.getElementById('a4_3').value.trim()) {
+    md += `## Extensión v2.0\n\n\`\`\`csharp\n${document.getElementById('a4_3').value}\n\`\`\`\n`;
+  }
+  navigator.clipboard.writeText(md).then(() => {
+    alert('✔ Markdown copiado.\nPégalo en proyecto-cafeteria.md y haz commit en GitHub:\n\ngit add proyecto-cafeteria.md\ngit commit -m "feat: proyecto cafetería digital"\ngit push');
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = md; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    alert('✔ Copiado.');
+  });
+}
+</script>
+</body>
+</html>
