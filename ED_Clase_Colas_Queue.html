@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Colas y sus operaciones — Estructura de Datos</title>
+<link rel="stylesheet" href="base.css">
+<style>
+:root{
+  --guinda:      #5e162e;
+  --guinda-l:    #F5E8EE;
+  --guinda-rule: #C85070;
+  --guinda-mid:  #8B2040;
+  --ink:         #1A1215;
+  --ink2:        #3D1F28;
+  --tx:          #2A1218;
+  --tx2:         #6B4050;
+  --tx3:         #A07080;
+  --border:      #DEC8CE;
+  --white:       #FFFFFF;
+  --off:         #FAF6F7;
+  --code-bg:     #1A0E12;
+  --code-border: #3D1F28;
+  --kw:  #F4A5B8;
+  --tp:  #93C5FD;
+  --st:  #86EFAC;
+  --cm:  #6B5060;
+  --nm:  #FCA5A5;
+  --mt:  #67E8F9;
+  --vr:  #F0E6EA;
+  --ok:  #14532D;  --ok-bg:#F0FDF4; --ok-bd:#86EFAC;
+  --er:  #7F1D1D;  --er-bg:#FFF1F2; --er-bd:#FCA5A5;
+  --am:  #78350F;  --am-bg:#FFFBEB; --am-bd:#FDE68A;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--white);color:var(--tx);font-family:'Source Serif 4',Georgia,serif;line-height:1.7;font-size:16px}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--off)}
+::-webkit-scrollbar-thumb{background:var(--guinda-rule)}
+
+/* HEADER */
+.site-header{background:var(--guinda);position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(94,22,46,.25)}
+.header-inner{max-width:1040px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:14px 32px;gap:20px}
+.header-logo img{height:44px;width:auto;filter:brightness(0) invert(1)}
+.header-center{text-align:center;flex:1}
+.header-course{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:2px;font-family:'Inter',sans-serif}
+.header-title{font-size:15px;font-weight:600;color:#fff;font-family:'Inter',sans-serif;letter-spacing:.02em}
+.header-logo2 img{height:36px;width:auto;filter:brightness(0) invert(1);opacity:.75}
+.progress-bar{height:3px;background:rgba(255,255,255,.15)}
+.progress-fill{height:100%;background:var(--guinda-rule);width:0%;transition:width .3s ease}
+
+/* WRAP */
+.wrap{max-width:860px;margin:0 auto;padding:48px 28px 120px}
+
+/* UNIT STAMP */
+.unit-stamp{display:flex;align-items:flex-start;gap:20px;border:1px solid var(--border);border-left:5px solid var(--guinda);background:var(--guinda-l);padding:24px 28px;margin-bottom:40px}
+.unit-num{font-size:56px;font-weight:700;color:var(--guinda);opacity:.2;line-height:1;flex-shrink:0;font-family:'Cormorant Garamond',Georgia,serif;min-width:60px}
+.unit-tag{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--guinda-rule);margin-bottom:4px;font-family:'Inter',sans-serif;font-weight:600}
+.unit-name{font-size:clamp(20px,3vw,28px);font-weight:700;color:var(--guinda);line-height:1.2;margin-bottom:6px;font-family:'Cormorant Garamond',Georgia,serif}
+.unit-topic{font-size:14px;color:var(--tx2);line-height:1.5;font-family:'Inter',sans-serif}
+.unit-time{margin-left:auto;flex-shrink:0;font-size:11px;color:var(--tx3);border:1px solid var(--border);padding:4px 10px;font-family:'Inter',sans-serif;align-self:flex-start}
+
+/* SECTION TITLE */
+.sec-title{font-size:clamp(18px,2.5vw,24px);font-weight:700;color:var(--guinda);margin-bottom:16px;font-family:'Cormorant Garamond',Georgia,serif;display:flex;align-items:center;gap:12px}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.sec-label{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--tx3);margin-bottom:10px;font-family:'Inter',sans-serif;font-weight:600}
+
+/* COMPETENCIAS */
+.comp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px;margin-bottom:40px}
+.comp-card{border:1px solid var(--border);border-left:4px solid var(--guinda-rule);background:var(--off);padding:16px 18px}
+.comp-type{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--guinda-rule);margin-bottom:6px;font-family:'Inter',sans-serif;font-weight:600}
+.comp-text{font-size:13.5px;color:var(--tx);line-height:1.65}
+
+/* INTRO */
+.intro-box{border:1px solid var(--border);background:var(--off);padding:24px 26px;margin-bottom:32px}
+.intro-box p{font-size:14.5px;color:var(--tx2);line-height:1.8;margin-bottom:12px}
+.intro-box p:last-child{margin-bottom:0}
+.intro-box strong{color:var(--tx)}
+
+/* ANALOGY */
+.analogy{border:1px solid var(--guinda-rule);border-left:4px solid var(--guinda);background:var(--guinda-l);padding:18px 22px;margin-bottom:20px}
+.analogy-label{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--guinda);margin-bottom:8px;font-family:'Inter',sans-serif;font-weight:600}
+.analogy p{font-size:14px;color:var(--ink2);line-height:1.75}
+.analogy p+p{margin-top:10px}
+.analogy strong{color:var(--guinda)}
+
+/* CONCEPT PAIR */
+.concept-pair{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.concept-card{border:1px solid var(--border);padding:18px 20px;background:var(--white)}
+.cc-head{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--guinda);margin-bottom:8px;font-family:'Inter',sans-serif;font-weight:600}
+.cc-body{font-size:13.5px;color:var(--tx2);line-height:1.65}
+
+/* QUEUE VISUAL — horizontal */
+.queue-visual{background:var(--off);border:1px solid var(--border);padding:24px 20px;margin:16px 0}
+.qv-label{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx3);margin-bottom:14px;font-family:'Inter',sans-serif;text-align:center}
+.qv-track{display:flex;align-items:center;gap:0;overflow-x:auto;padding:4px 0}
+.qv-arrow-ext{font-size:12px;color:var(--tx3);padding:0 10px;white-space:nowrap;font-family:'Inter',sans-serif}
+.qv-node{padding:12px 18px;border:1px solid var(--border);background:var(--white);font-size:13px;font-family:'Inter',sans-serif;font-weight:500;color:var(--tx2);white-space:nowrap;border-right:none;position:relative}
+.qv-node:last-of-type{border-right:1px solid var(--border)}
+.qv-front{border-color:var(--guinda);color:var(--guinda);background:var(--guinda-l);font-weight:600}
+.qv-back{border-color:var(--guinda-rule);color:var(--guinda-mid)}
+.qv-tag{display:block;font-size:9px;letter-spacing:.06em;text-transform:uppercase;margin-top:4px;font-family:'Inter',sans-serif}
+.qv-tag-front{color:var(--guinda)}
+.qv-tag-back{color:var(--guinda-rule)}
+.qv-sep{font-size:18px;color:var(--border);padding:0 2px;line-height:1}
+.qv-row-labels{display:flex;justify-content:space-between;margin-top:10px;font-size:10px;font-family:'Inter',sans-serif;color:var(--tx3)}
+
+/* OP TABLE */
+.op-table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13.5px}
+.op-table th{text-align:left;padding:10px 14px;background:var(--guinda);color:#fff;font-family:'Inter',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;border-right:1px solid var(--guinda-mid)}
+.op-table td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+.op-table tr:nth-child(even) td{background:var(--off)}
+.op-name{font-family:'Courier New',monospace;font-weight:700;font-size:14px}
+.op-guinda{color:var(--guinda)} .op-green{color:#065F46} .op-amber{color:#92400E}
+
+/* COMPARE TABLE */
+.cmp-table{width:100%;border-collapse:collapse;font-size:13px;margin:16px 0}
+.cmp-table th{padding:10px 14px;background:var(--guinda);color:#fff;font-family:'Inter',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;border-right:1px solid var(--guinda-mid);text-align:center}
+.cmp-table th:first-child{text-align:left}
+.cmp-table td{padding:11px 14px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);vertical-align:middle;text-align:center}
+.cmp-table td:first-child{text-align:left;font-weight:600;color:var(--tx);font-family:'Inter',sans-serif}
+.cmp-table tr:nth-child(even) td{background:var(--off)}
+.cmp-ok{color:var(--ok);font-weight:600} .cmp-er{color:var(--er)} .cmp-am{color:var(--am)}
+.cmp-struct{font-family:'Courier New',monospace;font-size:12px}
+
+/* CODE */
+.cb{background:var(--code-bg);border:1px solid var(--code-border);margin:16px 0;overflow:hidden}
+.cb-bar{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;border-bottom:1px solid var(--code-border);background:#120810}
+.cb-dots{display:flex;gap:5px}
+.cb-dot{width:9px;height:9px;border-radius:50%}
+.cb-dot:nth-child(1){background:#FF5F57} .cb-dot:nth-child(2){background:#FFBD2E} .cb-dot:nth-child(3){background:#28C840}
+.cb-fname{font-family:'Courier New',monospace;font-size:10px;color:#6B5060}
+.cb-lang{font-size:9px;color:var(--guinda-rule);padding:1px 6px;border:1px solid var(--code-border)}
+.cb-body{padding:18px 20px;font-family:'Courier New',monospace;font-size:13px;line-height:1.9;overflow-x:auto}
+.cb-body pre{white-space:pre-wrap;word-break:break-word}
+.kw{color:var(--kw)} .tp{color:var(--tp)} .st{color:var(--st)}
+.cm{color:var(--cm);font-style:italic} .nm{color:var(--nm)} .mt{color:var(--mt)} .vr{color:var(--vr)}
+
+/* CALLOUT */
+.callout{display:flex;gap:14px;padding:14px 16px;margin:14px 0;font-size:13.5px;line-height:1.65;border-left:4px solid}
+.co-g{background:var(--ok-bg);border-color:var(--ok-bd);color:var(--ok)}
+.co-r{background:var(--er-bg);border-color:var(--er-bd);color:var(--er)}
+.co-a{background:var(--am-bg);border-color:var(--am-bd);color:var(--am)}
+.co-p{background:var(--guinda-l);border-color:var(--guinda-rule);color:var(--guinda)}
+.callout-icon{font-size:15px;flex-shrink:0;font-style:normal}
+
+/* ACTIVITY */
+.activity{border:1px solid var(--border);margin:24px 0;background:var(--white)}
+.activity-head{background:var(--guinda);padding:12px 20px;display:flex;align-items:center;justify-content:space-between}
+.activity-title{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#fff;letter-spacing:.06em;text-transform:uppercase}
+.activity-time{font-family:'Inter',sans-serif;font-size:11px;color:rgba(255,255,255,.6)}
+.activity-body{padding:20px 22px}
+.activity-body p{font-size:13.5px;color:var(--tx);line-height:1.7;margin-bottom:10px}
+.activity-body p:last-child{margin-bottom:0}
+.activity-body strong{color:var(--guinda)}
+.activity-steps{list-style:none;display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.activity-steps li{display:flex;gap:12px;align-items:flex-start;font-size:13.5px;color:var(--tx2);line-height:1.6}
+.step-n{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--guinda);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;margin-top:2px;font-family:'Inter',sans-serif}
+
+/* TRACE */
+.trace-table{width:100%;border-collapse:collapse;font-size:13px;margin:14px 0}
+.trace-table th{padding:9px 12px;text-align:center;background:var(--guinda);color:#fff;font-family:'Inter',sans-serif;font-size:9px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;border-right:1px solid var(--guinda-mid)}
+.trace-table td{padding:10px 12px;border:1px solid var(--border);text-align:center;vertical-align:middle}
+.trace-table tr:nth-child(even) td{background:var(--off)}
+.trace-code{font-family:'Courier New',monospace;font-size:12px;color:var(--guinda)}
+.trace-inp{width:100%;background:transparent;border:none;border-bottom:1.5px solid var(--guinda-rule);font-family:'Courier New',monospace;font-size:12.5px;color:var(--guinda);text-align:center;padding:2px;outline:none}
+.trace-inp:focus{border-bottom-color:var(--guinda)}
+.trace-inp.ok{color:var(--ok);border-bottom-color:var(--ok-bd)}
+.trace-inp.er{color:var(--er);border-bottom-color:var(--er-bd)}
+
+/* BIB */
+.bib-list{list-style:none;display:flex;flex-direction:column;gap:14px}
+.bib-item{border-left:3px solid var(--border);padding:12px 16px;background:var(--off);font-size:13.5px;color:var(--tx2);line-height:1.7}
+.bib-type{font-family:'Inter',sans-serif;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--guinda-rule);margin-bottom:4px;font-weight:600}
+.bib-item a{color:var(--guinda);text-decoration:underline;word-break:break-all}
+
+.section-block{margin-bottom:52px}
+.divider{border:none;border-top:1px solid var(--border);margin:44px 0}
+
+@media(max-width:620px){
+  .header-inner{padding:12px 18px}
+  .wrap{padding:32px 18px 80px}
+  .concept-pair{grid-template-columns:1fr}
+  .comp-grid{grid-template-columns:1fr}
+  .unit-stamp{flex-direction:column;gap:10px}
+  .unit-num{font-size:36px}
+  .qv-track{flex-direction:column}
+  .qv-node{border-right:1px solid var(--border);border-bottom:none}
+  .qv-node:last-of-type{border-bottom:1px solid var(--border)}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-logo">
+      <img src="imagen1.png" alt="Logo institucional">
+    </div>
+    <div class="header-center">
+      <div class="header-course">Estructura de Datos &nbsp;|&nbsp; Licenciatura en Sistemas Computacionales</div>
+      <div class="header-title">Colas y sus operaciones</div>
+    </div>
+    <div class="header-logo2">
+      <img src="imagen2.png" alt="Logo de apoyo">
+    </div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="pFill"></div></div>
+</header>
+
+<div class="wrap">
+
+<!-- UNIT STAMP -->
+<div class="unit-stamp">
+  <div class="unit-num">01</div>
+  <div class="unit-meta">
+    <div class="unit-tag">Unidad 1 &nbsp;&mdash;&nbsp; Estructuras de datos lineales</div>
+    <div class="unit-name">Colas y sus operaciones</div>
+    <div class="unit-topic">
+      Tema: 1.4 &mdash; Cola (Queue&lt;T&gt;): concepto FIFO, declaracion, Enqueue, Dequeue, Peek y Count en C#.<br>
+      Prerrequisito inmediato: pilas y principio LIFO (Tema 1.3).
+    </div>
+  </div>
+  <div class="unit-time">90 min</div>
+</div>
+
+<!-- COMPETENCIAS -->
+<div class="section-block">
+  <div class="sec-label">Para esta sesion</div>
+  <div class="sec-title">Competencias a desarrollar</div>
+  <div class="comp-grid">
+    <div class="comp-card">
+      <div class="comp-type">Conceptual</div>
+      <div class="comp-text">Describe el principio FIFO (First In, First Out) y lo contrasta con LIFO, identificando situaciones del mundo real donde el orden de llegada determina el orden de atencion.</div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-type">Procedimental</div>
+      <div class="comp-text">Declara y opera una cola en C# usando <code style="font-family:Courier New;color:var(--guinda)">Queue&lt;T&gt;</code>, aplicando Enqueue, Dequeue, Peek y Count en programas funcionales ejecutados desde Codespaces.</div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-type">Analitica</div>
+      <div class="comp-text">Predice el estado de una cola tras una secuencia de operaciones, distinguiendo el frente del fondo, y detecta el error <code style="font-family:Courier New;color:var(--guinda)">InvalidOperationException</code> al operar sobre una cola vacia.</div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-type">Integradora</div>
+      <div class="comp-text">Selecciona entre Array, LinkedList, Stack y Queue la estructura adecuada para un problema dado, justificando la decision en terminos del orden de acceso requerido y la frecuencia de insercion y extraccion.</div>
+    </div>
+  </div>
+</div>
+
+<!-- INTRO -->
+<div class="section-block">
+  <div class="sec-label">Punto de partida</div>
+  <div class="sec-title">De las pilas a las colas</div>
+
+  <div class="intro-box">
+    <p>
+      En la sesion anterior estudiamos la pila (<code style="font-family:Courier New;color:var(--guinda)">Stack&lt;T&gt;</code>), cuya regla fundamental es LIFO: el ultimo elemento en ingresar es el primero en salir. Esa propiedad la hace ideal para historiales de acciones, navegacion hacia atras y evaluacion de expresiones.
+    </p>
+    <p>
+      Hoy presentamos su opuesto exacto: la <strong>cola</strong>. En una cola el primer elemento en ingresar es el primero en salir. El orden de llegada se respeta de manera estricta. Esta propiedad, llamada <strong>FIFO</strong>, aparece en casi cualquier sistema que maneja turnos, solicitudes o mensajes.
+    </p>
+    <p>
+      La cola no reemplaza a la pila: cada una existe porque hay problemas que solo una de ellas resuelve correctamente. Al terminar esta sesion podras elegir entre ambas con criterio tecnico.
+    </p>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">Analogia de la sesion</div>
+    <p>
+      Imagina la <strong>fila de alumnos en la ventanilla de la cafeteria</strong>. El primero que llego es el primero en ser atendido. No importa cuantos lleguen despues: nadie puede saltarse a quien ya estaba esperando.
+    </p>
+    <p>
+      Eso es exactamente una cola en programacion: los elementos <strong>entran por un extremo (el fondo)</strong> y <strong>salen por el otro extremo (el frente)</strong>. No hay acceso a posiciones intermedias ni posibilidad de insertar por el frente.
+    </p>
+  </div>
+</div>
+
+<!-- CONCEPTO FIFO -->
+<div class="section-block">
+  <div class="sec-label">Tema 1.4 &mdash; Concepto</div>
+  <div class="sec-title">Principio FIFO</div>
+
+  <div class="concept-pair">
+    <div class="concept-card">
+      <div class="cc-head">FIFO &mdash; First In, First Out</div>
+      <div class="cc-body">
+        El primer elemento en ingresar a la cola es el primero en ser extraido. El orden de salida es identico al orden de entrada. Esta propiedad garantiza equidad y reproducibilidad en sistemas de atencion secuencial.
+      </div>
+    </div>
+    <div class="concept-card">
+      <div class="cc-head">Comparacion inmediata con Stack</div>
+      <div class="cc-body">
+        Stack opera siempre sobre el tope: el ultimo en entrar es el primero en salir. Queue opera sobre el frente: el primero en entrar es el primero en salir. Son principios opuestos aplicados al mismo concepto de coleccion lineal.
+      </div>
+    </div>
+  </div>
+
+  <!-- Queue visual horizontal -->
+  <div class="queue-visual">
+    <div class="qv-label">Estado de una cola tras cuatro operaciones Enqueue &mdash; los elementos fluyen de derecha a izquierda</div>
+    <div class="qv-track">
+      <div class="qv-arrow-ext">Dequeue &larr;</div>
+      <div class="qv-node qv-front">Ana Ramirez<span class="qv-tag qv-tag-front">FRENTE &mdash; sale primero</span></div>
+      <div class="qv-sep">|</div>
+      <div class="qv-node">Luis Torres</div>
+      <div class="qv-sep">|</div>
+      <div class="qv-node">Sofia Gomez</div>
+      <div class="qv-sep">|</div>
+      <div class="qv-node qv-back">Marco Diaz<span class="qv-tag qv-tag-back">FONDO &mdash; ultimo en entrar</span></div>
+      <div class="qv-arrow-ext">&larr; Enqueue</div>
+    </div>
+    <div class="qv-row-labels">
+      <span>El elemento del frente es el proximo en ser extraido</span>
+      <span>Los nuevos elementos siempre se agregan al fondo</span>
+    </div>
+  </div>
+
+  <div class="callout co-p">
+    <span class="callout-icon">Regla</span>
+    <span>Los elementos entran por el fondo con <code style="font-family:Courier New">Enqueue</code> y salen por el frente con <code style="font-family:Courier New">Dequeue</code>. No hay acceso directo a posiciones intermedias ni al fondo.</span>
+  </div>
+</div>
+
+<!-- OPERACIONES -->
+<div class="section-block">
+  <div class="sec-label">Tema 1.4 &mdash; Operaciones</div>
+  <div class="sec-title">Las cuatro operaciones fundamentales</div>
+
+  <table class="op-table">
+    <thead>
+      <tr>
+        <th>Operacion</th>
+        <th>Descripcion</th>
+        <th>Analogia</th>
+        <th>Costo</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="op-name op-guinda">Enqueue()</span></td>
+        <td>Agrega un elemento al fondo de la cola. La cola crece en uno.</td>
+        <td>Un alumno nuevo se coloca al final de la fila.</td>
+        <td>O(1)</td>
+      </tr>
+      <tr>
+        <td><span class="op-name op-green">Dequeue()</span></td>
+        <td>Extrae y devuelve el elemento del frente. La cola decrece en uno.</td>
+        <td>Se atiende al alumno del frente: abandona la fila.</td>
+        <td>O(1)</td>
+      </tr>
+      <tr>
+        <td><span class="op-name op-amber">Peek()</span></td>
+        <td>Devuelve el elemento del frente sin extraerlo. La cola no cambia.</td>
+        <td>Ver quien es el siguiente sin atenderlo todavia.</td>
+        <td>O(1)</td>
+      </tr>
+      <tr>
+        <td><span class="op-name" style="color:var(--tx2)">Count</span></td>
+        <td>Propiedad que indica cuantos elementos contiene la cola en ese momento.</td>
+        <td>Contar cuantos alumnos hay en la fila.</td>
+        <td>O(1)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout co-r">
+    <span class="callout-icon">Error critico</span>
+    <span>Llamar <code style="font-family:Courier New">Dequeue()</code> o <code style="font-family:Courier New">Peek()</code> sobre una cola vacia genera <code style="font-family:Courier New">InvalidOperationException</code> en tiempo de ejecucion. Siempre verificar <code style="font-family:Courier New">Count &gt; 0</code> antes de extraer o consultar el frente.</span>
+  </div>
+</div>
+
+<!-- CODIGO 1 -->
+<div class="section-block">
+  <div class="sec-label">Codigo en C#</div>
+  <div class="sec-title">Ejemplo 1 &mdash; Declarar la cola y agregar elementos</div>
+
+  <p style="font-size:14px;color:var(--tx2);margin-bottom:14px;line-height:1.7">
+    La clase <code style="font-family:Courier New;color:var(--guinda)">Queue&lt;T&gt;</code> pertenece al espacio de nombres <code style="font-family:Courier New;color:var(--guinda)">System.Collections.Generic</code>, igual que <code style="font-family:Courier New;color:var(--guinda)">Stack&lt;T&gt;</code> y <code style="font-family:Courier New;color:var(--guinda)">LinkedList&lt;T&gt;</code>. La sintaxis de declaracion es identica; lo que cambia es el comportamiento.
+  </p>
+
+  <div class="cb">
+    <div class="cb-bar">
+      <div class="cb-dots"><div class="cb-dot"></div><div class="cb-dot"></div><div class="cb-dot"></div></div>
+      <span class="cb-fname">Ejemplo1_Declaracion.cs</span>
+      <span class="cb-lang">C#</span>
+    </div>
+    <div class="cb-body"><pre><span class="kw">using</span> <span class="tp">System</span>;
+<span class="kw">using</span> <span class="tp">System.Collections.Generic</span>;
+
+<span class="kw">class</span> <span class="tp">Program</span>
+{
+    <span class="kw">static</span> <span class="kw">void</span> <span class="mt">Main</span>()
+    {
+        <span class="cm">// Declarar una cola de textos vacia</span>
+        <span class="tp">Queue</span>&lt;<span class="tp">string</span>&gt; <span class="vr">fila</span> = <span class="kw">new</span> <span class="tp">Queue</span>&lt;<span class="tp">string</span>&gt;();
+        <span class="cm">//    ^tipo        ^nombre      ^constructor: crea la cola vacia</span>
+
+        <span class="cm">// Enqueue: agregar al FONDO. El primero que entra queda en el FRENTE.</span>
+        <span class="vr">fila</span>.<span class="mt">Enqueue</span>(<span class="st">"Ana Ramirez"</span>);   <span class="cm">// fila: Ana &lt;- frente</span>
+        <span class="vr">fila</span>.<span class="mt">Enqueue</span>(<span class="st">"Luis Torres"</span>);   <span class="cm">// fila: Ana | Luis &lt;- fondo</span>
+        <span class="vr">fila</span>.<span class="mt">Enqueue</span>(<span class="st">"Sofia Gomez"</span>);   <span class="cm">// fila: Ana | Luis | Sofia &lt;- fondo</span>
+        <span class="vr">fila</span>.<span class="mt">Enqueue</span>(<span class="st">"Marco Diaz"</span>);    <span class="cm">// fila: Ana | Luis | Sofia | Marco &lt;- fondo</span>
+
+        <span class="cm">// Count: cantidad actual de elementos</span>
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"Alumnos en fila: {</span><span class="vr">fila</span>.<span class="mt">Count</span><span class="st">}"</span>); <span class="cm">// 4</span>
+    }
+}</pre></div>
+  </div>
+</div>
+
+<!-- CODIGO 2 -->
+<div class="section-block">
+  <div class="sec-label">Codigo en C#</div>
+  <div class="sec-title">Ejemplo 2 &mdash; Dequeue y Peek sobre la misma cola</div>
+
+  <div class="cb">
+    <div class="cb-bar">
+      <div class="cb-dots"><div class="cb-dot"></div><div class="cb-dot"></div><div class="cb-dot"></div></div>
+      <span class="cb-fname">Ejemplo2_DequeueYPeek.cs</span>
+      <span class="cb-lang">C#</span>
+    </div>
+    <div class="cb-body"><pre><span class="kw">using</span> <span class="tp">System</span>;
+<span class="kw">using</span> <span class="tp">System.Collections.Generic</span>;
+
+<span class="kw">class</span> <span class="tp">Program</span>
+{
+    <span class="kw">static</span> <span class="kw">void</span> <span class="mt">Main</span>()
+    {
+        <span class="tp">Queue</span>&lt;<span class="tp">string</span>&gt; <span class="vr">fila</span> = <span class="kw">new</span> <span class="tp">Queue</span>&lt;<span class="tp">string</span>&gt;();
+        <span class="vr">fila</span>.<span class="mt">Enqueue</span>(<span class="st">"Ana Ramirez"</span>);
+        <span class="vr">fila</span>.<span class="mt">Enqueue</span>(<span class="st">"Luis Torres"</span>);
+        <span class="vr">fila</span>.<span class="mt">Enqueue</span>(<span class="st">"Sofia Gomez"</span>);
+        <span class="vr">fila</span>.<span class="mt">Enqueue</span>(<span class="st">"Marco Diaz"</span>);
+        <span class="cm">// Estado: Ana (frente) | Luis | Sofia | Marco (fondo)</span>
+
+        <span class="cm">// Peek: ver el frente SIN extraerlo &mdash; Count no cambia</span>
+        <span class="tp">string</span> <span class="vr">siguiente</span> = <span class="vr">fila</span>.<span class="mt">Peek</span>();
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"Siguiente: {</span><span class="vr">siguiente</span><span class="st">}"</span>);          <span class="cm">// Ana Ramirez</span>
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"Count tras Peek: {</span><span class="vr">fila</span>.<span class="mt">Count</span><span class="st">}"</span>);    <span class="cm">// 4 (no cambio)</span>
+
+        <span class="cm">// Dequeue: extraer el frente &mdash; Count disminuye en 1</span>
+        <span class="tp">string</span> <span class="vr">atendido</span> = <span class="vr">fila</span>.<span class="mt">Dequeue</span>();
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"Atendiendo: {</span><span class="vr">atendido</span><span class="st">}"</span>);           <span class="cm">// Ana Ramirez</span>
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"Count tras Dequeue: {</span><span class="vr">fila</span>.<span class="mt">Count</span><span class="st">}"</span>); <span class="cm">// 3 (disminuyo)</span>
+
+        <span class="cm">// Nuevo frente despues del Dequeue</span>
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"Nuevo frente: {</span><span class="vr">fila</span>.<span class="mt">Peek</span>()<span class="st">}"</span>);       <span class="cm">// Luis Torres</span>
+    }
+}</pre></div>
+  </div>
+
+  <div class="concept-pair" style="margin-top:16px">
+    <div class="concept-card">
+      <div class="cc-head">Peek() &mdash; solo consultar el frente</div>
+      <div class="cc-body">Devuelve el valor del frente. La cola permanece identica. Count no cambia. Util para tomar decisiones sobre el proximo elemento antes de extraerlo.</div>
+    </div>
+    <div class="concept-card">
+      <div class="cc-head">Dequeue() &mdash; extraer y devolver</div>
+      <div class="cc-body">Extrae el frente y lo devuelve. La cola pierde un elemento. Count disminuye en 1. El siguiente elemento pasa a ser el nuevo frente.</div>
+    </div>
+  </div>
+</div>
+
+<!-- CODIGO 3 COMPLETO -->
+<div class="section-block">
+  <div class="sec-label">Codigo en C#</div>
+  <div class="sec-title">Ejemplo 3 &mdash; Programa completo con foreach</div>
+
+  <div class="cb">
+    <div class="cb-bar">
+      <div class="cb-dots"><div class="cb-dot"></div><div class="cb-dot"></div><div class="cb-dot"></div></div>
+      <span class="cb-fname">Ejemplo3_Completo.cs</span>
+      <span class="cb-lang">C#</span>
+    </div>
+    <div class="cb-body"><pre><span class="kw">using</span> <span class="tp">System</span>;
+<span class="kw">using</span> <span class="tp">System.Collections.Generic</span>;
+
+<span class="kw">class</span> <span class="tp">Program</span>
+{
+    <span class="kw">static</span> <span class="kw">void</span> <span class="mt">Main</span>()
+    {
+        <span class="tp">Queue</span>&lt;<span class="tp">string</span>&gt; <span class="vr">fila</span> = <span class="kw">new</span> <span class="tp">Queue</span>&lt;<span class="tp">string</span>&gt;();
+
+        <span class="vr">fila</span>.<span class="mt">Enqueue</span>(<span class="st">"Ana Ramirez"</span>);
+        <span class="vr">fila</span>.<span class="mt">Enqueue</span>(<span class="st">"Luis Torres"</span>);
+        <span class="vr">fila</span>.<span class="mt">Enqueue</span>(<span class="st">"Sofia Gomez"</span>);
+        <span class="vr">fila</span>.<span class="mt">Enqueue</span>(<span class="st">"Marco Diaz"</span>);
+
+        <span class="cm">// foreach recorre del FRENTE al FONDO sin modificar la cola</span>
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">"=== Fila de atencion ==="</span>);
+        <span class="kw">foreach</span> (<span class="tp">string</span> <span class="vr">a</span> <span class="kw">in</span> <span class="vr">fila</span>)
+            <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"  {</span><span class="vr">a</span><span class="st">}"</span>);
+
+        <span class="cm">// Atender a todos en orden, verificando que la cola no este vacia</span>
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">"\n=== Atendiendo en orden ==="</span>);
+        <span class="kw">while</span> (<span class="vr">fila</span>.<span class="mt">Count</span> &gt; <span class="nm">0</span>)
+        {
+            <span class="tp">string</span> <span class="vr">turno</span> = <span class="vr">fila</span>.<span class="mt">Dequeue</span>();
+            <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"Atendiendo: {</span><span class="vr">turno</span><span class="st">}"</span>);
+        }
+
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"\nAlumnos restantes en fila: {</span><span class="vr">fila</span>.<span class="mt">Count</span><span class="st">}"</span>); <span class="cm">// 0</span>
+    }
+}</pre></div>
+  </div>
+
+  <div class="callout co-a">
+    <span class="callout-icon">Nota</span>
+    <span><code style="font-family:Courier New">foreach</code> en una cola recorre del frente al fondo, en el mismo orden en que se insertaron los elementos. El ciclo <code style="font-family:Courier New">while (fila.Count &gt; 0)</code> es el patron estandar para vaciar una cola de forma segura sin generar <code style="font-family:Courier New">InvalidOperationException</code>.</span>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- COMPARATIVA COMPLETA -->
+<div class="section-block">
+  <div class="sec-label">Vision de conjunto &mdash; Unidad 1</div>
+  <div class="sec-title">Las cuatro estructuras lineales</div>
+
+  <p style="font-size:14px;color:var(--tx2);margin-bottom:16px;line-height:1.7">
+    Con Queue completamos las cuatro estructuras lineales de la Unidad 1. La siguiente tabla resume cuando elegir cada una en funcion de las operaciones que el problema requiere con mayor frecuencia.
+  </p>
+
+  <table class="cmp-table">
+    <thead>
+      <tr>
+        <th>Criterio</th>
+        <th><span class="cmp-struct">Array</span></th>
+        <th><span class="cmp-struct">LinkedList&lt;T&gt;</span></th>
+        <th><span class="cmp-struct">Stack&lt;T&gt;</span></th>
+        <th><span class="cmp-struct">Queue&lt;T&gt;</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Principio de orden</td>
+        <td>&mdash; Ninguno</td>
+        <td>&mdash; Ninguno</td>
+        <td class="cmp-ok">LIFO</td>
+        <td class="cmp-ok">FIFO</td>
+      </tr>
+      <tr>
+        <td>Tamano fijo</td>
+        <td class="cmp-ok">Si &mdash; ideal</td>
+        <td class="cmp-er">No aplica</td>
+        <td class="cmp-er">No aplica</td>
+        <td class="cmp-er">No aplica</td>
+      </tr>
+      <tr>
+        <td>Acceso por indice [i]</td>
+        <td class="cmp-ok">O(1)</td>
+        <td class="cmp-er">O(n)</td>
+        <td class="cmp-er">No disponible</td>
+        <td class="cmp-er">No disponible</td>
+      </tr>
+      <tr>
+        <td>Insertar al inicio</td>
+        <td class="cmp-er">O(n)</td>
+        <td class="cmp-ok">O(1)</td>
+        <td class="cmp-ok">Push O(1)</td>
+        <td class="cmp-er">No disponible</td>
+      </tr>
+      <tr>
+        <td>Acceder al ultimo agregado</td>
+        <td class="cmp-am">arr[n-1]</td>
+        <td class="cmp-am">.Last.Value</td>
+        <td class="cmp-ok">Peek O(1)</td>
+        <td class="cmp-er">No corresponde</td>
+      </tr>
+      <tr>
+        <td>Acceder al primero en espera</td>
+        <td class="cmp-am">arr[0]</td>
+        <td class="cmp-am">.First.Value</td>
+        <td class="cmp-er">No corresponde</td>
+        <td class="cmp-ok">Peek O(1)</td>
+      </tr>
+      <tr>
+        <td>Caso de uso tipico</td>
+        <td>Datos fijos, tabla de calificaciones</td>
+        <td>Lista que cambia frecuentemente</td>
+        <td>Historial, Ctrl+Z, retroceso</td>
+        <td>Turnos, impresion, mensajeria</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout co-g">
+    <span class="callout-icon">Clave</span>
+    <span>La pregunta que guia la eleccion es siempre la misma: <strong>?en que orden necesito acceder a los datos?</strong> Si el orden no importa y el tamano es fijo: Array. Si cambia con frecuencia: LinkedList. Si siempre necesito el ultimo: Stack. Si siempre necesito el primero: Queue.</span>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ACTIVIDADES -->
+<div class="section-block">
+  <div class="sec-label">Durante la sesion</div>
+  <div class="sec-title">Actividades</div>
+
+  <!-- Actividad 1 -->
+  <div class="activity">
+    <div class="activity-head">
+      <span class="activity-title">Actividad 1 &mdash; Traza guiada</span>
+      <span class="activity-time">15 min</span>
+    </div>
+    <div class="activity-body">
+      <p>Completa la tabla siguiendo la ejecucion instruccion por instruccion. Escribe el estado de la cola de frente a fondo separado por barras verticales.</p>
+      <div class="cb" style="margin:14px 0">
+        <div class="cb-body" style="padding:14px 18px"><pre><span class="tp">Queue</span>&lt;<span class="tp">string</span>&gt; <span class="vr">cola</span> = <span class="kw">new</span> <span class="tp">Queue</span>&lt;<span class="tp">string</span>&gt;();
+<span class="vr">cola</span>.<span class="mt">Enqueue</span>(<span class="st">"Ana"</span>);
+<span class="vr">cola</span>.<span class="mt">Enqueue</span>(<span class="st">"Luis"</span>);
+<span class="vr">cola</span>.<span class="mt">Enqueue</span>(<span class="st">"Sofia"</span>);
+<span class="tp">string</span> <span class="vr">x</span> = <span class="vr">cola</span>.<span class="mt">Dequeue</span>();
+<span class="vr">cola</span>.<span class="mt">Enqueue</span>(<span class="st">"Marco"</span>);
+<span class="tp">string</span> <span class="vr">y</span> = <span class="vr">cola</span>.<span class="mt">Peek</span>();</pre></div>
+      </div>
+      <table class="trace-table">
+        <thead>
+          <tr><th>Instruccion</th><th>Frente</th><th>Estado completo (frente | fondo)</th><th>Count</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="trace-code">Enqueue("Ana")</td>
+            <td><input class="trace-inp" id="q1_1f" placeholder="?" oninput="chk('q1_1f','Ana')"></td>
+            <td><input class="trace-inp" id="q1_1s" placeholder="?" oninput="chk('q1_1s','Ana')"></td>
+            <td><input class="trace-inp" id="q1_1c" placeholder="?" oninput="chk('q1_1c','1')"></td>
+          </tr>
+          <tr><td class="trace-code">Enqueue("Luis")</td>
+            <td><input class="trace-inp" id="q1_2f" placeholder="?" oninput="chk('q1_2f','Ana')"></td>
+            <td><input class="trace-inp" id="q1_2s" placeholder="?" oninput="chk('q1_2s','Ana | Luis')"></td>
+            <td><input class="trace-inp" id="q1_2c" placeholder="?" oninput="chk('q1_2c','2')"></td>
+          </tr>
+          <tr><td class="trace-code">Enqueue("Sofia")</td>
+            <td><input class="trace-inp" id="q1_3f" placeholder="?" oninput="chk('q1_3f','Ana')"></td>
+            <td><input class="trace-inp" id="q1_3s" placeholder="?" oninput="chk('q1_3s','Ana | Luis | Sofia')"></td>
+            <td><input class="trace-inp" id="q1_3c" placeholder="?" oninput="chk('q1_3c','3')"></td>
+          </tr>
+          <tr><td class="trace-code">Dequeue() &rarr; x</td>
+            <td><input class="trace-inp" id="q1_4f" placeholder="?" oninput="chk('q1_4f','Luis')"></td>
+            <td><input class="trace-inp" id="q1_4s" placeholder="?" oninput="chk('q1_4s','Luis | Sofia')"></td>
+            <td><input class="trace-inp" id="q1_4c" placeholder="?" oninput="chk('q1_4c','2')"></td>
+          </tr>
+          <tr><td class="trace-code">Enqueue("Marco")</td>
+            <td><input class="trace-inp" id="q1_5f" placeholder="?" oninput="chk('q1_5f','Luis')"></td>
+            <td><input class="trace-inp" id="q1_5s" placeholder="?" oninput="chk('q1_5s','Luis | Sofia | Marco')"></td>
+            <td><input class="trace-inp" id="q1_5c" placeholder="?" oninput="chk('q1_5c','3')"></td>
+          </tr>
+          <tr><td class="trace-code">Peek() &rarr; y</td>
+            <td><input class="trace-inp" id="q1_6f" placeholder="?" oninput="chk('q1_6f','Luis')"></td>
+            <td><input class="trace-inp" id="q1_6s" placeholder="?" oninput="chk('q1_6s','Luis | Sofia | Marco')"></td>
+            <td><input class="trace-inp" id="q1_6c" placeholder="?" oninput="chk('q1_6c','3')"></td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="margin-top:12px"><strong>Verificacion:</strong> x = "Ana" &mdash; y = "Luis" &mdash; Count final = 3. Ejecuta el codigo en Codespaces y confirma los valores.</p>
+    </div>
+  </div>
+
+  <!-- Actividad 2 -->
+  <div class="activity">
+    <div class="activity-head">
+      <span class="activity-title">Actividad 2 &mdash; Stack vs Queue: elige la correcta</span>
+      <span class="activity-time">10 min</span>
+    </div>
+    <div class="activity-body">
+      <p>Para cada escenario indica que estructura usarias y justifica en una oracion por que el orden de acceso requerido corresponde a LIFO o FIFO.</p>
+      <ol class="activity-steps">
+        <li><div class="step-n">A</div><span>Un sistema de impresion universitario: los trabajos se imprimen en el mismo orden en que se enviaron desde las computadoras del laboratorio.</span></li>
+        <li><div class="step-n">B</div><span>El boton de retroceso de un navegador web: al presionarlo regresa a la ultima pagina que visitaste.</span></li>
+        <li><div class="step-n">C</div><span>Un sistema de atencion a tickets de soporte tecnico: el primer ticket enviado debe ser el primero en resolverse.</span></li>
+        <li><div class="step-n">D</div><span>El historial de ediciones de un documento: deshacer siempre revierte la ultima modificacion realizada.</span></li>
+      </ol>
+      <p style="margin-top:14px"><strong>Respuestas esperadas:</strong> A &rarr; Queue (FIFO), B &rarr; Stack (LIFO), C &rarr; Queue (FIFO), D &rarr; Stack (LIFO).</p>
+    </div>
+  </div>
+
+  <!-- Actividad 3 -->
+  <div class="activity">
+    <div class="activity-head">
+      <span class="activity-title">Actividad 3 &mdash; Sistema de turnos en Codespaces</span>
+      <span class="activity-time">25 min</span>
+    </div>
+    <div class="activity-body">
+      <p>Abre un nuevo archivo en tu Codespace e implementa el siguiente sistema paso a paso:</p>
+      <ol class="activity-steps">
+        <li><div class="step-n">1</div><span>Declara una <code style="font-family:Courier New;color:var(--guinda)">Queue&lt;string&gt;</code> llamada <code style="font-family:Courier New;color:var(--guinda)">turnos</code>. Representa la fila de atencion en la ventanilla escolar.</span></li>
+        <li><div class="step-n">2</div><span>Agrega con <code style="font-family:Courier New;color:var(--guinda)">Enqueue</code> a cinco alumnos: "Ana", "Luis", "Sofia", "Marco", "Karla". Muestra Count despues de cada insercion.</span></li>
+        <li><div class="step-n">3</div><span>Consulta con <code style="font-family:Courier New;color:var(--guinda)">Peek</code> quien sera el proximo atendido e imprimelo con el mensaje: "Proximo en atencion: [nombre]". Confirma que Count no cambio.</span></li>
+        <li><div class="step-n">4</div><span>Atiende a los tres primeros de la fila usando <code style="font-family:Courier New;color:var(--guinda)">Dequeue</code> dentro de un ciclo <code style="font-family:Courier New;color:var(--guinda)">for</code>. Imprime cada nombre con el mensaje: "Atendiendo a: [nombre]".</span></li>
+        <li><div class="step-n">5</div><span>Muestra con <code style="font-family:Courier New;color:var(--guinda)">foreach</code> quienes siguen en la fila. Anota en un comentario que el orden del foreach coincide con el orden FIFO de insercion.</span></li>
+      </ol>
+      <p style="margin-top:14px">Una vez que el programa compila y produce la salida esperada, haz commit en tu repositorio con el mensaje: <code style="font-family:Courier New;color:var(--guinda)">feat: cola-sistema-turnos</code>.</p>
+    </div>
+  </div>
+
+</div>
+
+<hr class="divider">
+
+<!-- REFERENCIAS -->
+<div class="section-block">
+  <div class="sec-label">Fuentes de consulta</div>
+  <div class="sec-title">Referencias bibliograficas</div>
+
+  <ul class="bib-list">
+    <li class="bib-item">
+      <div class="bib-type">Libro de texto principal</div>
+      Weiss, M. A. (2013). <em>Data Structures and Algorithm Analysis in C++</em> (4.a ed.). Pearson. Capitulo 3: Lists, Stacks, and Queues.
+    </li>
+    <li class="bib-item">
+      <div class="bib-type">Referencia de algoritmos</div>
+      Cormen, T. H., Leiserson, C. E., Rivest, R. L., &amp; Stein, C. (2014). <em>Introduction to Algorithms</em> (3.a ed.). MIT Press. Seccion 10.1: Stacks and Queues. Disponible en: <a href="https://mitpress.mit.edu/9780262046305/introduction-to-algorithms/" target="_blank" rel="noopener">mitpress.mit.edu</a>
+    </li>
+    <li class="bib-item">
+      <div class="bib-type">Documentacion oficial &mdash; Microsoft</div>
+      Microsoft. (2024). <em>Queue&lt;T&gt; Class</em>. Microsoft Learn. <a href="https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.queue-1" target="_blank" rel="noopener">learn.microsoft.com/dotnet/api/system.collections.generic.queue-1</a>
+    </li>
+    <li class="bib-item">
+      <div class="bib-type">Documentacion oficial &mdash; Microsoft</div>
+      Microsoft. (2024). <em>System.Collections.Generic Namespace</em>. Microsoft Learn. <a href="https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic" target="_blank" rel="noopener">learn.microsoft.com/dotnet/api/system.collections.generic</a>
+    </li>
+    <li class="bib-item">
+      <div class="bib-type">Recurso complementario</div>
+      Aliat Universidades. (s.f.). <em>Analisis y diseno de algoritmos</em>. Bibliotecas Digitales Aliat. <a href="http://www.aliat.org.mx/BibliotecasDigitales/sistemas/Analisis_y_disenio_de_algoritmos.pdf" target="_blank" rel="noopener">aliat.org.mx &mdash; Analisis y diseno de algoritmos (PDF)</a>
+    </li>
+  </ul>
+</div>
+
+<!-- Signature -->
+<div style="border-top:1px solid var(--border);padding-top:24px;margin-top:48px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--tx3);font-family:'Inter',sans-serif">
+  <span>Mtro. Jose Armando Vera Rodriguez</span>
+  <span>Estructura de Datos &nbsp;&mdash;&nbsp; Unidad 1 &nbsp;&mdash;&nbsp; Tema 1.4</span>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+window.addEventListener('scroll',()=>{
+  const h=document.documentElement.scrollHeight-window.innerHeight;
+  if(h>0) document.getElementById('pFill').style.width=(window.scrollY/h*100)+'%';
+});
+const ANS={
+  q1_1f:'Ana',  q1_1s:'Ana',                    q1_1c:'1',
+  q1_2f:'Ana',  q1_2s:'Ana | Luis',              q1_2c:'2',
+  q1_3f:'Ana',  q1_3s:'Ana | Luis | Sofia',      q1_3c:'3',
+  q1_4f:'Luis', q1_4s:'Luis | Sofia',             q1_4c:'2',
+  q1_5f:'Luis', q1_5s:'Luis | Sofia | Marco',    q1_5c:'3',
+  q1_6f:'Luis', q1_6s:'Luis | Sofia | Marco',    q1_6c:'3',
+};
+function norm(s){return s.toLowerCase().replace(/\s+/g,'').replace(/[|→\->]/g,'')}
+function chk(id,correct){
+  const el=document.getElementById(id);
+  const v=el.value.trim();
+  if(!v){el.className='trace-inp';return}
+  el.className='trace-inp '+(norm(v)===norm(correct)?'ok':'er');
+}
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){e.target.style.opacity='1';e.target.style.transform='translateY(0)'}
+  });
+},{threshold:.06});
+document.querySelectorAll('.section-block').forEach(el=>{
+  el.style.cssText='opacity:0;transform:translateY(16px);transition:opacity .5s ease,transform .5s ease';
+  obs.observe(el);
+});
+</script>
+</body>
+</html>
