@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador de Cola (Queue) — Estructura de Datos</title>
+<link rel="stylesheet" href="base.css">
+<style>
+:root{
+  --guinda:      #5e162e;
+  --guinda-l:    #F5E8EE;
+  --guinda-rule: #C85070;
+  --guinda-mid:  #8B2040;
+  --tx:          #2A1218;
+  --tx2:         #6B4050;
+  --tx3:         #A07080;
+  --border:      #DEC8CE;
+  --white:       #FFFFFF;
+  --off:         #FAF6F7;
+  --code-bg:     #1A0E12;
+  --ok:#14532D; --ok-bg:#F0FDF4; --ok-bd:#86EFAC;
+  --er:#7F1D1D; --er-bg:#FFF1F2; --er-bd:#FCA5A5;
+  --front-bg:#E6F1FB; --front-tx:#0C447C; --front-bd:#85B7EB;
+  --back-bg:#EAF3DE;  --back-tx:#27500A; --back-bd:#97C459;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--white);color:var(--tx);font-family:'Source Serif 4',Georgia,serif;line-height:1.7;font-size:16px}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--off)}
+::-webkit-scrollbar-thumb{background:var(--guinda-rule)}
+
+.site-header{background:var(--guinda);position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(94,22,46,.25)}
+.header-inner{max-width:1040px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:14px 32px;gap:20px}
+.header-logo img{height:44px;width:auto;filter:brightness(0) invert(1)}
+.header-center{text-align:center;flex:1}
+.header-course{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:2px;font-family:'Inter',sans-serif}
+.header-title{font-size:15px;font-weight:600;color:#fff;font-family:'Inter',sans-serif;letter-spacing:.02em}
+.header-logo2 img{height:36px;width:auto;filter:brightness(0) invert(1);opacity:.75}
+
+.wrap{max-width:900px;margin:0 auto;padding:40px 28px 100px}
+
+.intro-box{border:1px solid var(--border);background:var(--off);padding:22px 26px;margin-bottom:32px}
+.intro-box p{font-size:14.5px;color:var(--tx2);line-height:1.8;margin-bottom:10px}
+.intro-box p:last-child{margin-bottom:0}
+.intro-box strong{color:var(--tx)}
+.sec-label{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--tx3);margin-bottom:10px;font-family:'Inter',sans-serif;font-weight:600}
+.sec-title{font-size:clamp(18px,2.5vw,24px);font-weight:700;color:var(--guinda);margin-bottom:16px;font-family:'Cormorant Garamond',Georgia,serif;display:flex;align-items:center;gap:12px}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* SIMULATOR PANEL */
+.sim-panel{
+  border:1px solid var(--border);background:var(--white);
+  padding:28px 30px;margin-bottom:36px;
+}
+
+.sim-controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:24px}
+.sim-input{
+  flex:1;min-width:180px;font-family:'Inter',sans-serif;font-size:14px;
+  padding:10px 14px;border:1px solid var(--border);background:var(--off);
+  color:var(--tx);outline:none;transition:border-color .2s;
+}
+.sim-input:focus{border-color:var(--guinda-rule)}
+.sim-btn{
+  font-family:'Inter',sans-serif;font-size:13px;font-weight:500;
+  padding:10px 18px;border:1px solid var(--border);background:var(--white);
+  color:var(--tx2);cursor:pointer;transition:all .15s;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.sim-btn:hover{border-color:var(--guinda-rule);color:var(--guinda)}
+.sim-btn:active{transform:scale(.97)}
+.sim-btn-primary{background:var(--guinda);color:#fff;border-color:var(--guinda)}
+.sim-btn-primary:hover{background:var(--guinda-mid);color:#fff}
+
+.sim-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px}
+.sim-stat{background:var(--off);border:1px solid var(--border);padding:14px 16px}
+.sim-stat-label{font-family:'Inter',sans-serif;font-size:11px;color:var(--tx3);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase}
+.sim-stat-value{font-family:'Courier New',monospace;font-size:20px;font-weight:700;color:var(--guinda)}
+
+.sim-legend{display:flex;gap:20px;font-size:12px;color:var(--tx2);flex-wrap:wrap;margin-bottom:20px;font-family:'Inter',sans-serif}
+.sim-legend-item{display:flex;align-items:center;gap:7px}
+.sim-dot{width:11px;height:11px;border-radius:2px;display:inline-block;border:1px solid}
+
+.sim-track-outer{position:relative;padding:30px 4px 26px;overflow-x:auto;border-top:1px dashed var(--border);border-bottom:1px dashed var(--border)}
+.sim-track{display:flex;align-items:center;gap:0;min-height:84px;position:relative}
+.sim-arrowlabel{
+  font-family:'Inter',sans-serif;font-size:11.5px;color:var(--tx3);
+  white-space:nowrap;display:flex;flex-direction:column;align-items:center;
+  gap:4px;min-width:74px;text-align:center;
+}
+.sim-arrowlabel .arrow-glyph{font-size:20px;line-height:1;color:var(--guinda-rule)}
+.sim-node{
+  position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  width:104px;height:60px;border-radius:0;font-family:'Inter',sans-serif;
+  font-size:14px;font-weight:500;flex-shrink:0;
+  transition:transform .25s ease,opacity .25s ease;
+  border:1px solid var(--border);background:var(--off);color:var(--tx);
+}
+.sim-node.front{background:var(--front-bg);color:var(--front-tx);border-color:var(--front-bd)}
+.sim-node.back{background:var(--back-bg);color:var(--back-tx);border-color:var(--back-bd)}
+.sim-tag{font-size:9.5px;font-weight:400;letter-spacing:.04em;text-transform:uppercase;margin-top:3px;opacity:.8}
+.sim-gap{width:14px;flex-shrink:0;position:relative}
+.sim-gap::after{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:var(--border)}
+.sim-empty{font-family:'Inter',sans-serif;font-size:13px;color:var(--tx3);padding:1rem 2rem;text-align:center;width:100%;transition:color .3s}
+
+@keyframes sim-pop-in{from{opacity:0;transform:translateX(24px) scale(.85)}to{opacity:1;transform:translateX(0) scale(1)}}
+@keyframes sim-pop-out{from{opacity:1;transform:translateX(0) scale(1)}to{opacity:0;transform:translateX(-34px) scale(.7)}}
+.sim-node.entering{animation:sim-pop-in .3s ease}
+.sim-node.leaving{animation:sim-pop-out .3s ease forwards}
+@keyframes sim-peek-pulse{0%,100%{box-shadow:0 0 0 0 transparent}50%{box-shadow:0 0 0 5px var(--front-bd)}}
+.sim-node.peeking{animation:sim-peek-pulse .6s ease}
+
+.sim-log{
+  font-family:'Courier New',monospace;font-size:12.5px;
+  background:var(--code-bg);color:#EEFFFF;
+  padding:14px 18px;max-height:160px;overflow-y:auto;
+  display:flex;flex-direction:column;gap:5px;margin-top:20px;
+}
+.sim-log-line{color:#B8A8B0}
+.sim-log-line.ok{color:#86EFAC}
+.sim-log-line.err{color:#FCA5A5}
+
+/* EXPLANATION CARDS */
+.exp-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:32px}
+.exp-card{border:1px solid var(--border);padding:18px 20px;background:var(--white)}
+.exp-card.front-c{border-left:4px solid var(--front-bd)}
+.exp-card.back-c{border-left:4px solid var(--back-bd)}
+.exp-head{font-family:'Inter',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;font-weight:600}
+.exp-card.front-c .exp-head{color:var(--front-tx)}
+.exp-card.back-c .exp-head{color:var(--back-tx)}
+.exp-body{font-size:13.5px;color:var(--tx2);line-height:1.65}
+
+.callout{display:flex;gap:14px;padding:14px 16px;margin:14px 0;font-size:13.5px;line-height:1.65;border-left:4px solid}
+.co-p{background:var(--guinda-l);border-color:var(--guinda-rule);color:var(--guinda)}
+.co-r{background:var(--er-bg);border-color:var(--er-bd);color:var(--er)}
+.callout-icon{font-size:15px;flex-shrink:0;font-style:normal}
+
+footer{border-top:1px solid var(--border);padding-top:24px;margin-top:48px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--tx3);font-family:'Inter',sans-serif}
+
+@media(max-width:620px){
+  .header-inner{padding:12px 18px}
+  .wrap{padding:28px 18px 80px}
+  .sim-stats{grid-template-columns:1fr}
+  .exp-grid{grid-template-columns:1fr}
+  .sim-panel{padding:20px 18px}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-logo">
+      <img src="imagen1.png" alt="Logo institucional">
+    </div>
+    <div class="header-center">
+      <div class="header-course">Estructura de Datos &nbsp;|&nbsp; Licenciatura en Sistemas Computacionales</div>
+      <div class="header-title">Simulador de Cola — Queue&lt;T&gt;</div>
+    </div>
+    <div class="header-logo2">
+      <img src="imagen2.png" alt="Logo de apoyo">
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<div class="intro-box">
+  <p>
+    Este simulador representa visualmente una <strong>cola (Queue&lt;T&gt;)</strong> en C#. Usalo para confirmar tus predicciones de la Actividad 1 y para experimentar libremente con la regla FIFO antes de escribir codigo en Codespaces.
+  </p>
+  <p>
+    Los elementos siempre entran por el <strong>fondo</strong> (verde) con <code style="font-family:Courier New;color:var(--guinda)">Enqueue</code> y siempre salen por el <strong>frente</strong> (azul) con <code style="font-family:Courier New;color:var(--guinda)">Dequeue</code>.
+  </p>
+</div>
+
+<div class="sec-label">Simulacion interactiva</div>
+<div class="sec-title">Cola en accion</div>
+
+<div class="sim-panel">
+
+  <div class="sim-controls">
+    <input type="text" id="sim-name" class="sim-input" placeholder="Nombre del alumno (ej. Ana)" maxlength="14">
+    <button id="sim-enqueue" class="sim-btn sim-btn-primary">Enqueue</button>
+    <button id="sim-dequeue" class="sim-btn">Dequeue</button>
+    <button id="sim-peek" class="sim-btn">Peek</button>
+    <button id="sim-reset" class="sim-btn">Reset</button>
+  </div>
+
+  <div class="sim-stats">
+    <div class="sim-stat">
+      <div class="sim-stat-label">Count</div>
+      <div class="sim-stat-value" id="sim-count">0</div>
+    </div>
+    <div class="sim-stat">
+      <div class="sim-stat-label">Frente (Peek)</div>
+      <div class="sim-stat-value" id="sim-front">&mdash;</div>
+    </div>
+    <div class="sim-stat">
+      <div class="sim-stat-label">Fondo (ultimo en entrar)</div>
+      <div class="sim-stat-value" id="sim-back">&mdash;</div>
+    </div>
+  </div>
+
+  <div class="sim-legend">
+    <span class="sim-legend-item"><span class="sim-dot" style="background:var(--front-bg);border-color:var(--front-bd)"></span>Frente &mdash; sale primero (Dequeue)</span>
+    <span class="sim-legend-item"><span class="sim-dot" style="background:var(--back-bg);border-color:var(--back-bd)"></span>Fondo &mdash; ultimo en entrar (Enqueue)</span>
+  </div>
+
+  <div class="sim-track-outer">
+    <div class="sim-track" id="sim-track">
+      <div class="sim-arrowlabel"><span class="arrow-glyph">&larr;</span>Dequeue<br>(sale aqui)</div>
+      <div class="sim-empty" id="sim-empty-msg">La cola esta vacia. Usa Enqueue para agregar.</div>
+      <div class="sim-arrowlabel" id="sim-back-arrow" style="display:none"><span class="arrow-glyph">&larr;</span>Enqueue<br>(entra aqui)</div>
+    </div>
+  </div>
+
+  <div class="sim-log" id="sim-log">
+    <div class="sim-log-line">Cola vacia. Listo para iniciar.</div>
+  </div>
+
+</div>
+
+<div class="sec-label">Que representa cada operacion</div>
+<div class="sec-title">Lectura del simulador</div>
+
+<div class="exp-grid">
+  <div class="exp-card front-c">
+    <div class="exp-head">Frente — Dequeue() y Peek()</div>
+    <div class="exp-body">El nodo azul es siempre el primero en haber entrado. <code style="font-family:Courier New">Dequeue()</code> lo extrae y lo devuelve. <code style="font-family:Courier New">Peek()</code> lo muestra sin quitarlo — observa el parpadeo y que Count no cambia.</div>
+  </div>
+  <div class="exp-card back-c">
+    <div class="exp-head">Fondo — Enqueue()</div>
+    <div class="exp-body">El nodo verde es siempre el ultimo en haber entrado. Cada nuevo <code style="font-family:Courier New">Enqueue()</code> se agrega aqui, nunca en otra posicion. El frente nunca cambia por un Enqueue.</div>
+  </div>
+</div>
+
+<div class="callout co-p">
+  <span class="callout-icon">Para verificar</span>
+  <span>Reproduce aqui la traza de la Actividad 1: Enqueue Ana, Luis, Sofia &mdash; Dequeue &mdash; Enqueue Marco &mdash; Peek. Compara cada estado con lo que escribiste en la tabla.</span>
+</div>
+
+<div class="callout co-r">
+  <span class="callout-icon">Error a propósito</span>
+  <span>Presiona Reset y luego Dequeue o Peek de inmediato: el simulador mostrara el mismo error <code style="font-family:Courier New">InvalidOperationException</code> que C# lanza al operar sobre una cola vacia.</span>
+</div>
+
+<footer>
+  <span>Mtro. Jose Armando Vera Rodriguez</span>
+  <span>Estructura de Datos &nbsp;&mdash;&nbsp; Unidad 1 &nbsp;&mdash;&nbsp; Tema 1.4</span>
+</footer>
+
+</div>
+
+<script>
+(function(){
+  const queue = [];
+  const trackEl = document.getElementById('sim-track');
+  const emptyMsg = document.getElementById('sim-empty-msg');
+  const backArrow = document.getElementById('sim-back-arrow');
+  const nameInput = document.getElementById('sim-name');
+  const logEl = document.getElementById('sim-log');
+  const countEl = document.getElementById('sim-count');
+  const frontEl = document.getElementById('sim-front');
+  const backEl = document.getElementById('sim-back');
+
+  function log(text, cls){
+    const line = document.createElement('div');
+    line.className = 'sim-log-line' + (cls ? ' ' + cls : '');
+    line.textContent = text;
+    logEl.appendChild(line);
+    logEl.scrollTop = logEl.scrollHeight;
+    while(logEl.children.length > 40){ logEl.removeChild(logEl.firstChild); }
+  }
+
+  function render(){
+    countEl.textContent = queue.length;
+    frontEl.textContent = queue.length ? queue[0] : '\u2014';
+    backEl.textContent = queue.length ? queue[queue.length-1] : '\u2014';
+
+    Array.from(trackEl.querySelectorAll('.sim-node, .sim-gap')).forEach(n => n.remove());
+
+    if(queue.length === 0){
+      emptyMsg.style.display = 'block';
+      backArrow.style.display = 'none';
+      return;
+    }
+    emptyMsg.style.display = 'none';
+    backArrow.style.display = 'flex';
+
+    let anchor = trackEl.querySelector('.sim-arrowlabel');
+
+    queue.forEach((name, i) => {
+      const node = document.createElement('div');
+      node.className = 'sim-node';
+      if(i === 0) node.classList.add('front');
+      else if(i === queue.length - 1) node.classList.add('back');
+      node.dataset.idx = i;
+
+      const label = document.createElement('span');
+      label.textContent = name;
+      node.appendChild(label);
+
+      const tag = document.createElement('span');
+      tag.className = 'sim-tag';
+      if(i === 0) tag.textContent = 'frente';
+      else if(i === queue.length - 1) tag.textContent = 'fondo';
+      else tag.textContent = '';
+      node.appendChild(tag);
+
+      anchor.insertAdjacentElement('afterend', node);
+      anchor = node;
+
+      if(i < queue.length - 1){
+        const gap = document.createElement('div');
+        gap.className = 'sim-gap';
+        anchor.insertAdjacentElement('afterend', gap);
+        anchor = gap;
+      }
+    });
+  }
+
+  function enqueue(){
+    let name = nameInput.value.trim();
+    if(!name) name = 'Alumno' + (queue.length + 1);
+    if(name.length > 14) name = name.slice(0,14);
+    queue.push(name);
+    render();
+    requestAnimationFrame(() => {
+      const nodes = trackEl.querySelectorAll('.sim-node');
+      const last = nodes[nodes.length - 1];
+      if(last) last.classList.add('entering');
+    });
+    log('Enqueue("' + name + '")  ->  se agrega al fondo. Count = ' + queue.length, 'ok');
+    nameInput.value = '';
+    nameInput.focus();
+  }
+
+  function dequeue(){
+    if(queue.length === 0){
+      log('Dequeue()  ->  InvalidOperationException: la cola esta vacia.', 'err');
+      emptyMsg.style.color = '#7F1D1D';
+      setTimeout(() => { emptyMsg.style.color = ''; }, 900);
+      return;
+    }
+    const nodes = trackEl.querySelectorAll('.sim-node');
+    const first = nodes[0];
+    const removed = queue[0];
+    if(first){
+      first.classList.add('leaving');
+      setTimeout(() => {
+        queue.shift();
+        render();
+      }, 260);
+    } else {
+      queue.shift();
+      render();
+    }
+    log('Dequeue()  ->  se extrae "' + removed + '" del frente. Count = ' + (queue.length - 1 >= 0 ? queue.length - 1 : 0), 'ok');
+  }
+
+  function peek(){
+    if(queue.length === 0){
+      log('Peek()  ->  InvalidOperationException: la cola esta vacia.', 'err');
+      return;
+    }
+    const nodes = trackEl.querySelectorAll('.sim-node');
+    const first = nodes[0];
+    if(first){
+      first.classList.remove('peeking');
+      void first.offsetWidth;
+      first.classList.add('peeking');
+    }
+    log('Peek()  ->  "' + queue[0] + '"  (la cola no cambia, Count sigue en ' + queue.length + ')');
+  }
+
+  function reset(){
+    queue.length = 0;
+    render();
+    log('Cola reiniciada.');
+  }
+
+  document.getElementById('sim-enqueue').addEventListener('click', enqueue);
+  document.getElementById('sim-dequeue').addEventListener('click', dequeue);
+  document.getElementById('sim-peek').addEventListener('click', peek);
+  document.getElementById('sim-reset').addEventListener('click', reset);
+  nameInput.addEventListener('keydown', e => { if(e.key === 'Enter') enqueue(); });
+
+  ['Ana','Luis','Sofia'].forEach(n => queue.push(n));
+  render();
+  log('Cola inicial cargada con 3 alumnos en espera.');
+})();
+</script>
+</body>
+</html>
