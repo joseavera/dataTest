@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practica integradora — Unidad 1 — Estructura de Datos</title>
+<link rel="stylesheet" href="base.css">
+<style>
+:root{
+  --guinda:      #5e162e;
+  --guinda-l:    #F5E8EE;
+  --guinda-rule: #C85070;
+  --guinda-mid:  #8B2040;
+  --ink:         #1A1215;
+  --ink2:        #3D1F28;
+  --tx:          #2A1218;
+  --tx2:         #6B4050;
+  --tx3:         #A07080;
+  --border:      #DEC8CE;
+  --white:       #FFFFFF;
+  --off:         #FAF6F7;
+  --code-bg:     #1A0E12;
+  --code-border: #3D1F28;
+  --kw:  #F4A5B8; --tp:  #93C5FD; --st:  #86EFAC; --cm:  #6B5060;
+  --nm:  #FCA5A5; --mt:  #67E8F9; --vr:  #F0E6EA;
+  --ok:  #14532D; --ok-bg: #F0FDF4; --ok-bd: #86EFAC;
+  --er:  #7F1D1D; --er-bg: #FFF1F2; --er-bd: #FCA5A5;
+  --am:  #78350F; --am-bg: #FFFBEB; --am-bd: #FDE68A;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--white);color:var(--tx);font-family:'Source Serif 4',Georgia,serif;line-height:1.7;font-size:16px}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--off)}
+::-webkit-scrollbar-thumb{background:var(--guinda-rule)}
+
+.site-header{background:var(--guinda);position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(94,22,46,.25)}
+.header-inner{max-width:1040px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:14px 32px;gap:20px}
+.header-logo img{height:44px;width:auto;filter:brightness(0) invert(1)}
+.header-center{text-align:center;flex:1}
+.header-course{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:2px;font-family:'Inter',sans-serif}
+.header-title{font-size:15px;font-weight:600;color:#fff;font-family:'Inter',sans-serif;letter-spacing:.02em}
+.header-logo2 img{height:36px;width:auto;filter:brightness(0) invert(1);opacity:.75}
+.progress-bar{height:3px;background:rgba(255,255,255,.15)}
+.progress-fill{height:100%;background:var(--guinda-rule);width:0%;transition:width .3s ease}
+
+.wrap{max-width:860px;margin:0 auto;padding:48px 28px 120px}
+
+.unit-stamp{display:flex;align-items:flex-start;gap:20px;border:1px solid var(--border);border-left:5px solid var(--guinda);background:var(--guinda-l);padding:24px 28px;margin-bottom:40px}
+.unit-num{font-size:56px;font-weight:700;color:var(--guinda);opacity:.2;line-height:1;flex-shrink:0;font-family:'Cormorant Garamond',Georgia,serif;min-width:60px}
+.unit-tag{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--guinda-rule);margin-bottom:4px;font-family:'Inter',sans-serif;font-weight:600}
+.unit-name{font-size:clamp(20px,3vw,28px);font-weight:700;color:var(--guinda);line-height:1.2;margin-bottom:6px;font-family:'Cormorant Garamond',Georgia,serif}
+.unit-topic{font-size:14px;color:var(--tx2);line-height:1.5;font-family:'Inter',sans-serif}
+.unit-time{margin-left:auto;flex-shrink:0;font-size:11px;color:var(--tx3);border:1px solid var(--border);padding:4px 10px;font-family:'Inter',sans-serif;align-self:flex-start}
+
+.sec-title{font-size:clamp(18px,2.5vw,24px);font-weight:700;color:var(--guinda);margin-bottom:16px;font-family:'Cormorant Garamond',Georgia,serif;display:flex;align-items:center;gap:12px}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.sec-label{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--tx3);margin-bottom:10px;font-family:'Inter',sans-serif;font-weight:600}
+
+.comp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px;margin-bottom:40px}
+.comp-card{border:1px solid var(--border);border-left:4px solid var(--guinda-rule);background:var(--off);padding:16px 18px}
+.comp-type{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--guinda-rule);margin-bottom:6px;font-family:'Inter',sans-serif;font-weight:600}
+.comp-text{font-size:13.5px;color:var(--tx);line-height:1.65}
+
+.intro-box{border:1px solid var(--border);background:var(--off);padding:24px 26px;margin-bottom:32px}
+.intro-box p{font-size:14.5px;color:var(--tx2);line-height:1.8;margin-bottom:12px}
+.intro-box p:last-child{margin-bottom:0}
+.intro-box strong{color:var(--tx)}
+
+.analogy{border:1px solid var(--guinda-rule);border-left:4px solid var(--guinda);background:var(--guinda-l);padding:18px 22px;margin-bottom:20px}
+.analogy-label{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--guinda);margin-bottom:8px;font-family:'Inter',sans-serif;font-weight:600}
+.analogy p{font-size:14px;color:var(--ink2);line-height:1.75}
+.analogy p+p{margin-top:10px}
+.analogy strong{color:var(--guinda)}
+
+.concept-pair{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.concept-card{border:1px solid var(--border);padding:18px 20px;background:var(--white)}
+.cc-head{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--guinda);margin-bottom:8px;font-family:'Inter',sans-serif;font-weight:600}
+.cc-body{font-size:13.5px;color:var(--tx2);line-height:1.65}
+
+.cmp-table{width:100%;border-collapse:collapse;font-size:13px;margin:16px 0}
+.cmp-table th{padding:10px 14px;background:var(--guinda);color:#fff;font-family:'Inter',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;border-right:1px solid var(--guinda-mid);text-align:center}
+.cmp-table th:first-child{text-align:left}
+.cmp-table td{padding:11px 14px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);vertical-align:middle;text-align:center}
+.cmp-table td:first-child{text-align:left;font-weight:600;color:var(--tx);font-family:'Inter',sans-serif}
+.cmp-table tr:nth-child(even) td{background:var(--off)}
+.cmp-ok{color:var(--ok);font-weight:600} .cmp-er{color:var(--er)} .cmp-am{color:var(--am)}
+.cmp-struct{font-family:'Courier New',monospace;font-size:12px}
+
+.cb{background:var(--code-bg);border:1px solid var(--code-border);margin:16px 0;overflow:hidden}
+.cb-bar{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;border-bottom:1px solid var(--code-border);background:#120810}
+.cb-dots{display:flex;gap:5px}
+.cb-dot{width:9px;height:9px;border-radius:50%}
+.cb-dot:nth-child(1){background:#FF5F57} .cb-dot:nth-child(2){background:#FFBD2E} .cb-dot:nth-child(3){background:#28C840}
+.cb-fname{font-family:'Courier New',monospace;font-size:10px;color:#6B5060}
+.cb-lang{font-size:9px;color:var(--guinda-rule);padding:1px 6px;border:1px solid var(--code-border)}
+.cb-body{padding:18px 20px;font-family:'Courier New',monospace;font-size:13px;line-height:1.9;overflow-x:auto}
+.cb-body pre{white-space:pre-wrap;word-break:break-word}
+.kw{color:var(--kw)} .tp{color:var(--tp)} .st{color:var(--st)}
+.cm{color:var(--cm);font-style:italic} .nm{color:var(--nm)} .mt{color:var(--mt)} .vr{color:var(--vr)}
+
+.callout{display:flex;gap:14px;padding:14px 16px;margin:14px 0;font-size:13.5px;line-height:1.65;border-left:4px solid}
+.co-g{background:var(--ok-bg);border-color:var(--ok-bd);color:var(--ok)}
+.co-r{background:var(--er-bg);border-color:var(--er-bd);color:var(--er)}
+.co-a{background:var(--am-bg);border-color:var(--am-bd);color:var(--am)}
+.co-p{background:var(--guinda-l);border-color:var(--guinda-rule);color:var(--guinda)}
+.callout-icon{font-size:15px;flex-shrink:0;font-style:normal}
+
+.activity{border:1px solid var(--border);margin:24px 0;background:var(--white)}
+.activity-head{background:var(--guinda);padding:12px 20px;display:flex;align-items:center;justify-content:space-between}
+.activity-title{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#fff;letter-spacing:.06em;text-transform:uppercase}
+.activity-time{font-family:'Inter',sans-serif;font-size:11px;color:rgba(255,255,255,.6)}
+.activity-body{padding:20px 22px}
+.activity-body p{font-size:13.5px;color:var(--tx);line-height:1.7;margin-bottom:10px}
+.activity-body p:last-child{margin-bottom:0}
+.activity-body strong{color:var(--guinda)}
+.activity-steps{list-style:none;display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.activity-steps li{display:flex;gap:12px;align-items:flex-start;font-size:13.5px;color:var(--tx2);line-height:1.6}
+.step-n{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--guinda);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;margin-top:2px;font-family:'Inter',sans-serif}
+
+.decision-table{width:100%;border-collapse:collapse;font-size:13px;margin:14px 0}
+.decision-table th{padding:9px 12px;background:var(--guinda-mid);color:#fff;font-family:'Inter',sans-serif;font-size:9px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;border-right:1px solid var(--guinda);text-align:left}
+.decision-table td{padding:10px 12px;border:1px solid var(--border);vertical-align:top}
+.decision-table tr:nth-child(even) td{background:var(--off)}
+.decision-scenario{font-size:13px;color:var(--tx)}
+.decision-input{
+  width:100%;background:transparent;border:none;
+  border-bottom:1.5px solid var(--guinda-rule);
+  font-family:'Inter',sans-serif;font-size:12.5px;
+  color:var(--guinda);padding:4px 2px;outline:none;
+}
+.decision-input:focus{border-bottom-color:var(--guinda)}
+.decision-input.ok{color:var(--ok);border-bottom-color:var(--ok-bd)}
+.decision-input.er{color:var(--er);border-bottom-color:var(--er-bd)}
+
+.bib-list{list-style:none;display:flex;flex-direction:column;gap:14px}
+.bib-item{border-left:3px solid var(--border);padding:12px 16px;background:var(--off);font-size:13.5px;color:var(--tx2);line-height:1.7}
+.bib-type{font-family:'Inter',sans-serif;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--guinda-rule);margin-bottom:4px;font-weight:600}
+.bib-item a{color:var(--guinda);text-decoration:underline;word-break:break-all}
+
+.section-block{margin-bottom:52px}
+.divider{border:none;border-top:1px solid var(--border);margin:44px 0}
+
+@media(max-width:620px){
+  .header-inner{padding:12px 18px}
+  .wrap{padding:32px 18px 80px}
+  .concept-pair{grid-template-columns:1fr}
+  .comp-grid{grid-template-columns:1fr}
+  .unit-stamp{flex-direction:column;gap:10px}
+  .unit-num{font-size:36px}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-logo">
+      <img src="imagen1.png" alt="Logo institucional">
+    </div>
+    <div class="header-center">
+      <div class="header-course">Estructura de Datos &nbsp;|&nbsp; Licenciatura en Sistemas Computacionales</div>
+      <div class="header-title">Practica integradora — Unidad 1</div>
+    </div>
+    <div class="header-logo2">
+      <img src="imagen2.png" alt="Logo de apoyo">
+    </div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="pFill"></div></div>
+</header>
+
+<div class="wrap">
+
+<div class="unit-stamp">
+  <div class="unit-num">01</div>
+  <div class="unit-meta">
+    <div class="unit-tag">Unidad 1 &nbsp;&mdash;&nbsp; Estructuras de datos lineales</div>
+    <div class="unit-name">Practica integradora &mdash; Cierre de Unidad 1</div>
+    <div class="unit-topic">
+      Tema: 1.5 &mdash; Integracion de Array, LinkedList&lt;T&gt;, Stack&lt;T&gt; y Queue&lt;T&gt; en un sistema funcional.<br>
+      Prerrequisito inmediato: temas 1.1 a 1.4 (arreglos, listas enlazadas, pilas y colas).
+    </div>
+  </div>
+  <div class="unit-time">90 min</div>
+</div>
+
+<!-- COMPETENCIAS -->
+<div class="section-block">
+  <div class="sec-label">Para esta sesion</div>
+  <div class="sec-title">Competencias a desarrollar</div>
+  <div class="comp-grid">
+    <div class="comp-card">
+      <div class="comp-type">Conceptual</div>
+      <div class="comp-text">Distingue las cuatro estructuras lineales de la unidad por su principio de organizacion (sin orden, FIFO, LIFO) y por su comportamiento de memoria (contigua, dispersa con punteros).</div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-type">Procedimental</div>
+      <div class="comp-text">Implementa un programa en C# que combina Array, LinkedList&lt;T&gt;, Stack&lt;T&gt; y Queue&lt;T&gt; dentro de un mismo sistema, ejecutandolo correctamente desde Codespaces.</div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-type">Analitica</div>
+      <div class="comp-text">Diagnostica que estructura de datos resuelve mejor un requerimiento dado, justificando la decision con el costo de las operaciones involucradas (acceso, insercion, eliminacion).</div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-type">Integradora</div>
+      <div class="comp-text">Disena la arquitectura de un sistema pequeno que requiere mas de una estructura de datos, documentando por que cada modulo usa la estructura que usa.</div>
+    </div>
+  </div>
+</div>
+
+<!-- INTRO -->
+<div class="section-block">
+  <div class="sec-label">Punto de partida</div>
+  <div class="sec-title">Cuatro estructuras, una decision en comun</div>
+
+  <div class="intro-box">
+    <p>
+      A lo largo de esta unidad construimos cuatro herramientas: el <strong>arreglo</strong>, que ofrece acceso directo a cambio de tamano fijo; la <strong>lista enlazada</strong>, que sacrifica el acceso directo por flexibilidad de tamano; la <strong>pila</strong>, que impone LIFO para resolver problemas de retroceso; y la <strong>cola</strong>, que impone FIFO para resolver problemas de turnos.
+    </p>
+    <p>
+      Ninguna de las cuatro es superior a las demas en terminos absolutos. Cada una es la respuesta correcta a una pregunta especifica: <strong>?en que orden necesito acceder a los datos, y que tan seguido cambia su cantidad?</strong>
+    </p>
+    <p>
+      Esta sesion no introduce conceptos nuevos. Su proposito es que practiques la decision mas importante de todo el curso hasta ahora: <strong>elegir la estructura correcta antes de escribir una sola linea de codigo</strong>.
+    </p>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">El sistema que vamos a construir</div>
+    <p>
+      Trabajaremos sobre un <strong>sistema de biblioteca escolar</strong> con cuatro requerimientos distintos: un catalogo de 5 categorias fijas, una lista de socios que se inscriben y se dan de baja, una fila de espera para libros muy solicitados, y un historial de prestamos para poder deshacer el ultimo registro en caso de error.
+    </p>
+    <p>
+      Cada requerimiento se resuelve con una estructura distinta de la unidad. Al final del programa tendras un sistema funcional que demuestra el dominio completo de Unidad 1.
+    </p>
+  </div>
+</div>
+
+<!-- REPASO COMPARATIVO -->
+<div class="section-block">
+  <div class="sec-label">Repaso de la unidad</div>
+  <div class="sec-title">Las cuatro estructuras lado a lado</div>
+
+  <table class="cmp-table">
+    <thead>
+      <tr>
+        <th>Criterio</th>
+        <th><span class="cmp-struct">Array</span></th>
+        <th><span class="cmp-struct">LinkedList&lt;T&gt;</span></th>
+        <th><span class="cmp-struct">Stack&lt;T&gt;</span></th>
+        <th><span class="cmp-struct">Queue&lt;T&gt;</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Principio de orden</td>
+        <td>&mdash; Ninguno</td>
+        <td>&mdash; Ninguno</td>
+        <td class="cmp-ok">LIFO</td>
+        <td class="cmp-ok">FIFO</td>
+      </tr>
+      <tr>
+        <td>Tamano</td>
+        <td class="cmp-er">Fijo</td>
+        <td class="cmp-ok">Flexible</td>
+        <td class="cmp-ok">Flexible</td>
+        <td class="cmp-ok">Flexible</td>
+      </tr>
+      <tr>
+        <td>Acceso por indice [i]</td>
+        <td class="cmp-ok">O(1)</td>
+        <td class="cmp-er">O(n)</td>
+        <td class="cmp-er">No disponible</td>
+        <td class="cmp-er">No disponible</td>
+      </tr>
+      <tr>
+        <td>Operacion principal</td>
+        <td class="cmp-struct">arr[i]</td>
+        <td class="cmp-struct">AddFirst / AddLast</td>
+        <td class="cmp-struct">Push / Pop</td>
+        <td class="cmp-struct">Enqueue / Dequeue</td>
+      </tr>
+      <tr>
+        <td>Caso de uso en la biblioteca</td>
+        <td>Catalogo de categorias fijas</td>
+        <td>Lista de socios inscritos</td>
+        <td>Historial de prestamos</td>
+        <td>Fila de espera de un libro</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout co-g">
+    <span class="callout-icon">Clave de toda la unidad</span>
+    <span>La pregunta que decide la estructura siempre es la misma: <strong>?el tamano es fijo o cambia?</strong> y <strong>?en que orden necesito sacar los datos?</strong> Responder esas dos preguntas antes de programar evita rediseñar el sistema a la mitad.</span>
+  </div>
+</div>
+
+<!-- ACTIVIDAD 1: DECISION MATRIX -->
+<div class="section-block">
+  <div class="sec-label">Antes del codigo</div>
+  <div class="sec-title">Diseno del sistema de biblioteca</div>
+
+  <p style="font-size:14px;color:var(--tx2);margin-bottom:14px;line-height:1.7">
+    Antes de ver el codigo, completa la matriz de decision. Para cada modulo del sistema, escribe que estructura usarias y la razon principal en una frase corta.
+  </p>
+
+  <table class="decision-table">
+    <thead>
+      <tr><th style="width:30%">Modulo y requerimiento</th><th style="width:22%">Estructura</th><th style="width:48%">Razon principal</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="decision-scenario"><strong>Catalogo.</strong> 5 categorias fijas: Ficcion, Ciencia, Historia, Arte, Infantil. Nunca cambian.</td>
+        <td><input class="decision-input" id="d1e" placeholder="?" oninput="chkD('d1e','Array')"></td>
+        <td><input class="decision-input" id="d1r" placeholder="Escribe tu razon..."></td>
+      </tr>
+      <tr>
+        <td class="decision-scenario"><strong>Socios.</strong> Se inscriben y se dan de baja constantemente durante el ciclo escolar.</td>
+        <td><input class="decision-input" id="d2e" placeholder="?" oninput="chkD('d2e','LinkedList')"></td>
+        <td><input class="decision-input" id="d2r" placeholder="Escribe tu razon..."></td>
+      </tr>
+      <tr>
+        <td class="decision-scenario"><strong>Fila de espera.</strong> Varios alumnos quieren el mismo libro. El primero en pedirlo debe recibirlo primero.</td>
+        <td><input class="decision-input" id="d3e" placeholder="?" oninput="chkD('d3e','Queue')"></td>
+        <td><input class="decision-input" id="d3r" placeholder="Escribe tu razon..."></td>
+      </tr>
+      <tr>
+        <td class="decision-scenario"><strong>Historial de prestamos.</strong> Si la bibliotecaria se equivoca, debe poder deshacer el ultimo registro.</td>
+        <td><input class="decision-input" id="d4e" placeholder="?" oninput="chkD('d4e','Stack')"></td>
+        <td><input class="decision-input" id="d4r" placeholder="Escribe tu razon..."></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout co-p">
+    <span class="callout-icon">Verificacion</span>
+    <span>Catalogo &rarr; Array &mdash; Socios &rarr; LinkedList &mdash; Fila de espera &rarr; Queue &mdash; Historial &rarr; Stack. Si tu respuesta no coincide, revisa si el tamano del modulo cambia y en que orden se necesita acceder a los datos.</span>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- CODIGO INTEGRADO -->
+<div class="section-block">
+  <div class="sec-label">Codigo en C#</div>
+  <div class="sec-title">Sistema completo de la biblioteca</div>
+
+  <p style="font-size:14px;color:var(--tx2);margin-bottom:14px;line-height:1.7">
+    El siguiente programa implementa los cuatro modulos en un solo archivo. Cada modulo usa la estructura definida en la matriz de decision. Lee los comentarios: explican por que se eligio cada una.
+  </p>
+
+  <div class="cb">
+    <div class="cb-bar">
+      <div class="cb-dots"><div class="cb-dot"></div><div class="cb-dot"></div><div class="cb-dot"></div></div>
+      <span class="cb-fname">SistemaBiblioteca.cs</span>
+      <span class="cb-lang">C#</span>
+    </div>
+    <div class="cb-body"><pre><span class="kw">using</span> <span class="tp">System</span>;
+<span class="kw">using</span> <span class="tp">System.Collections.Generic</span>;
+
+<span class="kw">class</span> <span class="tp">Program</span>
+{
+    <span class="cm">// ── MODULO 1: Catalogo ─────────────────────────────────────────</span>
+    <span class="cm">// Array: 5 categorias fijas, nunca cambian. Acceso directo por indice.</span>
+    <span class="kw">static</span> <span class="tp">string</span>[] <span class="vr">categorias</span> = {
+        <span class="st">"Ficcion"</span>, <span class="st">"Ciencia"</span>, <span class="st">"Historia"</span>, <span class="st">"Arte"</span>, <span class="st">"Infantil"</span>
+    };
+
+    <span class="cm">// ── MODULO 2: Socios ───────────────────────────────────────────</span>
+    <span class="cm">// LinkedList: la lista crece y encoge con cada inscripcion o baja.</span>
+    <span class="kw">static</span> <span class="tp">LinkedList</span>&lt;<span class="tp">string</span>&gt; <span class="vr">socios</span> = <span class="kw">new</span> <span class="tp">LinkedList</span>&lt;<span class="tp">string</span>&gt;();
+
+    <span class="cm">// ── MODULO 3: Fila de espera ───────────────────────────────────</span>
+    <span class="cm">// Queue: FIFO. El primero en pedir el libro es el primero en recibirlo.</span>
+    <span class="kw">static</span> <span class="tp">Queue</span>&lt;<span class="tp">string</span>&gt; <span class="vr">filaEspera</span> = <span class="kw">new</span> <span class="tp">Queue</span>&lt;<span class="tp">string</span>&gt;();
+
+    <span class="cm">// ── MODULO 4: Historial de prestamos ───────────────────────────</span>
+    <span class="cm">// Stack: LIFO. Permite deshacer siempre el ultimo registro.</span>
+    <span class="kw">static</span> <span class="tp">Stack</span>&lt;<span class="tp">string</span>&gt; <span class="vr">historial</span> = <span class="kw">new</span> <span class="tp">Stack</span>&lt;<span class="tp">string</span>&gt;();
+
+    <span class="kw">static</span> <span class="kw">void</span> <span class="mt">Main</span>()
+    {
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">"=========================================="</span>);
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">"  SISTEMA DE BIBLIOTECA — UNIDAD 1"</span>);
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">"=========================================="</span>);
+
+        <span class="mt">MostrarCatalogo</span>();
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>();
+
+        <span class="mt">InscribirSocio</span>(<span class="st">"Ana Ramirez"</span>);
+        <span class="mt">InscribirSocio</span>(<span class="st">"Luis Torres"</span>);
+        <span class="mt">InscribirSocio</span>(<span class="st">"Sofia Gomez"</span>);
+        <span class="mt">DarDeBajaSocio</span>(<span class="st">"Luis Torres"</span>);
+        <span class="mt">MostrarSocios</span>();
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>();
+
+        <span class="mt">PedirLibro</span>(<span class="st">"Ana Ramirez"</span>, <span class="st">"Cien anios de soledad"</span>);
+        <span class="mt">PedirLibro</span>(<span class="st">"Sofia Gomez"</span>, <span class="st">"Cien anios de soledad"</span>);
+        <span class="mt">PedirLibro</span>(<span class="st">"Marco Diaz"</span>,  <span class="st">"Cien anios de soledad"</span>);
+        <span class="mt">EntregarSiguiente</span>();
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>();
+
+        <span class="mt">RegistrarPrestamo</span>(<span class="st">"Ana Ramirez: Cien anios de soledad"</span>);
+        <span class="mt">RegistrarPrestamo</span>(<span class="st">"Sofia Gomez: El Principito"</span>);
+        <span class="mt">DeshacerUltimoPrestamo</span>();
+        <span class="mt">MostrarHistorial</span>();
+    }
+
+    <span class="cm">// ── Funciones del modulo Catalogo (Array) ──────────────────────</span>
+    <span class="kw">static</span> <span class="kw">void</span> <span class="mt">MostrarCatalogo</span>()
+    {
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">"--- Catalogo de categorias ---"</span>);
+        <span class="kw">for</span> (<span class="tp">int</span> <span class="vr">i</span> = <span class="nm">0</span>; <span class="vr">i</span> &lt; <span class="vr">categorias</span>.Length; <span class="vr">i</span>++)
+            <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"  [{</span><span class="vr">i</span><span class="st">}] {</span><span class="vr">categorias</span><span class="st">[i]}"</span>);
+    }
+
+    <span class="cm">// ── Funciones del modulo Socios (LinkedList) ───────────────────</span>
+    <span class="kw">static</span> <span class="kw">void</span> <span class="mt">InscribirSocio</span>(<span class="tp">string</span> <span class="vr">nombre</span>)
+    {
+        <span class="vr">socios</span>.<span class="mt">AddLast</span>(<span class="vr">nombre</span>);
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"Socio inscrito: {</span><span class="vr">nombre</span><span class="st">}"</span>);
+    }
+
+    <span class="kw">static</span> <span class="kw">void</span> <span class="mt">DarDeBajaSocio</span>(<span class="tp">string</span> <span class="vr">nombre</span>)
+    {
+        <span class="kw">if</span> (<span class="vr">socios</span>.<span class="mt">Contains</span>(<span class="vr">nombre</span>))
+        {
+            <span class="vr">socios</span>.<span class="mt">Remove</span>(<span class="vr">nombre</span>);
+            <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"Socio dado de baja: {</span><span class="vr">nombre</span><span class="st">}"</span>);
+        }
+    }
+
+    <span class="kw">static</span> <span class="kw">void</span> <span class="mt">MostrarSocios</span>()
+    {
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">"--- Socios activos ---"</span>);
+        <span class="kw">foreach</span> (<span class="tp">string</span> <span class="vr">s</span> <span class="kw">in</span> <span class="vr">socios</span>)
+            <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"  {</span><span class="vr">s</span><span class="st">}"</span>);
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"Total: {</span><span class="vr">socios</span>.<span class="mt">Count</span><span class="st">}"</span>);
+    }
+
+    <span class="cm">// ── Funciones del modulo Fila de espera (Queue) ────────────────</span>
+    <span class="kw">static</span> <span class="kw">void</span> <span class="mt">PedirLibro</span>(<span class="tp">string</span> <span class="vr">solicitante</span>, <span class="tp">string</span> <span class="vr">titulo</span>)
+    {
+        <span class="vr">filaEspera</span>.<span class="mt">Enqueue</span>(<span class="vr">solicitante</span>);
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"{</span><span class="vr">solicitante</span><span class="st">} solicito: {</span><span class="vr">titulo</span><span class="st">}"</span>);
+    }
+
+    <span class="kw">static</span> <span class="kw">void</span> <span class="mt">EntregarSiguiente</span>()
+    {
+        <span class="kw">if</span> (<span class="vr">filaEspera</span>.<span class="mt">Count</span> &gt; <span class="nm">0</span>)
+        {
+            <span class="tp">string</span> <span class="vr">siguiente</span> = <span class="vr">filaEspera</span>.<span class="mt">Dequeue</span>();
+            <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"Libro entregado a: {</span><span class="vr">siguiente</span><span class="st">}"</span>);
+            <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"En espera todavia: {</span><span class="vr">filaEspera</span>.<span class="mt">Count</span><span class="st">}"</span>);
+        }
+    }
+
+    <span class="cm">// ── Funciones del modulo Historial (Stack) ─────────────────────</span>
+    <span class="kw">static</span> <span class="kw">void</span> <span class="mt">RegistrarPrestamo</span>(<span class="tp">string</span> <span class="vr">registro</span>)
+    {
+        <span class="vr">historial</span>.<span class="mt">Push</span>(<span class="vr">registro</span>);
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"Prestamo registrado: {</span><span class="vr">registro</span><span class="st">}"</span>);
+    }
+
+    <span class="kw">static</span> <span class="kw">void</span> <span class="mt">DeshacerUltimoPrestamo</span>()
+    {
+        <span class="kw">if</span> (<span class="vr">historial</span>.<span class="mt">Count</span> &gt; <span class="nm">0</span>)
+        {
+            <span class="tp">string</span> <span class="vr">deshecho</span> = <span class="vr">historial</span>.<span class="mt">Pop</span>();
+            <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"Prestamo deshecho: {</span><span class="vr">deshecho</span><span class="st">}"</span>);
+        }
+    }
+
+    <span class="kw">static</span> <span class="kw">void</span> <span class="mt">MostrarHistorial</span>()
+    {
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">"--- Historial (mas reciente primero) ---"</span>);
+        <span class="kw">foreach</span> (<span class="tp">string</span> <span class="vr">h</span> <span class="kw">in</span> <span class="vr">historial</span>)
+            <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"  {</span><span class="vr">h</span><span class="st">}"</span>);
+    }
+}</pre></div>
+  </div>
+
+  <div class="callout co-a">
+    <span class="callout-icon">Nota de arquitectura</span>
+    <span>Observa que cada estructura se declara como <code style="font-family:Courier New">static</code> a nivel de clase, no dentro de <code style="font-family:Courier New">Main()</code>. Esto permite que todas las funciones del programa accedan y modifiquen el mismo catalogo, la misma lista de socios, la misma fila y el mismo historial.</span>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ACTIVIDADES -->
+<div class="section-block">
+  <div class="sec-label">Durante la sesion</div>
+  <div class="sec-title">Actividades</div>
+
+  <div class="activity">
+    <div class="activity-head">
+      <span class="activity-title">Actividad 1 &mdash; Matriz de decision</span>
+      <span class="activity-time">15 min</span>
+    </div>
+    <div class="activity-body">
+      <p>Completa la matriz de decision de la seccion anterior antes de avanzar. Discute en equipo cada respuesta antes de escribirla.</p>
+    </div>
+  </div>
+
+  <div class="activity">
+    <div class="activity-head">
+      <span class="activity-title">Actividad 2 &mdash; Traza del sistema completo</span>
+      <span class="activity-time">20 min</span>
+    </div>
+    <div class="activity-body">
+      <p>Sin ejecutar el codigo, predice la salida completa del programa <code style="font-family:Courier New;color:var(--guinda)">SistemaBiblioteca.cs</code>. Presta especial atencion a dos detalles que suelen generar errores:</p>
+      <ol class="activity-steps">
+        <li><div class="step-n">1</div><span>?Que aparece primero en <code style="font-family:Courier New;color:var(--guinda)">MostrarSocios()</code>: el orden de inscripcion o el orden alfabetico?</span></li>
+        <li><div class="step-n">2</div><span>?Que aparece primero en <code style="font-family:Courier New;color:var(--guinda)">MostrarHistorial()</code>: el primer prestamo registrado o el ultimo?</span></li>
+      </ol>
+      <p style="margin-top:14px"><strong>Verificacion:</strong> Socios mantiene el orden de insercion (Ana, Sofia — Luis fue dado de baja). Historial muestra LIFO: "Ana Ramirez: Cien anios de soledad" aparece arriba porque "Sofia Gomez: El Principito" fue deshecho con Pop antes de mostrar.</p>
+    </div>
+  </div>
+
+  <div class="activity">
+    <div class="activity-head">
+      <span class="activity-title">Actividad 3 &mdash; Extension en Codespaces</span>
+      <span class="activity-time">35 min</span>
+    </div>
+    <div class="activity-body">
+      <p>Copia <code style="font-family:Courier New;color:var(--guinda)">SistemaBiblioteca.cs</code> a tu Codespace, ejecutalo y confirma tu traza. Despues agrega la siguiente funcionalidad nueva:</p>
+      <ol class="activity-steps">
+        <li><div class="step-n">1</div><span>Agrega un metodo <code style="font-family:Courier New;color:var(--guinda)">BuscarCategoria(string nombre)</code> que recorra el arreglo <code style="font-family:Courier New;color:var(--guinda)">categorias</code> e indique si existe, junto con su indice.</span></li>
+        <li><div class="step-n">2</div><span>Agrega un metodo <code style="font-family:Courier New;color:var(--guinda)">CancelarSolicitud(string nombre)</code> que verifique con <code style="font-family:Courier New;color:var(--guinda)">Contains</code> si el alumno esta en la fila antes de intentar cualquier operacion.</span></li>
+        <li><div class="step-n">3</div><span>Agrega validacion con <code style="font-family:Courier New;color:var(--guinda)">if (historial.Count &gt; 0)</code> en <code style="font-family:Courier New;color:var(--guinda)">DeshacerUltimoPrestamo()</code> para evitar <code style="font-family:Courier New;color:var(--guinda)">InvalidOperationException</code> si el historial esta vacio.</span></li>
+        <li><div class="step-n">4</div><span>Prueba tu sistema completo con al menos 3 socios, 2 solicitudes de libro y 2 prestamos registrados.</span></li>
+      </ol>
+      <p style="margin-top:14px">Al terminar, haz commit con el mensaje: <code style="font-family:Courier New;color:var(--guinda)">feat: sistema-biblioteca-unidad1-completo</code>.</p>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- CIERRE CONCEPTUAL -->
+<div class="section-block">
+  <div class="sec-label">Cierre de la unidad</div>
+  <div class="sec-title">Lo que sigue: estructuras no lineales</div>
+
+  <div class="intro-box">
+    <p>
+      Las cuatro estructuras de esta unidad comparten una propiedad: son <strong>lineales</strong>. Cada elemento tiene como maximo un predecesor y un sucesor. Esa linealidad facilita razonarlas, pero tambien limita lo que pueden representar de forma eficiente.
+    </p>
+    <p>
+      En la Unidad 2 trabajaremos con <strong>arboles</strong>: estructuras donde un elemento puede tener varios sucesores. Esto permitira representar jerarquias, busquedas mas eficientes que recorrer una lista completa, y problemas como el sistema de archivos de una computadora o el arbol genealogico de una familia.
+    </p>
+  </div>
+
+  <div class="callout co-p">
+    <span class="callout-icon">Puente conceptual</span>
+    <span>Asi como un nodo de LinkedList apunta a un solo siguiente nodo, un nodo de arbol apuntara a varios hijos. La logica de punteros que ya dominas en esta unidad es exactamente la base que necesitaras para entender arboles.</span>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- REFERENCIAS -->
+<div class="section-block">
+  <div class="sec-label">Fuentes de consulta</div>
+  <div class="sec-title">Referencias bibliograficas</div>
+
+  <ul class="bib-list">
+    <li class="bib-item">
+      <div class="bib-type">Libro de texto principal</div>
+      Weiss, M. A. (2013). <em>Data Structures and Algorithm Analysis in C++</em> (4.a ed.). Pearson. Capitulo 3: Lists, Stacks, and Queues.
+    </li>
+    <li class="bib-item">
+      <div class="bib-type">Referencia de algoritmos</div>
+      Cormen, T. H., Leiserson, C. E., Rivest, R. L., &amp; Stein, C. (2014). <em>Introduction to Algorithms</em> (3.a ed.). MIT Press. Seccion 10.1 a 10.2: Linear data structures.
+    </li>
+    <li class="bib-item">
+      <div class="bib-type">Documentacion oficial &mdash; Microsoft</div>
+      Microsoft. (2024). <em>System.Collections.Generic Namespace</em>. Microsoft Learn. <a href="https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic" target="_blank" rel="noopener">learn.microsoft.com/dotnet/api/system.collections.generic</a>
+    </li>
+    <li class="bib-item">
+      <div class="bib-type">Documentacion oficial &mdash; Microsoft</div>
+      Microsoft. (2024). <em>Choosing a Collection Class</em>. Microsoft Learn. <a href="https://learn.microsoft.com/en-us/dotnet/standard/collections/" target="_blank" rel="noopener">learn.microsoft.com/dotnet/standard/collections</a>
+    </li>
+    <li class="bib-item">
+      <div class="bib-type">Recurso complementario</div>
+      Aliat Universidades. (s.f.). <em>Analisis y diseno de algoritmos</em>. Bibliotecas Digitales Aliat. <a href="http://www.aliat.org.mx/BibliotecasDigitales/sistemas/Analisis_y_disenio_de_algoritmos.pdf" target="_blank" rel="noopener">aliat.org.mx &mdash; Analisis y diseno de algoritmos (PDF)</a>
+    </li>
+  </ul>
+</div>
+
+<div style="border-top:1px solid var(--border);padding-top:24px;margin-top:48px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--tx3);font-family:'Inter',sans-serif">
+  <span>Mtro. Jose Armando Vera Rodriguez</span>
+  <span>Estructura de Datos &nbsp;&mdash;&nbsp; Unidad 1 &nbsp;&mdash;&nbsp; Tema 1.5</span>
+</div>
+
+</div>
+
+<script>
+window.addEventListener('scroll',()=>{
+  const h=document.documentElement.scrollHeight-window.innerHeight;
+  if(h>0) document.getElementById('pFill').style.width=(window.scrollY/h*100)+'%';
+});
+
+function chkD(id, correct){
+  const el = document.getElementById(id);
+  const v = el.value.trim().toLowerCase();
+  if(!v){ el.className='decision-input'; return; }
+  const ok = v.includes(correct.toLowerCase());
+  el.className = 'decision-input ' + (ok ? 'ok' : 'er');
+}
+
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){e.target.style.opacity='1';e.target.style.transform='translateY(0)'}
+  });
+},{threshold:.06});
+document.querySelectorAll('.section-block').forEach(el=>{
+  el.style.cssText='opacity:0;transform:translateY(16px);transition:opacity .5s ease,transform .5s ease';
+  obs.observe(el);
+});
+</script>
+</body>
+</html>
