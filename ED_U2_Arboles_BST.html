@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arboles Binarios de Busqueda — Estructura de Datos</title>
+<link rel="stylesheet" href="base.css">
+<style>
+:root{
+  --guinda:      #5e162e;
+  --guinda-l:    #F5E8EE;
+  --guinda-rule: #C85070;
+  --guinda-mid:  #8B2040;
+  --tx:          #2A1218;
+  --tx2:         #6B4050;
+  --tx3:         #A07080;
+  --border:      #DEC8CE;
+  --white:       #FFFFFF;
+  --off:         #FAF6F7;
+  --code-bg:     #1A0E12;
+  --code-border: #3D1F28;
+  --kw:#F4A5B8; --tp:#93C5FD; --st:#86EFAC; --cm:#6B5060;
+  --nm:#FCA5A5; --mt:#67E8F9; --vr:#F0E6EA;
+  --ok:#14532D; --ok-bg:#F0FDF4; --ok-bd:#86EFAC;
+  --er:#7F1D1D; --er-bg:#FFF1F2; --er-bd:#FCA5A5;
+  --am:#78350F; --am-bg:#FFFBEB; --am-bd:#FDE68A;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--white);color:var(--tx);font-family:'Source Serif 4',Georgia,serif;line-height:1.7;font-size:16px}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--off)}
+::-webkit-scrollbar-thumb{background:var(--guinda-rule)}
+
+/* ── HEADER ─────────────────────────────────────── */
+.site-header{background:var(--guinda);position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(94,22,46,.25)}
+.header-inner{max-width:1040px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:14px 32px;gap:20px}
+.header-logo img{height:44px;width:auto;filter:brightness(0) invert(1)}
+.header-center{text-align:center;flex:1}
+.header-course{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:2px;font-family:'Inter',sans-serif}
+.header-title{font-size:15px;font-weight:600;color:#fff;font-family:'Inter',sans-serif;letter-spacing:.02em}
+.header-logo2 img{height:36px;width:auto;filter:brightness(0) invert(1);opacity:.75}
+.progress-bar{height:3px;background:rgba(255,255,255,.15)}
+.progress-fill{height:100%;background:var(--guinda-rule);width:0%;transition:width .3s ease}
+
+/* ── WRAP ────────────────────────────────────────── */
+.wrap{max-width:860px;margin:0 auto;padding:48px 28px 120px}
+
+/* ── UNIT STAMP ──────────────────────────────────── */
+.unit-stamp{display:flex;align-items:flex-start;gap:20px;border:1px solid var(--border);border-left:5px solid var(--guinda);background:var(--guinda-l);padding:24px 28px;margin-bottom:40px}
+.unit-num{font-size:56px;font-weight:700;color:var(--guinda);opacity:.2;line-height:1;flex-shrink:0;font-family:'Cormorant Garamond',Georgia,serif;min-width:60px}
+.unit-tag{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--guinda-rule);margin-bottom:4px;font-family:'Inter',sans-serif;font-weight:600}
+.unit-name{font-size:clamp(20px,3vw,28px);font-weight:700;color:var(--guinda);line-height:1.2;margin-bottom:6px;font-family:'Cormorant Garamond',Georgia,serif}
+.unit-topic{font-size:14px;color:var(--tx2);line-height:1.5;font-family:'Inter',sans-serif}
+.unit-time{margin-left:auto;flex-shrink:0;font-size:11px;color:var(--tx3);border:1px solid var(--border);padding:4px 10px;font-family:'Inter',sans-serif;align-self:flex-start}
+
+/* ── SECTION TITLES ───────────────────────────────── */
+.sec-title{font-size:clamp(18px,2.5vw,24px);font-weight:700;color:var(--guinda);margin-bottom:16px;font-family:'Cormorant Garamond',Georgia,serif;display:flex;align-items:center;gap:12px}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.sec-label{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--tx3);margin-bottom:10px;font-family:'Inter',sans-serif;font-weight:600}
+
+/* ── COMPETENCIAS ─────────────────────────────────── */
+.comp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px;margin-bottom:40px}
+.comp-card{border:1px solid var(--border);border-left:4px solid var(--guinda-rule);background:var(--off);padding:16px 18px}
+.comp-type{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--guinda-rule);margin-bottom:6px;font-family:'Inter',sans-serif;font-weight:600}
+.comp-text{font-size:13.5px;color:var(--tx);line-height:1.65}
+
+/* ── TEXT BLOCKS ──────────────────────────────────── */
+.intro-box{border:1px solid var(--border);background:var(--off);padding:24px 26px;margin-bottom:32px}
+.intro-box p{font-size:14.5px;color:var(--tx2);line-height:1.8;margin-bottom:12px}
+.intro-box p:last-child{margin-bottom:0}
+.intro-box strong{color:var(--tx)}
+
+.analogy{border:1px solid var(--guinda-rule);border-left:4px solid var(--guinda);background:var(--guinda-l);padding:18px 22px;margin-bottom:20px}
+.analogy-label{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--guinda);margin-bottom:8px;font-family:'Inter',sans-serif;font-weight:600}
+.analogy p{font-size:14px;color:#3D1F28;line-height:1.75}
+.analogy p+p{margin-top:10px}
+.analogy strong{color:var(--guinda)}
+
+.concept-pair{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.concept-card{border:1px solid var(--border);padding:18px 20px;background:var(--white)}
+.cc-head{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--guinda);margin-bottom:8px;font-family:'Inter',sans-serif;font-weight:600}
+.cc-body{font-size:13.5px;color:var(--tx2);line-height:1.65}
+
+/* ── TREE DIAGRAM ─────────────────────────────────── */
+.tree-box{background:var(--off);border:1px solid var(--border);padding:24px;margin:16px 0;overflow-x:auto}
+.tree-box-label{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx3);margin-bottom:18px;text-align:center;font-family:'Inter',sans-serif}
+.tree-svg-wrap{display:flex;justify-content:center}
+
+/* ── TERM GRID ────────────────────────────────────── */
+.term-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin:16px 0}
+.term-card{border:1px solid var(--border);padding:14px 16px;background:var(--white)}
+.term-name{font-family:'Courier New',monospace;font-size:13px;font-weight:700;color:var(--guinda);margin-bottom:4px}
+.term-def{font-size:12.5px;color:var(--tx2);line-height:1.55}
+
+/* ── RULE CARD ────────────────────────────────────── */
+.rule-card{border:1px solid var(--border);background:var(--white);margin:14px 0}
+.rule-head{background:var(--guinda-mid);padding:10px 18px;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:#fff;letter-spacing:.06em;text-transform:uppercase}
+.rule-body{padding:16px 18px;font-size:13.5px;color:var(--tx2);line-height:1.7}
+.rule-body strong{color:var(--guinda)}
+.rule-body code{font-family:'Courier New',monospace;color:var(--guinda);background:var(--guinda-l);padding:1px 5px;font-size:12.5px}
+
+/* ── CODE ─────────────────────────────────────────── */
+.cb{background:var(--code-bg);border:1px solid var(--code-border);margin:16px 0;overflow:hidden}
+.cb-bar{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;border-bottom:1px solid var(--code-border);background:#120810}
+.cb-dots{display:flex;gap:5px}
+.cb-dot{width:9px;height:9px;border-radius:50%}
+.cb-dot:nth-child(1){background:#FF5F57}.cb-dot:nth-child(2){background:#FFBD2E}.cb-dot:nth-child(3){background:#28C840}
+.cb-fname{font-family:'Courier New',monospace;font-size:10px;color:#6B5060}
+.cb-lang{font-size:9px;color:var(--guinda-rule);padding:1px 6px;border:1px solid var(--code-border)}
+.cb-body{padding:18px 20px;font-family:'Courier New',monospace;font-size:13px;line-height:1.9;overflow-x:auto}
+.cb-body pre{white-space:pre-wrap;word-break:break-word}
+.kw{color:var(--kw)}.tp{color:var(--tp)}.st{color:var(--st)}
+.cm{color:var(--cm);font-style:italic}.nm{color:var(--nm)}.mt{color:var(--mt)}.vr{color:var(--vr)}
+
+/* ── CALLOUT ──────────────────────────────────────── */
+.callout{display:flex;gap:14px;padding:14px 16px;margin:14px 0;font-size:13.5px;line-height:1.65;border-left:4px solid}
+.co-g{background:var(--ok-bg);border-color:var(--ok-bd);color:var(--ok)}
+.co-r{background:var(--er-bg);border-color:var(--er-bd);color:var(--er)}
+.co-a{background:var(--am-bg);border-color:var(--am-bd);color:var(--am)}
+.co-p{background:var(--guinda-l);border-color:var(--guinda-rule);color:var(--guinda)}
+.callout-icon{font-size:15px;flex-shrink:0;font-style:normal}
+
+/* ── INSERTION STEPS ──────────────────────────────── */
+.insert-steps{display:flex;flex-direction:column;gap:10px;margin:14px 0}
+.ins-step{display:flex;gap:14px;align-items:flex-start;padding:12px 16px;border:1px solid var(--border);background:var(--white)}
+.ins-num{flex-shrink:0;width:26px;height:26px;background:var(--guinda);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'Inter',sans-serif;margin-top:1px}
+.ins-text{font-size:13.5px;color:var(--tx2);line-height:1.65}
+.ins-text strong{color:var(--guinda)}
+.ins-text code{font-family:'Courier New',monospace;color:var(--guinda-mid);font-size:12.5px}
+
+/* ── TRACE TABLE ──────────────────────────────────── */
+.trace-table{width:100%;border-collapse:collapse;font-size:13px;margin:14px 0}
+.trace-table th{padding:9px 12px;text-align:center;background:var(--guinda);color:#fff;font-family:'Inter',sans-serif;font-size:9px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;border-right:1px solid var(--guinda-mid)}
+.trace-table th:first-child{text-align:left}
+.trace-table td{padding:10px 12px;border:1px solid var(--border);vertical-align:middle}
+.trace-table tr:nth-child(even) td{background:var(--off)}
+.trace-code{font-family:'Courier New',monospace;font-size:12px;color:var(--guinda)}
+.trace-inp{width:100%;background:transparent;border:none;border-bottom:1.5px solid var(--guinda-rule);font-family:'Courier New',monospace;font-size:12.5px;color:var(--guinda);text-align:center;padding:2px;outline:none}
+.trace-inp:focus{border-bottom-color:var(--guinda)}
+.trace-inp.ok{color:var(--ok);border-bottom-color:var(--ok-bd)}
+.trace-inp.er{color:var(--er);border-bottom-color:var(--er-bd)}
+
+/* ── ACTIVITY ─────────────────────────────────────── */
+.activity{border:1px solid var(--border);margin:24px 0;background:var(--white)}
+.activity-head{background:var(--guinda);padding:12px 20px;display:flex;align-items:center;justify-content:space-between}
+.activity-title{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#fff;letter-spacing:.06em;text-transform:uppercase}
+.activity-time{font-family:'Inter',sans-serif;font-size:11px;color:rgba(255,255,255,.6)}
+.activity-body{padding:20px 22px}
+.activity-body p{font-size:13.5px;color:var(--tx);line-height:1.7;margin-bottom:10px}
+.activity-body p:last-child{margin-bottom:0}
+.activity-body strong{color:var(--guinda)}
+.act-steps{list-style:none;display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.act-steps li{display:flex;gap:12px;align-items:flex-start;font-size:13.5px;color:var(--tx2);line-height:1.6}
+.step-n{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--guinda);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;margin-top:2px;font-family:'Inter',sans-serif}
+
+/* ── BIB ──────────────────────────────────────────── */
+.bib-list{list-style:none;display:flex;flex-direction:column;gap:14px}
+.bib-item{border-left:3px solid var(--border);padding:12px 16px;background:var(--off);font-size:13.5px;color:var(--tx2);line-height:1.7}
+.bib-type{font-family:'Inter',sans-serif;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--guinda-rule);margin-bottom:4px;font-weight:600}
+.bib-item a{color:var(--guinda);text-decoration:underline;word-break:break-all}
+
+.section-block{margin-bottom:52px}
+.divider{border:none;border-top:1px solid var(--border);margin:44px 0}
+
+@media(max-width:620px){
+  .header-inner{padding:12px 18px}
+  .wrap{padding:32px 18px 80px}
+  .concept-pair{grid-template-columns:1fr}
+  .comp-grid{grid-template-columns:1fr}
+  .unit-stamp{flex-direction:column;gap:10px}
+  .unit-num{font-size:36px}
+  .term-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-logo">
+      <img src="imagen1.png" alt="Logo institucional">
+    </div>
+    <div class="header-center">
+      <div class="header-course">Estructura de Datos &nbsp;|&nbsp; Licenciatura en Sistemas Computacionales</div>
+      <div class="header-title">Arboles Binarios de Busqueda — BST</div>
+    </div>
+    <div class="header-logo2">
+      <img src="imagen2.png" alt="Logo de apoyo">
+    </div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="pFill"></div></div>
+</header>
+
+<div class="wrap">
+
+<!-- UNIT STAMP -->
+<div class="unit-stamp">
+  <div class="unit-num">02</div>
+  <div class="unit-meta">
+    <div class="unit-tag">Unidad 2 &nbsp;&mdash;&nbsp; Estructuras de datos no lineales</div>
+    <div class="unit-name">Arboles Binarios de Busqueda (BST)</div>
+    <div class="unit-topic">
+      Tema: 2.1 &mdash; Concepto de arbol, terminologia, nodo, y propiedad BST. Insercion y recorrido InOrder en C#.<br>
+      Prerrequisito inmediato: Unidad 1 completa (arreglos, LinkedList, Stack, Queue).
+    </div>
+  </div>
+  <div class="unit-time">90 min</div>
+</div>
+
+<!-- COMPETENCIAS -->
+<div class="section-block">
+  <div class="sec-label">Para esta sesion</div>
+  <div class="sec-title">Competencias a desarrollar</div>
+  <div class="comp-grid">
+    <div class="comp-card">
+      <div class="comp-type">Conceptual</div>
+      <div class="comp-text">Describe la diferencia entre estructuras lineales y no lineales, identifica los componentes de un arbol (raiz, nodo, hijo, hoja, altura) y enuncia la propiedad de orden del arbol binario de busqueda.</div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-type">Procedimental</div>
+      <div class="comp-text">Implementa un BST en C# con una clase <code style="font-family:Courier New;color:var(--guinda)">Nodo</code> y metodos de insercion y recorrido InOrder, ejecutando el programa correctamente desde Codespaces.</div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-type">Analitica</div>
+      <div class="comp-text">Traza la construccion de un BST a partir de una secuencia de valores dada, predice el resultado del recorrido InOrder y explica por que ese recorrido produce los valores en orden ascendente.</div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-type">Integradora</div>
+      <div class="comp-text">Justifica por que un BST puede buscar un valor mas rapidamente que una lista enlazada, relacionando la propiedad de orden con la reduccion del numero de comparaciones necesarias.</div>
+    </div>
+  </div>
+</div>
+
+<!-- INTRO: BRIDGE FROM UNIT 1 -->
+<div class="section-block">
+  <div class="sec-label">Puente desde la Unidad 1</div>
+  <div class="sec-title">De estructuras lineales a no lineales</div>
+
+  <div class="intro-box">
+    <p>
+      Todas las estructuras de la Unidad 1 comparten una propiedad: son <strong>lineales</strong>. En un arreglo, en una lista enlazada, en una pila o en una cola, cada elemento tiene a lo sumo un predecesor y un sucesor. La informacion se organiza como una fila.
+    </p>
+    <p>
+      Esa linealidad funciona bien cuando la cantidad de datos es pequena. Pero si necesitas buscar un valor en una lista de un millon de elementos, tendras que recorrer, en el peor caso, el millon completo. Esto se llama <strong>busqueda lineal</strong> y su costo es O(n).
+    </p>
+    <p>
+      El <strong>arbol binario de busqueda</strong> rompe esa linealidad: organiza los datos de forma jerarquica y garantiza que, si el arbol esta bien construido, encontrar cualquier valor requiere a lo sumo <strong>log2(n) comparaciones</strong>. Para un millon de elementos, eso significa como maximo 20 comparaciones.
+    </p>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">La analogia del diccionario</div>
+    <p>
+      Cuando buscas una palabra en un diccionario fisico, no comienzas desde la letra A y avanzas pagina por pagina. Abres por la mitad: si tu palabra esta antes, descartaste la mitad del libro; si esta despues, descartaste la otra mitad. Repites hasta encontrarla.
+    </p>
+    <p>
+      Eso es exactamente lo que hace un BST: en cada nodo <strong>toma una decision binaria</strong> — izquierda o derecha — y con cada decision descarta aproximadamente la mitad de los datos restantes. La busqueda no recorre todo: <strong>navega</strong>.
+    </p>
+  </div>
+</div>
+
+<!-- TERMINOLOGIA -->
+<div class="section-block">
+  <div class="sec-label">Tema 2.1 &mdash; Concepto</div>
+  <div class="sec-title">Terminologia del arbol</div>
+
+  <!-- SVG tree diagram -->
+  <div class="tree-box">
+    <div class="tree-box-label">BST construido con la secuencia: 50, 30, 70, 20, 40, 60, 80</div>
+    <div class="tree-svg-wrap">
+      <svg width="480" height="260" viewBox="0 0 480 260" xmlns="http://www.w3.org/2000/svg" style="font-family:'Courier New',monospace;overflow:visible">
+        <!-- edges -->
+        <line x1="240" y1="44" x2="140" y2="104" stroke="#DEC8CE" stroke-width="1.5"/>
+        <line x1="240" y1="44" x2="340" y2="104" stroke="#DEC8CE" stroke-width="1.5"/>
+        <line x1="140" y1="124" x2="90" y2="184" stroke="#DEC8CE" stroke-width="1.5"/>
+        <line x1="140" y1="124" x2="190" y2="184" stroke="#DEC8CE" stroke-width="1.5"/>
+        <line x1="340" y1="124" x2="290" y2="184" stroke="#DEC8CE" stroke-width="1.5"/>
+        <line x1="340" y1="124" x2="390" y2="184" stroke="#DEC8CE" stroke-width="1.5"/>
+        <!-- root -->
+        <circle cx="240" cy="34" r="22" fill="#5e162e" stroke="#5e162e"/>
+        <text x="240" y="39" text-anchor="middle" fill="white" font-size="14" font-weight="600">50</text>
+        <text x="280" y="22" fill="#A07080" font-size="10">raiz</text>
+        <!-- level 2 -->
+        <circle cx="140" cy="114" r="20" fill="#F5E8EE" stroke="#C85070" stroke-width="1.5"/>
+        <text x="140" y="119" text-anchor="middle" fill="#5e162e" font-size="13" font-weight="600">30</text>
+        <circle cx="340" cy="114" r="20" fill="#F5E8EE" stroke="#C85070" stroke-width="1.5"/>
+        <text x="340" y="119" text-anchor="middle" fill="#5e162e" font-size="13" font-weight="600">70</text>
+        <!-- labels -->
+        <text x="60" y="112" fill="#A07080" font-size="10">hijo izq</text>
+        <text x="358" y="112" fill="#A07080" font-size="10">hijo der</text>
+        <!-- level 3 -->
+        <circle cx="90" cy="194" r="19" fill="#FAF6F7" stroke="#DEC8CE" stroke-width="1.5"/>
+        <text x="90" y="199" text-anchor="middle" fill="#6B4050" font-size="13">20</text>
+        <circle cx="190" cy="194" r="19" fill="#FAF6F7" stroke="#DEC8CE" stroke-width="1.5"/>
+        <text x="190" y="199" text-anchor="middle" fill="#6B4050" font-size="13">40</text>
+        <circle cx="290" cy="194" r="19" fill="#FAF6F7" stroke="#DEC8CE" stroke-width="1.5"/>
+        <text x="290" y="199" text-anchor="middle" fill="#6B4050" font-size="13">60</text>
+        <circle cx="390" cy="194" r="19" fill="#FAF6F7" stroke="#DEC8CE" stroke-width="1.5"/>
+        <text x="390" y="199" text-anchor="middle" fill="#6B4050" font-size="13">80</text>
+        <!-- leaf labels -->
+        <text x="50" y="232" fill="#A07080" font-size="10">hoja</text>
+        <text x="170" y="232" fill="#A07080" font-size="10">hoja</text>
+        <text x="270" y="232" fill="#A07080" font-size="10">hoja</text>
+        <text x="370" y="232" fill="#A07080" font-size="10">hoja</text>
+        <!-- height annotation -->
+        <line x1="440" y1="34" x2="440" y2="194" stroke="#DEC8CE" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="448" y="115" fill="#A07080" font-size="10">altura = 3</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="term-grid">
+    <div class="term-card">
+      <div class="term-name">Raiz</div>
+      <div class="term-def">El nodo superior del arbol. Todos los demas nodos descienden de el. En el ejemplo: 50.</div>
+    </div>
+    <div class="term-card">
+      <div class="term-name">Nodo</div>
+      <div class="term-def">Cada elemento del arbol. Contiene un valor y referencias a hijo izquierdo e hijo derecho.</div>
+    </div>
+    <div class="term-card">
+      <div class="term-name">Hijo</div>
+      <div class="term-def">Nodo que desciende directamente de otro. Un nodo binario tiene a lo sumo dos hijos.</div>
+    </div>
+    <div class="term-card">
+      <div class="term-name">Hoja</div>
+      <div class="term-def">Nodo sin hijos. Sus referencias izquierda y derecha valen null. En el ejemplo: 20, 40, 60, 80.</div>
+    </div>
+    <div class="term-card">
+      <div class="term-name">Altura</div>
+      <div class="term-def">Numero de niveles del arbol. Determina el costo de busqueda. En el ejemplo: altura = 3.</div>
+    </div>
+    <div class="term-card">
+      <div class="term-name">SubArbol</div>
+      <div class="term-def">Cualquier nodo con sus descendientes forma un subarbol. El nodo 30 encabeza el subarbol izquierdo.</div>
+    </div>
+  </div>
+</div>
+
+<!-- PROPIEDAD BST -->
+<div class="section-block">
+  <div class="sec-label">Tema 2.1 &mdash; Propiedad fundamental</div>
+  <div class="sec-title">La regla que define un BST</div>
+
+  <div class="rule-card">
+    <div class="rule-head">Propiedad de orden del BST</div>
+    <div class="rule-body">
+      Para <strong>cualquier nodo N</strong> del arbol, se cumple siempre:<br><br>
+      Todos los valores del <strong>subarbol izquierdo</strong> de N son <strong>menores</strong> que el valor de N.<br>
+      Todos los valores del <strong>subarbol derecho</strong> de N son <strong>mayores</strong> que el valor de N.<br><br>
+      Esta propiedad no aplica solo a la raiz: aplica a <strong>cada nodo</strong> individualmente. Verificarla en la raiz no garantiza que se cumpla en los nodos internos.
+    </div>
+  </div>
+
+  <div class="concept-pair">
+    <div class="concept-card">
+      <div class="cc-head">Verificacion en el ejemplo</div>
+      <div class="cc-body">
+        Raiz 50: izquierda tiene {20, 30, 40}, todos menores. Derecha tiene {60, 70, 80}, todos mayores.<br><br>
+        Nodo 30: izquierda tiene {20}, menor. Derecha tiene {40}, mayor.<br><br>
+        La propiedad se cumple en cada nodo del arbol.
+      </div>
+    </div>
+    <div class="concept-card">
+      <div class="cc-head">Por que importa esta propiedad</div>
+      <div class="cc-body">
+        Al buscar un valor X, en cada nodo la comparacion elimina un subarbol completo. Si X es menor que el nodo actual, el subarbol derecho ya no se revisa. Cada comparacion reduce el problema a la mitad.
+      </div>
+    </div>
+  </div>
+
+  <div class="callout co-p">
+    <span class="callout-icon">Conexion con la Unidad 1</span>
+    <span>El nodo de un BST es conceptualmente igual al nodo de un <code style="font-family:Courier New">LinkedList</code>: contiene un dato y referencias a otros nodos. La diferencia es que aqui hay <strong>dos referencias</strong> (izquierda y derecha) en lugar de una sola (siguiente).</span>
+  </div>
+</div>
+
+<!-- INSERCION -->
+<div class="section-block">
+  <div class="sec-label">Tema 2.1 &mdash; Operacion de insercion</div>
+  <div class="sec-title">Como se inserta un valor en el BST</div>
+
+  <div class="insert-steps">
+    <div class="ins-step">
+      <div class="ins-num">1</div>
+      <div class="ins-text">Si el arbol esta vacio, el nuevo nodo se convierte en la <strong>raiz</strong>.</div>
+    </div>
+    <div class="ins-step">
+      <div class="ins-num">2</div>
+      <div class="ins-text">Compara el valor nuevo con el nodo actual. Si es <strong>menor</strong>, ve al hijo izquierdo. Si es <strong>mayor</strong>, ve al hijo derecho.</div>
+    </div>
+    <div class="ins-step">
+      <div class="ins-num">3</div>
+      <div class="ins-text">Si el hijo en esa direccion es <code>null</code>, <strong>inserta el nodo ahi</strong>. Si no es null, repite el paso 2 con ese hijo como nuevo nodo actual.</div>
+    </div>
+    <div class="ins-step">
+      <div class="ins-num">4</div>
+      <div class="ins-text">El proceso garantiza que la <strong>propiedad BST siempre se mantiene</strong> despues de cada insercion.</div>
+    </div>
+  </div>
+
+  <div class="intro-box" style="margin-bottom:16px">
+    <p>
+      <strong>Traza de insercion para la secuencia: 50, 30, 70, 20, 40, 60, 80</strong>
+    </p>
+    <p>
+      Insertar 50: arbol vacio &rarr; 50 es la raiz.<br>
+      Insertar 30: 30 &lt; 50 &rarr; va al hijo izquierdo de 50.<br>
+      Insertar 70: 70 &gt; 50 &rarr; va al hijo derecho de 50.<br>
+      Insertar 20: 20 &lt; 50 &rarr; izquierda; 20 &lt; 30 &rarr; hijo izquierdo de 30.<br>
+      Insertar 40: 40 &lt; 50 &rarr; izquierda; 40 &gt; 30 &rarr; hijo derecho de 30.<br>
+      Insertar 60: 60 &gt; 50 &rarr; derecha; 60 &lt; 70 &rarr; hijo izquierdo de 70.<br>
+      Insertar 80: 80 &gt; 50 &rarr; derecha; 80 &gt; 70 &rarr; hijo derecho de 70.
+    </p>
+  </div>
+
+  <div class="callout co-a">
+    <span class="callout-icon">Observacion</span>
+    <span>El orden en que se insertan los valores determina la forma del arbol. La secuencia 50, 30, 70... produce un arbol equilibrado. Si hubieramos insertado 20, 30, 40, 50, 60, 70, 80 en ese orden, el arbol degeneraria en una lista enlazada hacia la derecha. Los arboles AVL y Heap de los temas siguientes resuelven este problema.</span>
+  </div>
+</div>
+
+<!-- CODIGO 1: CLASE NODO -->
+<div class="section-block">
+  <div class="sec-label">Codigo en C#</div>
+  <div class="sec-title">Ejemplo 1 &mdash; Definir la clase Nodo</div>
+
+  <p style="font-size:14px;color:var(--tx2);margin-bottom:14px;line-height:1.7">
+    Un BST en C# requiere primero definir que es un nodo. El nodo guarda el valor y dos referencias: una al hijo izquierdo y otra al hijo derecho. Si no hay hijo, la referencia vale <code style="font-family:Courier New;color:var(--guinda)">null</code>.
+  </p>
+
+  <div class="cb">
+    <div class="cb-bar">
+      <div class="cb-dots"><div class="cb-dot"></div><div class="cb-dot"></div><div class="cb-dot"></div></div>
+      <span class="cb-fname">Nodo.cs</span>
+      <span class="cb-lang">C#</span>
+    </div>
+    <div class="cb-body"><pre><span class="cm">// Un nodo de BST contiene tres cosas:</span>
+<span class="cm">// 1. El valor que almacena</span>
+<span class="cm">// 2. Una referencia al hijo izquierdo (menor)</span>
+<span class="cm">// 3. Una referencia al hijo derecho (mayor)</span>
+<span class="kw">class</span> <span class="tp">Nodo</span>
+{
+    <span class="kw">public</span> <span class="tp">int</span>  <span class="vr">Valor</span>;
+    <span class="kw">public</span> <span class="tp">Nodo</span> <span class="vr">Izquierdo</span>;
+    <span class="kw">public</span> <span class="tp">Nodo</span> <span class="vr">Derecho</span>;
+
+    <span class="kw">public</span> <span class="mt">Nodo</span>(<span class="tp">int</span> <span class="vr">valor</span>)
+    {
+        <span class="vr">Valor</span>      = <span class="vr">valor</span>;
+        <span class="vr">Izquierdo</span>  = <span class="kw">null</span>; <span class="cm">// sin hijo izquierdo al crearse</span>
+        <span class="vr">Derecho</span>    = <span class="kw">null</span>; <span class="cm">// sin hijo derecho al crearse</span>
+    }
+}</pre></div>
+  </div>
+
+  <div class="callout co-p">
+    <span class="callout-icon">Conexion directa</span>
+    <span>Compara este nodo con el de <code style="font-family:Courier New">LinkedList</code>: aquel tenia <code style="font-family:Courier New">Valor</code> y un solo <code style="font-family:Courier New">Siguiente</code>. Este tiene <code style="font-family:Courier New">Valor</code>, <code style="font-family:Courier New">Izquierdo</code> y <code style="font-family:Courier New">Derecho</code>. La logica de punteros es exactamente la misma; solo cambia cuantos hay.</span>
+  </div>
+</div>
+
+<!-- CODIGO 2: BST CON INSERCION -->
+<div class="section-block">
+  <div class="sec-label">Codigo en C#</div>
+  <div class="sec-title">Ejemplo 2 &mdash; Clase BST con insercion e InOrder</div>
+
+  <div class="cb">
+    <div class="cb-bar">
+      <div class="cb-dots"><div class="cb-dot"></div><div class="cb-dot"></div><div class="cb-dot"></div></div>
+      <span class="cb-fname">BST.cs</span>
+      <span class="cb-lang">C#</span>
+    </div>
+    <div class="cb-body"><pre><span class="kw">class</span> <span class="tp">BST</span>
+{
+    <span class="kw">private</span> <span class="tp">Nodo</span> <span class="vr">raiz</span> = <span class="kw">null</span>;
+
+    <span class="cm">// ── Insertar ────────────────────────────────────────────────────</span>
+    <span class="kw">public</span> <span class="kw">void</span> <span class="mt">Insertar</span>(<span class="tp">int</span> <span class="vr">valor</span>)
+    {
+        <span class="vr">raiz</span> = <span class="mt">InsertarRec</span>(<span class="vr">raiz</span>, <span class="vr">valor</span>);
+    }
+
+    <span class="kw">private</span> <span class="tp">Nodo</span> <span class="mt">InsertarRec</span>(<span class="tp">Nodo</span> <span class="vr">nodo</span>, <span class="tp">int</span> <span class="vr">valor</span>)
+    {
+        <span class="cm">// Caso base: posicion libre, crear el nuevo nodo aqui</span>
+        <span class="kw">if</span> (<span class="vr">nodo</span> == <span class="kw">null</span>)
+            <span class="kw">return</span> <span class="kw">new</span> <span class="tp">Nodo</span>(<span class="vr">valor</span>);
+
+        <span class="cm">// Comparar y bajar por el subarbol correcto</span>
+        <span class="kw">if</span> (<span class="vr">valor</span> &lt; <span class="vr">nodo</span>.<span class="vr">Valor</span>)
+            <span class="vr">nodo</span>.<span class="vr">Izquierdo</span> = <span class="mt">InsertarRec</span>(<span class="vr">nodo</span>.<span class="vr">Izquierdo</span>, <span class="vr">valor</span>);
+        <span class="kw">else</span> <span class="kw">if</span> (<span class="vr">valor</span> &gt; <span class="vr">nodo</span>.<span class="vr">Valor</span>)
+            <span class="vr">nodo</span>.<span class="vr">Derecho</span>   = <span class="mt">InsertarRec</span>(<span class="vr">nodo</span>.<span class="vr">Derecho</span>, <span class="vr">valor</span>);
+        <span class="cm">// Si valor == nodo.Valor no se inserta (sin duplicados)</span>
+
+        <span class="kw">return</span> <span class="vr">nodo</span>;
+    }
+
+    <span class="cm">// ── Recorrido InOrder: Izquierdo - Raiz - Derecho ───────────────</span>
+    <span class="cm">// Produce los valores en orden ASCENDENTE por la propiedad BST</span>
+    <span class="kw">public</span> <span class="kw">void</span> <span class="mt">InOrder</span>()
+    {
+        <span class="mt">InOrderRec</span>(<span class="vr">raiz</span>);
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>();
+    }
+
+    <span class="kw">private</span> <span class="kw">void</span> <span class="mt">InOrderRec</span>(<span class="tp">Nodo</span> <span class="vr">nodo</span>)
+    {
+        <span class="kw">if</span> (<span class="vr">nodo</span> == <span class="kw">null</span>) <span class="kw">return</span>;
+
+        <span class="mt">InOrderRec</span>(<span class="vr">nodo</span>.<span class="vr">Izquierdo</span>);   <span class="cm">// visita el subarbol izquierdo</span>
+        <span class="tp">Console</span>.<span class="mt">Write</span>(<span class="vr">nodo</span>.<span class="vr">Valor</span> + <span class="st">" "</span>); <span class="cm">// imprime el nodo actual</span>
+        <span class="mt">InOrderRec</span>(<span class="vr">nodo</span>.<span class="vr">Derecho</span>);    <span class="cm">// visita el subarbol derecho</span>
+    }
+}</pre></div>
+  </div>
+</div>
+
+<!-- CODIGO 3: PROGRAMA COMPLETO -->
+<div class="section-block">
+  <div class="sec-label">Codigo en C#</div>
+  <div class="sec-title">Ejemplo 3 &mdash; Programa completo ejecutable</div>
+
+  <div class="cb">
+    <div class="cb-bar">
+      <div class="cb-dots"><div class="cb-dot"></div><div class="cb-dot"></div><div class="cb-dot"></div></div>
+      <span class="cb-fname">Program.cs</span>
+      <span class="cb-lang">C#</span>
+    </div>
+    <div class="cb-body"><pre><span class="kw">using</span> <span class="tp">System</span>;
+
+<span class="kw">class</span> <span class="tp">Nodo</span>
+{
+    <span class="kw">public</span> <span class="tp">int</span>  <span class="vr">Valor</span>;
+    <span class="kw">public</span> <span class="tp">Nodo</span> <span class="vr">Izquierdo</span>, <span class="vr">Derecho</span>;
+    <span class="kw">public</span> <span class="mt">Nodo</span>(<span class="tp">int</span> <span class="vr">v</span>) { <span class="vr">Valor</span> = <span class="vr">v</span>; }
+}
+
+<span class="kw">class</span> <span class="tp">BST</span>
+{
+    <span class="kw">private</span> <span class="tp">Nodo</span> <span class="vr">raiz</span>;
+
+    <span class="kw">public</span> <span class="kw">void</span> <span class="mt">Insertar</span>(<span class="tp">int</span> <span class="vr">v</span>) =&gt; <span class="vr">raiz</span> = <span class="mt">Ins</span>(<span class="vr">raiz</span>, <span class="vr">v</span>);
+
+    <span class="kw">private</span> <span class="tp">Nodo</span> <span class="mt">Ins</span>(<span class="tp">Nodo</span> <span class="vr">n</span>, <span class="tp">int</span> <span class="vr">v</span>)
+    {
+        <span class="kw">if</span> (<span class="vr">n</span> == <span class="kw">null</span>) <span class="kw">return</span> <span class="kw">new</span> <span class="tp">Nodo</span>(<span class="vr">v</span>);
+        <span class="kw">if</span> (<span class="vr">v</span> &lt; <span class="vr">n</span>.<span class="vr">Valor</span>) <span class="vr">n</span>.<span class="vr">Izquierdo</span> = <span class="mt">Ins</span>(<span class="vr">n</span>.<span class="vr">Izquierdo</span>, <span class="vr">v</span>);
+        <span class="kw">else</span> <span class="kw">if</span> (<span class="vr">v</span> &gt; <span class="vr">n</span>.<span class="vr">Valor</span>) <span class="vr">n</span>.<span class="vr">Derecho</span> = <span class="mt">Ins</span>(<span class="vr">n</span>.<span class="vr">Derecho</span>, <span class="vr">v</span>);
+        <span class="kw">return</span> <span class="vr">n</span>;
+    }
+
+    <span class="kw">public</span> <span class="kw">void</span> <span class="mt">InOrder</span>()
+    {
+        <span class="mt">IO</span>(<span class="vr">raiz</span>);
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>();
+    }
+
+    <span class="kw">private</span> <span class="kw">void</span> <span class="mt">IO</span>(<span class="tp">Nodo</span> <span class="vr">n</span>)
+    {
+        <span class="kw">if</span> (<span class="vr">n</span> == <span class="kw">null</span>) <span class="kw">return</span>;
+        <span class="mt">IO</span>(<span class="vr">n</span>.<span class="vr">Izquierdo</span>);
+        <span class="tp">Console</span>.<span class="mt">Write</span>(<span class="vr">n</span>.<span class="vr">Valor</span> + <span class="st">" "</span>);
+        <span class="mt">IO</span>(<span class="vr">n</span>.<span class="vr">Derecho</span>);
+    }
+}
+
+<span class="kw">class</span> <span class="tp">Program</span>
+{
+    <span class="kw">static</span> <span class="kw">void</span> <span class="mt">Main</span>()
+    {
+        <span class="tp">BST</span> <span class="vr">arbol</span> = <span class="kw">new</span> <span class="tp">BST</span>();
+
+        <span class="tp">int</span>[] <span class="vr">valores</span> = { <span class="nm">50</span>, <span class="nm">30</span>, <span class="nm">70</span>, <span class="nm">20</span>, <span class="nm">40</span>, <span class="nm">60</span>, <span class="nm">80</span> };
+
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">"Insertando: 50, 30, 70, 20, 40, 60, 80"</span>);
+        <span class="kw">foreach</span> (<span class="tp">int</span> <span class="vr">v</span> <span class="kw">in</span> <span class="vr">valores</span>)
+            <span class="vr">arbol</span>.<span class="mt">Insertar</span>(<span class="vr">v</span>);
+
+        <span class="tp">Console</span>.<span class="mt">Write</span>(<span class="st">"InOrder: "</span>);
+        <span class="vr">arbol</span>.<span class="mt">InOrder</span>();
+        <span class="cm">// Salida: 20 30 40 50 60 70 80  (orden ascendente)</span>
+    }
+}</pre></div>
+  </div>
+
+  <div class="callout co-g">
+    <span class="callout-icon">Por que InOrder produce orden ascendente</span>
+    <span>El recorrido InOrder visita siempre: subarbol izquierdo (todos menores) &rarr; nodo actual &rarr; subarbol derecho (todos mayores). La propiedad BST garantiza que este patron produce los valores de menor a mayor sin excepcion.</span>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ACTIVIDADES -->
+<div class="section-block">
+  <div class="sec-label">Durante la sesion</div>
+  <div class="sec-title">Actividades</div>
+
+  <!-- Act 1 -->
+  <div class="activity">
+    <div class="activity-head">
+      <span class="activity-title">Actividad 1 &mdash; Traza de insercion</span>
+      <span class="activity-time">15 min</span>
+    </div>
+    <div class="activity-body">
+      <p>Dada la secuencia de insercion <strong>45, 25, 65, 15, 35, 55, 75</strong>, completa la tabla indicando en que posicion del arbol queda cada valor. Dibuja el arbol resultante en papel antes de verificar.</p>
+      <table class="trace-table">
+        <thead>
+          <tr>
+            <th style="text-align:left">Valor a insertar</th>
+            <th>Comparacion en raiz</th>
+            <th>Comparacion nivel 2</th>
+            <th>Posicion final</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="trace-code">45</td>
+            <td><input class="trace-inp" id="t1_1" placeholder="?" oninput="chk('t1_1','arbol vacio')"></td>
+            <td><input class="trace-inp" id="t1_1b" placeholder="?" oninput="chk('t1_1b','—')"></td>
+            <td><input class="trace-inp" id="t1_1c" placeholder="?" oninput="chk('t1_1c','raiz')"></td>
+          </tr>
+          <tr>
+            <td class="trace-code">25</td>
+            <td><input class="trace-inp" id="t1_2" placeholder="?" oninput="chk('t1_2','25 < 45')"></td>
+            <td><input class="trace-inp" id="t1_2b" placeholder="?" oninput="chk('t1_2b','—')"></td>
+            <td><input class="trace-inp" id="t1_2c" placeholder="?" oninput="chk('t1_2c','izq de 45')"></td>
+          </tr>
+          <tr>
+            <td class="trace-code">65</td>
+            <td><input class="trace-inp" id="t1_3" placeholder="?" oninput="chk('t1_3','65 > 45')"></td>
+            <td><input class="trace-inp" id="t1_3b" placeholder="?" oninput="chk('t1_3b','—')"></td>
+            <td><input class="trace-inp" id="t1_3c" placeholder="?" oninput="chk('t1_3c','der de 45')"></td>
+          </tr>
+          <tr>
+            <td class="trace-code">15</td>
+            <td><input class="trace-inp" id="t1_4" placeholder="?" oninput="chk('t1_4','15 < 45')"></td>
+            <td><input class="trace-inp" id="t1_4b" placeholder="?" oninput="chk('t1_4b','15 < 25')"></td>
+            <td><input class="trace-inp" id="t1_4c" placeholder="?" oninput="chk('t1_4c','izq de 25')"></td>
+          </tr>
+          <tr>
+            <td class="trace-code">35</td>
+            <td><input class="trace-inp" id="t1_5" placeholder="?" oninput="chk('t1_5','35 < 45')"></td>
+            <td><input class="trace-inp" id="t1_5b" placeholder="?" oninput="chk('t1_5b','35 > 25')"></td>
+            <td><input class="trace-inp" id="t1_5c" placeholder="?" oninput="chk('t1_5c','der de 25')"></td>
+          </tr>
+          <tr>
+            <td class="trace-code">55</td>
+            <td><input class="trace-inp" id="t1_6" placeholder="?" oninput="chk('t1_6','55 > 45')"></td>
+            <td><input class="trace-inp" id="t1_6b" placeholder="?" oninput="chk('t1_6b','55 < 65')"></td>
+            <td><input class="trace-inp" id="t1_6c" placeholder="?" oninput="chk('t1_6c','izq de 65')"></td>
+          </tr>
+          <tr>
+            <td class="trace-code">75</td>
+            <td><input class="trace-inp" id="t1_7" placeholder="?" oninput="chk('t1_7','75 > 45')"></td>
+            <td><input class="trace-inp" id="t1_7b" placeholder="?" oninput="chk('t1_7b','75 > 65')"></td>
+            <td><input class="trace-inp" id="t1_7c" placeholder="?" oninput="chk('t1_7c','der de 65')"></td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="margin-top:12px"><strong>InOrder esperado:</strong> 15 25 35 45 55 65 75</p>
+    </div>
+  </div>
+
+  <!-- Act 2 -->
+  <div class="activity">
+    <div class="activity-head">
+      <span class="activity-title">Actividad 2 &mdash; Analisis de la propiedad BST</span>
+      <span class="activity-time">10 min</span>
+    </div>
+    <div class="activity-body">
+      <p>El siguiente arbol fue construido de manera incorrecta. Identifica que nodo viola la propiedad BST y explica por que.</p>
+      <div style="background:var(--off);border:1px solid var(--border);padding:20px;text-align:center;margin:14px 0">
+        <svg width="320" height="180" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" style="font-family:'Courier New',monospace;overflow:visible">
+          <line x1="160" y1="34" x2="90" y2="94" stroke="#DEC8CE" stroke-width="1.5"/>
+          <line x1="160" y1="34" x2="230" y2="94" stroke="#DEC8CE" stroke-width="1.5"/>
+          <line x1="90" y1="114" x2="50" y2="164" stroke="#DEC8CE" stroke-width="1.5"/>
+          <line x1="90" y1="114" x2="130" y2="164" stroke="#DEC8CE" stroke-width="1.5"/>
+          <circle cx="160" cy="24" r="20" fill="#5e162e"/><text x="160" y="29" text-anchor="middle" fill="white" font-size="13" font-weight="600">40</text>
+          <circle cx="90" cy="104" r="18" fill="#F5E8EE" stroke="#C85070" stroke-width="1.5"/><text x="90" y="109" text-anchor="middle" fill="#5e162e" font-size="13" font-weight="600">20</text>
+          <circle cx="230" cy="104" r="18" fill="#F5E8EE" stroke="#C85070" stroke-width="1.5"/><text x="230" y="109" text-anchor="middle" fill="#5e162e" font-size="13" font-weight="600">60</text>
+          <circle cx="50" cy="164" r="17" fill="#FAF6F7" stroke="#DEC8CE"/><text x="50" y="169" text-anchor="middle" fill="#6B4050" font-size="13">10</text>
+          <!-- violation node in red -->
+          <circle cx="130" cy="164" r="17" fill="#FFF1F2" stroke="#FCA5A5" stroke-width="2"/><text x="130" y="169" text-anchor="middle" fill="#7F1D1D" font-size="13" font-weight="600">55</text>
+        </svg>
+      </div>
+      <p><strong>Pregunta:</strong> El nodo con valor 55 aparece como hijo derecho de 20. ?Por que viola la propiedad BST? ?En que posicion deberia estar correctamente?</p>
+      <p><strong>Respuesta esperada:</strong> 55 es mayor que 40 (la raiz), por lo que pertenece al subarbol derecho de 40, no al izquierdo. Como hijo derecho de 20, viola la regla de que todos los nodos del subarbol izquierdo de 40 deben ser menores que 40. El valor 55 deberia insertarse como hijo izquierdo de 60.</p>
+    </div>
+  </div>
+
+  <!-- Act 3 -->
+  <div class="activity">
+    <div class="activity-head">
+      <span class="activity-title">Actividad 3 &mdash; Implementacion en Codespaces</span>
+      <span class="activity-time">30 min</span>
+    </div>
+    <div class="activity-body">
+      <p>Abre un nuevo proyecto en tu Codespace e implementa paso a paso:</p>
+      <ol class="act-steps">
+        <li><div class="step-n">1</div><span>Copia la clase <code style="font-family:Courier New;color:var(--guinda)">Nodo</code> y la clase <code style="font-family:Courier New;color:var(--guinda)">BST</code> del Ejemplo 3. Ejecuta el programa base y confirma que el InOrder imprime <strong>20 30 40 50 60 70 80</strong>.</span></li>
+        <li><div class="step-n">2</div><span>Agrega el metodo <code style="font-family:Courier New;color:var(--guinda)">Buscar(int valor)</code> a la clase BST. Debe devolver <code style="font-family:Courier New;color:var(--guinda)">true</code> si el valor existe y <code style="font-family:Courier New;color:var(--guinda)">false</code> si no. Implementalo siguiendo la misma logica que <code style="font-family:Courier New;color:var(--guinda)">Insertar</code>: compara y baja por el subarbol correcto.</span></li>
+        <li><div class="step-n">3</div><span>Prueba con: <code style="font-family:Courier New;color:var(--guinda)">arbol.Buscar(40)</code> &rarr; true, <code style="font-family:Courier New;color:var(--guinda)">arbol.Buscar(99)</code> &rarr; false.</span></li>
+        <li><div class="step-n">4</div><span>Inserta los valores de la secuencia de la Actividad 1 (45, 25, 65, 15, 35, 55, 75) en un segundo arbol y llama a <code style="font-family:Courier New;color:var(--guinda)">InOrder()</code>. Confirma que coincide con tu traza en papel.</span></li>
+      </ol>
+      <p style="margin-top:14px">Al terminar, haz commit con el mensaje: <code style="font-family:Courier New;color:var(--guinda)">feat: bst-insercion-inorder-buscar</code>.</p>
+    </div>
+  </div>
+
+</div>
+
+<hr class="divider">
+
+<!-- REFERENCIAS -->
+<div class="section-block">
+  <div class="sec-label">Fuentes de consulta</div>
+  <div class="sec-title">Referencias bibliograficas</div>
+  <ul class="bib-list">
+    <li class="bib-item">
+      <div class="bib-type">Libro de texto principal</div>
+      Weiss, M. A. (2013). <em>Data Structures and Algorithm Analysis in C++</em> (4.a ed.). Pearson. Capitulo 4: Trees.
+    </li>
+    <li class="bib-item">
+      <div class="bib-type">Referencia de algoritmos</div>
+      Cormen, T. H., Leiserson, C. E., Rivest, R. L., &amp; Stein, C. (2014). <em>Introduction to Algorithms</em> (3.a ed.). MIT Press. Capitulo 12: Binary Search Trees.
+    </li>
+    <li class="bib-item">
+      <div class="bib-type">Documentacion oficial &mdash; Microsoft</div>
+      Microsoft. (2024). <em>Tree Data Structure</em>. Microsoft Learn. <a href="https://learn.microsoft.com/en-us/dotnet/standard/collections/selecting-a-collection-class" target="_blank" rel="noopener">learn.microsoft.com/dotnet/standard/collections/selecting-a-collection-class</a>
+    </li>
+    <li class="bib-item">
+      <div class="bib-type">Documentacion oficial &mdash; Microsoft</div>
+      Microsoft. (2024). <em>Recursion in C#</em>. Microsoft Learn. <a href="https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/methods" target="_blank" rel="noopener">learn.microsoft.com/dotnet/csharp/programming-guide</a>
+    </li>
+    <li class="bib-item">
+      <div class="bib-type">Recurso complementario</div>
+      Aliat Universidades. (s.f.). <em>Analisis y diseno de algoritmos</em>. Bibliotecas Digitales Aliat. <a href="http://www.aliat.org.mx/BibliotecasDigitales/sistemas/Analisis_y_disenio_de_algoritmos.pdf" target="_blank" rel="noopener">aliat.org.mx &mdash; Analisis y diseno de algoritmos (PDF)</a>
+    </li>
+  </ul>
+</div>
+
+<div style="border-top:1px solid var(--border);padding-top:24px;margin-top:48px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--tx3);font-family:'Inter',sans-serif">
+  <span>Mtro. Jose Armando Vera Rodriguez</span>
+  <span>Estructura de Datos &nbsp;&mdash;&nbsp; Unidad 2 &nbsp;&mdash;&nbsp; Tema 2.1</span>
+</div>
+
+</div>
+
+<script>
+window.addEventListener('scroll',()=>{
+  const h=document.documentElement.scrollHeight-window.innerHeight;
+  if(h>0) document.getElementById('pFill').style.width=(window.scrollY/h*100)+'%';
+});
+
+const ANS={
+  t1_1:'arbol vacio', t1_1b:'—', t1_1c:'raiz',
+  t1_2:'25 < 45',     t1_2b:'—', t1_2c:'izq de 45',
+  t1_3:'65 > 45',     t1_3b:'—', t1_3c:'der de 45',
+  t1_4:'15 < 45',     t1_4b:'15 < 25', t1_4c:'izq de 25',
+  t1_5:'35 < 45',     t1_5b:'35 > 25', t1_5c:'der de 25',
+  t1_6:'55 > 45',     t1_6b:'55 < 65', t1_6c:'izq de 65',
+  t1_7:'75 > 45',     t1_7b:'75 > 65', t1_7c:'der de 65',
+};
+
+function norm(s){ return s.trim().toLowerCase().replace(/\s+/g,' '); }
+function chk(id, correct){
+  const el = document.getElementById(id);
+  const v = el.value.trim();
+  if(!v){ el.className='trace-inp'; return; }
+  el.className = 'trace-inp ' + (norm(v) === norm(correct) ? 'ok' : 'er');
+}
+
+const obs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){ e.target.style.opacity='1'; e.target.style.transform='translateY(0)'; }
+  });
+},{threshold:.06});
+document.querySelectorAll('.section-block').forEach(el=>{
+  el.style.cssText='opacity:0;transform:translateY(16px);transition:opacity .5s ease,transform .5s ease';
+  obs.observe(el);
+});
+</script>
+</body>
+</html>
