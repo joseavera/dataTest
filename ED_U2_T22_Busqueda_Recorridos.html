@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Búsqueda y recorridos en BST — Estructura de Datos</title>
+<link rel="stylesheet" href="base.css">
+<style>
+:root{
+  --guinda:      #5e162e;
+  --guinda-l:    #F5E8EE;
+  --guinda-rule: #C85070;
+  --guinda-mid:  #8B2040;
+  --tx:          #2A1218;
+  --tx2:         #6B4050;
+  --tx3:         #A07080;
+  --border:      #DEC8CE;
+  --white:       #FFFFFF;
+  --off:         #FAF6F7;
+  --code-bg:     #1A0E12;
+  --code-border: #3D1F28;
+  --kw:#F4A5B8; --tp:#93C5FD; --st:#86EFAC; --cm:#6B5060;
+  --nm:#FCA5A5; --mt:#67E8F9; --vr:#F0E6EA;
+  --ok:#14532D; --ok-bg:#F0FDF4; --ok-bd:#86EFAC;
+  --er:#7F1D1D; --er-bg:#FFF1F2; --er-bd:#FCA5A5;
+  --am:#78350F; --am-bg:#FFFBEB; --am-bd:#FDE68A;
+  --pre-bg:#EBF5EB; --pre-bd:#86EFAC;
+  --post-bg:#FFF3E0; --post-bd:#FBBF24;
+  --in-bg:#E8F4FD;  --in-bd:#93C5FD;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--white);color:var(--tx);font-family:'Source Serif 4',Georgia,serif;line-height:1.7;font-size:16px}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--off)}
+::-webkit-scrollbar-thumb{background:var(--guinda-rule)}
+
+.site-header{background:var(--guinda);position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(94,22,46,.25)}
+.header-inner{max-width:1040px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:14px 32px;gap:20px}
+.header-logo img{height:44px;width:auto;filter:brightness(0) invert(1)}
+.header-center{text-align:center;flex:1}
+.header-course{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:2px;font-family:'Inter',sans-serif}
+.header-title{font-size:15px;font-weight:600;color:#fff;font-family:'Inter',sans-serif;letter-spacing:.02em}
+.header-logo2 img{height:36px;width:auto;filter:brightness(0) invert(1);opacity:.75}
+.progress-bar{height:3px;background:rgba(255,255,255,.15)}
+.progress-fill{height:100%;background:var(--guinda-rule);width:0%;transition:width .3s ease}
+
+.wrap{max-width:860px;margin:0 auto;padding:48px 28px 120px}
+
+.unit-stamp{display:flex;align-items:flex-start;gap:20px;border:1px solid var(--border);border-left:5px solid var(--guinda);background:var(--guinda-l);padding:24px 28px;margin-bottom:40px}
+.unit-num{font-size:56px;font-weight:700;color:var(--guinda);opacity:.2;line-height:1;flex-shrink:0;font-family:'Cormorant Garamond',Georgia,serif;min-width:60px}
+.unit-tag{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--guinda-rule);margin-bottom:4px;font-family:'Inter',sans-serif;font-weight:600}
+.unit-name{font-size:clamp(20px,3vw,28px);font-weight:700;color:var(--guinda);line-height:1.2;margin-bottom:6px;font-family:'Cormorant Garamond',Georgia,serif}
+.unit-topic{font-size:14px;color:var(--tx2);line-height:1.5;font-family:'Inter',sans-serif}
+.unit-time{margin-left:auto;flex-shrink:0;font-size:11px;color:var(--tx3);border:1px solid var(--border);padding:4px 10px;font-family:'Inter',sans-serif;align-self:flex-start}
+
+.sec-title{font-size:clamp(18px,2.5vw,24px);font-weight:700;color:var(--guinda);margin-bottom:16px;font-family:'Cormorant Garamond',Georgia,serif;display:flex;align-items:center;gap:12px}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.sec-label{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--tx3);margin-bottom:10px;font-family:'Inter',sans-serif;font-weight:600}
+
+.comp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px;margin-bottom:40px}
+.comp-card{border:1px solid var(--border);border-left:4px solid var(--guinda-rule);background:var(--off);padding:16px 18px}
+.comp-type{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--guinda-rule);margin-bottom:6px;font-family:'Inter',sans-serif;font-weight:600}
+.comp-text{font-size:13.5px;color:var(--tx);line-height:1.65}
+
+.intro-box{border:1px solid var(--border);background:var(--off);padding:24px 26px;margin-bottom:32px}
+.intro-box p{font-size:14.5px;color:var(--tx2);line-height:1.8;margin-bottom:12px}
+.intro-box p:last-child{margin-bottom:0}
+.intro-box strong{color:var(--tx)}
+
+.analogy{border:1px solid var(--guinda-rule);border-left:4px solid var(--guinda);background:var(--guinda-l);padding:18px 22px;margin-bottom:20px}
+.analogy-label{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--guinda);margin-bottom:8px;font-family:'Inter',sans-serif;font-weight:600}
+.analogy p{font-size:14px;color:#3D1F28;line-height:1.75}
+.analogy p+p{margin-top:10px}
+.analogy strong{color:var(--guinda)}
+
+.concept-pair{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.concept-card{border:1px solid var(--border);padding:18px 20px;background:var(--white)}
+.cc-head{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--guinda);margin-bottom:8px;font-family:'Inter',sans-serif;font-weight:600}
+.cc-body{font-size:13.5px;color:var(--tx2);line-height:1.65}
+
+/* TRAVERSAL CARDS */
+.traversal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:16px 0}
+.tv-card{border:1px solid var(--border);padding:18px 16px;background:var(--white)}
+.tv-card.inorder{border-top:4px solid #93C5FD;background:var(--in-bg)}
+.tv-card.preorder{border-top:4px solid #86EFAC;background:var(--pre-bg)}
+.tv-card.postorder{border-top:4px solid #FBBF24;background:var(--post-bg)}
+.tv-name{font-family:'Inter',sans-serif;font-size:12px;font-weight:700;margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em}
+.tv-card.inorder .tv-name{color:#0C447C}
+.tv-card.preorder .tv-name{color:#14532D}
+.tv-card.postorder .tv-name{color:#78350F}
+.tv-pattern{font-family:'Courier New',monospace;font-size:12px;margin-bottom:8px;padding:6px 8px;background:rgba(255,255,255,.7);border:1px solid rgba(0,0,0,.06)}
+.tv-desc{font-size:12.5px;color:var(--tx2);line-height:1.55}
+.tv-result{margin-top:10px;font-family:'Courier New',monospace;font-size:11.5px;padding:5px 8px;background:rgba(255,255,255,.8)}
+
+/* SEARCH VISUAL */
+.search-path{
+  display:flex;flex-direction:column;gap:8px;margin:14px 0;
+  background:var(--off);border:1px solid var(--border);padding:18px 20px;
+}
+.sp-step{display:flex;align-items:center;gap:14px;font-size:13.5px}
+.sp-node{
+  width:38px;height:38px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Courier New',monospace;font-size:14px;font-weight:700;
+  border:2px solid;
+}
+.sp-active{background:var(--guinda);color:#fff;border-color:var(--guinda)}
+.sp-found{background:var(--ok-bg);color:var(--ok);border-color:var(--ok-bd)}
+.sp-skip{background:var(--off);color:var(--tx3);border-color:var(--border)}
+.sp-desc{font-size:13px;color:var(--tx2);line-height:1.5}
+.sp-desc strong{color:var(--guinda)}
+.sp-arrow{color:var(--tx3);font-size:12px;padding-left:4px}
+
+/* TREE BOX */
+.tree-box{background:var(--off);border:1px solid var(--border);padding:20px;margin:16px 0;overflow-x:auto}
+.tree-box-label{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx3);margin-bottom:14px;text-align:center;font-family:'Inter',sans-serif}
+.tree-svg-wrap{display:flex;justify-content:center}
+
+/* ORDER SEQUENCE VISUALIZER */
+.order-seq{display:flex;align-items:center;gap:0;flex-wrap:nowrap;overflow-x:auto;padding:12px 0;margin:10px 0}
+.os-node{
+  width:44px;height:44px;border-radius:0;flex-shrink:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  border:1px solid var(--border);background:var(--white);
+  font-family:'Courier New',monospace;font-size:14px;font-weight:700;color:var(--tx);
+}
+.os-num{font-size:9px;font-family:'Inter',sans-serif;color:var(--tx3);font-weight:400;margin-top:2px}
+.os-node.in{border-color:var(--in-bd);background:var(--in-bg);color:#0C447C}
+.os-node.pre{border-color:var(--pre-bd);background:var(--pre-bg);color:#14532D}
+.os-node.post{border-color:var(--post-bd);background:var(--post-bg);color:#78350F}
+.os-arrow{color:var(--tx3);font-size:12px;padding:0 2px;flex-shrink:0}
+
+/* CODE */
+.cb{background:var(--code-bg);border:1px solid var(--code-border);margin:16px 0;overflow:hidden}
+.cb-bar{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;border-bottom:1px solid var(--code-border);background:#120810}
+.cb-dots{display:flex;gap:5px}
+.cb-dot{width:9px;height:9px;border-radius:50%}
+.cb-dot:nth-child(1){background:#FF5F57}.cb-dot:nth-child(2){background:#FFBD2E}.cb-dot:nth-child(3){background:#28C840}
+.cb-fname{font-family:'Courier New',monospace;font-size:10px;color:#6B5060}
+.cb-lang{font-size:9px;color:var(--guinda-rule);padding:1px 6px;border:1px solid var(--code-border)}
+.cb-body{padding:18px 20px;font-family:'Courier New',monospace;font-size:13px;line-height:1.9;overflow-x:auto}
+.cb-body pre{white-space:pre-wrap;word-break:break-word}
+.kw{color:var(--kw)}.tp{color:var(--tp)}.st{color:var(--st)}
+.cm{color:var(--cm);font-style:italic}.nm{color:var(--nm)}.mt{color:var(--mt)}.vr{color:var(--vr)}
+
+.callout{display:flex;gap:14px;padding:14px 16px;margin:14px 0;font-size:13.5px;line-height:1.65;border-left:4px solid}
+.co-g{background:var(--ok-bg);border-color:var(--ok-bd);color:var(--ok)}
+.co-r{background:var(--er-bg);border-color:var(--er-bd);color:var(--er)}
+.co-a{background:var(--am-bg);border-color:var(--am-bd);color:var(--am)}
+.co-p{background:var(--guinda-l);border-color:var(--guinda-rule);color:var(--guinda)}
+.callout-icon{font-size:15px;flex-shrink:0;font-style:normal}
+
+.activity{border:1px solid var(--border);margin:24px 0;background:var(--white)}
+.activity-head{background:var(--guinda);padding:12px 20px;display:flex;align-items:center;justify-content:space-between}
+.activity-title{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#fff;letter-spacing:.06em;text-transform:uppercase}
+.activity-time{font-family:'Inter',sans-serif;font-size:11px;color:rgba(255,255,255,.6)}
+.activity-body{padding:20px 22px}
+.activity-body p{font-size:13.5px;color:var(--tx);line-height:1.7;margin-bottom:10px}
+.activity-body p:last-child{margin-bottom:0}
+.activity-body strong{color:var(--guinda)}
+.act-steps{list-style:none;display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.act-steps li{display:flex;gap:12px;align-items:flex-start;font-size:13.5px;color:var(--tx2);line-height:1.6}
+.step-n{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--guinda);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;margin-top:2px;font-family:'Inter',sans-serif}
+
+.trace-table{width:100%;border-collapse:collapse;font-size:13px;margin:14px 0}
+.trace-table th{padding:9px 12px;text-align:center;background:var(--guinda);color:#fff;font-family:'Inter',sans-serif;font-size:9px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;border-right:1px solid var(--guinda-mid)}
+.trace-table th:first-child{text-align:left}
+.trace-table td{padding:10px 12px;border:1px solid var(--border);vertical-align:middle}
+.trace-table tr:nth-child(even) td{background:var(--off)}
+.trace-code{font-family:'Courier New',monospace;font-size:12px;color:var(--guinda)}
+.trace-inp{width:100%;background:transparent;border:none;border-bottom:1.5px solid var(--guinda-rule);font-family:'Courier New',monospace;font-size:12.5px;color:var(--guinda);text-align:center;padding:2px;outline:none}
+.trace-inp:focus{border-bottom-color:var(--guinda)}
+.trace-inp.ok{color:var(--ok);border-bottom-color:var(--ok-bd)}
+.trace-inp.er{color:var(--er);border-bottom-color:var(--er-bd)}
+
+.mcq{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.mcq-opt{display:flex;align-items:flex-start;gap:12px;padding:10px 14px;border:1px solid var(--border);cursor:pointer;font-size:13px;transition:all .15s;background:var(--off)}
+.mcq-opt:hover{border-color:var(--guinda-rule);background:var(--guinda-l)}
+.mcq-opt.ok{border-color:var(--ok-bd)!important;background:var(--ok-bg)!important;color:var(--ok)!important}
+.mcq-opt.er{border-color:var(--er-bd)!important;background:var(--er-bg)!important;color:var(--er)!important}
+.mcq-opt.show-ok{border-color:var(--ok-bd);background:var(--ok-bg);color:var(--ok);opacity:.7}
+.mcq-letter{flex-shrink:0;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;border:1px solid var(--border);color:var(--tx3);font-family:'Inter',sans-serif;margin-top:1px}
+.mcq-fb{display:none;margin-top:8px;padding:10px 14px;font-size:12.5px;line-height:1.6;border-left:3px solid}
+.mcq-fb.show{display:block}
+.mcq-fb.ok{background:var(--ok-bg);border-color:var(--ok-bd);color:var(--ok)}
+.mcq-fb.er{background:var(--er-bg);border-color:var(--er-bd);color:var(--er)}
+
+.bib-list{list-style:none;display:flex;flex-direction:column;gap:14px}
+.bib-item{border-left:3px solid var(--border);padding:12px 16px;background:var(--off);font-size:13.5px;color:var(--tx2);line-height:1.7}
+.bib-type{font-family:'Inter',sans-serif;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--guinda-rule);margin-bottom:4px;font-weight:600}
+.bib-item a{color:var(--guinda);text-decoration:underline;word-break:break-all}
+
+.section-block{margin-bottom:52px}
+.divider{border:none;border-top:1px solid var(--border);margin:44px 0}
+
+@media(max-width:640px){
+  .header-inner{padding:12px 18px}
+  .wrap{padding:32px 18px 80px}
+  .concept-pair,.traversal-grid{grid-template-columns:1fr}
+  .comp-grid{grid-template-columns:1fr}
+  .unit-stamp{flex-direction:column;gap:10px}
+  .unit-num{font-size:36px}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-logo"><img src="imagen1.png" alt="Logo institucional"></div>
+    <div class="header-center">
+      <div class="header-course">Estructura de Datos &nbsp;|&nbsp; Licenciatura en Sistemas Computacionales</div>
+      <div class="header-title">Búsqueda y recorridos en BST</div>
+    </div>
+    <div class="header-logo2"><img src="imagen2.png" alt="Logo de apoyo"></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="pFill"></div></div>
+</header>
+
+<div class="wrap">
+
+<!-- UNIT STAMP -->
+<div class="unit-stamp">
+  <div class="unit-num">02</div>
+  <div class="unit-meta">
+    <div class="unit-tag">Unidad 2 &nbsp;&mdash;&nbsp; Estructuras de datos no lineales</div>
+    <div class="unit-name">Búsqueda y recorridos en el BST</div>
+    <div class="unit-topic">
+      Tema: 2.2 &mdash; Método Buscar en BST, recorridos InOrder, PreOrder y PostOrder en C#, y análisis comparativo de los tres recorridos.<br>
+      Prerrequisito inmediato: Tema 2.1 — clase Nodo, propiedad BST, inserción recursiva e InOrder (4 de julio).
+    </div>
+  </div>
+  <div class="unit-time">90 min</div>
+</div>
+
+<!-- COMPETENCIAS -->
+<div class="section-block">
+  <div class="sec-label">Para esta sesión</div>
+  <div class="sec-title">Competencias a desarrollar</div>
+  <div class="comp-grid">
+    <div class="comp-card">
+      <div class="comp-type">Conceptual</div>
+      <div class="comp-text">Distingue los tres recorridos clásicos de un árbol binario (InOrder, PreOrder y PostOrder) por el orden en que visitan el nodo actual respecto a sus subárboles, y asocia cada uno con un caso de uso concreto.</div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-type">Procedimental</div>
+      <div class="comp-text">Implementa en C# los métodos <code style="font-family:Courier New;color:var(--guinda)">Buscar</code>, <code style="font-family:Courier New;color:var(--guinda)">PreOrder</code> y <code style="font-family:Courier New;color:var(--guinda)">PostOrder</code> sobre la clase BST del tema anterior, ejecutando el programa correctamente desde Codespaces.</div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-type">Analítica</div>
+      <div class="comp-text">Traza manualmente los tres recorridos sobre un BST dado, predice la secuencia exacta de valores que cada uno imprime y justifica por qué la búsqueda en un BST es más eficiente que en una lista enlazada.</div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-type">Integradora</div>
+      <div class="comp-text">Selecciona el recorrido adecuado según el requerimiento del problema: InOrder para listar en orden, PreOrder para copiar o serializar el árbol, PostOrder para eliminar nodos de forma segura.</div>
+    </div>
+  </div>
+</div>
+
+<!-- REPASO -->
+<div class="section-block">
+  <div class="sec-label">Repaso de la sesión anterior</div>
+  <div class="sec-title">Lo que ya sabemos del BST</div>
+
+  <div class="intro-box">
+    <p>
+      En la sesión del 4 de julio construimos la base del BST: la clase <code style="font-family:Courier New;color:var(--guinda)">Nodo</code> con sus tres atributos (<strong>Valor</strong>, <strong>Izquierdo</strong>, <strong>Derecho</strong>), la propiedad de orden que dice que todo lo menor va a la izquierda y todo lo mayor va a la derecha, el método <code style="font-family:Courier New;color:var(--guinda)">Insertar</code> recursivo, y el recorrido <strong>InOrder</strong> que produce los valores en orden ascendente.
+    </p>
+    <p>
+      Hoy completamos el BST con dos cosas que le faltaban: la <strong>búsqueda</strong> —que era la extensión pendiente de la Actividad 3— y dos recorridos adicionales que sirven para casos de uso distintos al de listar en orden.
+    </p>
+  </div>
+
+  <!-- Reference BST -->
+  <div class="tree-box">
+    <div class="tree-box-label">Árbol de referencia para toda la sesión — insertado con: 50, 30, 70, 20, 40, 60, 80</div>
+    <div class="tree-svg-wrap">
+      <svg width="480" height="220" viewBox="0 0 480 220" xmlns="http://www.w3.org/2000/svg" style="font-family:'Courier New',monospace;overflow:visible">
+        <line x1="240" y1="38" x2="140" y2="98"  stroke="#DEC8CE" stroke-width="1.5"/>
+        <line x1="240" y1="38" x2="340" y2="98"  stroke="#DEC8CE" stroke-width="1.5"/>
+        <line x1="140" y1="118" x2="90"  y2="168" stroke="#DEC8CE" stroke-width="1.5"/>
+        <line x1="140" y1="118" x2="190" y2="168" stroke="#DEC8CE" stroke-width="1.5"/>
+        <line x1="340" y1="118" x2="290" y2="168" stroke="#DEC8CE" stroke-width="1.5"/>
+        <line x1="340" y1="118" x2="390" y2="168" stroke="#DEC8CE" stroke-width="1.5"/>
+        <circle cx="240" cy="28" r="22" fill="#5e162e"/><text x="240" y="33" text-anchor="middle" fill="white" font-size="14" font-weight="600">50</text>
+        <circle cx="140" cy="108" r="20" fill="#F5E8EE" stroke="#C85070" stroke-width="1.5"/><text x="140" y="113" text-anchor="middle" fill="#5e162e" font-size="13" font-weight="600">30</text>
+        <circle cx="340" cy="108" r="20" fill="#F5E8EE" stroke="#C85070" stroke-width="1.5"/><text x="340" y="113" text-anchor="middle" fill="#5e162e" font-size="13" font-weight="600">70</text>
+        <circle cx="90"  cy="168" r="18" fill="#FAF6F7" stroke="#DEC8CE"/><text x="90"  y="173" text-anchor="middle" fill="#6B4050" font-size="13">20</text>
+        <circle cx="190" cy="168" r="18" fill="#FAF6F7" stroke="#DEC8CE"/><text x="190" y="173" text-anchor="middle" fill="#6B4050" font-size="13">40</text>
+        <circle cx="290" cy="168" r="18" fill="#FAF6F7" stroke="#DEC8CE"/><text x="290" y="173" text-anchor="middle" fill="#6B4050" font-size="13">60</text>
+        <circle cx="390" cy="168" r="18" fill="#FAF6F7" stroke="#DEC8CE"/><text x="390" y="173" text-anchor="middle" fill="#6B4050" font-size="13">80</text>
+        <text x="240" y="10" text-anchor="middle" fill="#A07080" font-size="10" font-family="'Inter',sans-serif">raíz</text>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- BUSQUEDA -->
+<div class="section-block">
+  <div class="sec-label">Tema 2.2 — Búsqueda</div>
+  <div class="sec-title">Buscar un valor en el BST</div>
+
+  <div class="analogy">
+    <div class="analogy-label">Por qué la búsqueda en BST es diferente a la búsqueda en lista</div>
+    <p>
+      En una <strong>lista enlazada</strong> buscar el valor 60 obliga a recorrer todos los nodos desde el primero hasta encontrarlo o llegar al final. Con un millón de nodos, en el peor caso se hacen un millón de comparaciones.
+    </p>
+    <p>
+      En un <strong>BST</strong>, al llegar al nodo 50 sabemos que 60 es mayor, así que el subárbol izquierdo completo (20, 30, 40) queda <strong>descartado de inmediato</strong>. Con un árbol equilibrado de un millón de nodos, el máximo de comparaciones es aproximadamente 20.
+    </p>
+  </div>
+
+  <p style="font-size:14px;color:var(--tx2);margin-bottom:10px;line-height:1.7">
+    Traza de <code style="font-family:Courier New;color:var(--guinda)">Buscar(60)</code> sobre el árbol de referencia:
+  </p>
+
+  <div class="search-path">
+    <div class="sp-step">
+      <div class="sp-node sp-active">50</div>
+      <div class="sp-desc"><strong>60 &gt; 50</strong> — busco en el subárbol derecho. El subárbol izquierdo completo (20, 30, 40) queda descartado.</div>
+    </div>
+    <div class="sp-step">
+      <div class="sp-node sp-active">70</div>
+      <div class="sp-desc"><strong>60 &lt; 70</strong> — busco en el subárbol izquierdo de 70.</div>
+    </div>
+    <div class="sp-step">
+      <div class="sp-node sp-found">60</div>
+      <div class="sp-desc"><strong>60 == 60</strong> — valor encontrado. Se devuelve <code style="font-family:Courier New;color:var(--guinda)">true</code>. Solo se hicieron 3 comparaciones.</div>
+    </div>
+  </div>
+
+  <div class="callout co-g">
+    <span class="callout-icon">Costo</span>
+    <span>La búsqueda en un BST equilibrado cuesta <strong>O(log n)</strong> comparaciones en el caso promedio — exactamente la mitad del árbol se descarta en cada nivel. En el peor caso (árbol degenerado en lista) sigue siendo O(n), por eso los árboles AVL del siguiente tema garantizan el equilibrio.</span>
+  </div>
+</div>
+
+<!-- CODIGO BUSCAR -->
+<div class="section-block">
+  <div class="sec-label">Código en C#</div>
+  <div class="sec-title">Ejemplo 1 — Método Buscar</div>
+
+  <div class="cb">
+    <div class="cb-bar">
+      <div class="cb-dots"><div class="cb-dot"></div><div class="cb-dot"></div><div class="cb-dot"></div></div>
+      <span class="cb-fname">BST.cs — método Buscar</span>
+      <span class="cb-lang">C#</span>
+    </div>
+    <div class="cb-body"><pre><span class="cm">// Agrega estos dos métodos a la clase BST del tema anterior</span>
+
+<span class="kw">public</span> <span class="tp">bool</span> <span class="mt">Buscar</span>(<span class="tp">int</span> <span class="vr">valor</span>)
+{
+    <span class="kw">return</span> <span class="mt">BuscarRec</span>(<span class="vr">raiz</span>, <span class="vr">valor</span>);
+}
+
+<span class="kw">private</span> <span class="tp">bool</span> <span class="mt">BuscarRec</span>(<span class="tp">Nodo</span> <span class="vr">nodo</span>, <span class="tp">int</span> <span class="vr">valor</span>)
+{
+    <span class="cm">// Caso base 1: llegué a un null — el valor no existe</span>
+    <span class="kw">if</span> (<span class="vr">nodo</span> == <span class="kw">null</span>) <span class="kw">return</span> <span class="kw">false</span>;
+
+    <span class="cm">// Caso base 2: encontré el valor</span>
+    <span class="kw">if</span> (<span class="vr">valor</span> == <span class="vr">nodo</span>.<span class="vr">Valor</span>) <span class="kw">return</span> <span class="kw">true</span>;
+
+    <span class="cm">// Decisión binaria: izquierda o derecha</span>
+    <span class="kw">if</span> (<span class="vr">valor</span> &lt; <span class="vr">nodo</span>.<span class="vr">Valor</span>)
+        <span class="kw">return</span> <span class="mt">BuscarRec</span>(<span class="vr">nodo</span>.<span class="vr">Izquierdo</span>, <span class="vr">valor</span>);
+    <span class="kw">else</span>
+        <span class="kw">return</span> <span class="mt">BuscarRec</span>(<span class="vr">nodo</span>.<span class="vr">Derecho</span>, <span class="vr">valor</span>);
+}
+
+<span class="cm">// Prueba en Main:</span>
+<span class="cm">// arbol.Buscar(40)  → true   (existe en el árbol)</span>
+<span class="cm">// arbol.Buscar(99)  → false  (no existe)</span>
+<span class="cm">// arbol.Buscar(50)  → true   (es la raíz)</span></pre></div>
+  </div>
+
+  <div class="callout co-p">
+    <span class="callout-icon">Patrón recursivo</span>
+    <span>La estructura de <code style="font-family:Courier New">BuscarRec</code> es idéntica a la de <code style="font-family:Courier New">InsertarRec</code>: mismo caso base (nodo == null), misma decisión binaria (menor → izquierda, mayor → derecha). La diferencia es que en lugar de crear un nodo devuelve <code style="font-family:Courier New">true</code> o <code style="font-family:Courier New">false</code>.</span>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- RECORRIDOS -->
+<div class="section-block">
+  <div class="sec-label">Tema 2.2 — Los tres recorridos</div>
+  <div class="sec-title">InOrder, PreOrder y PostOrder</div>
+
+  <div class="intro-box">
+    <p>
+      Los tres recorridos visitan exactamente los mismos nodos. Lo que cambia es <strong>el momento en que se procesa el nodo actual</strong> respecto a sus subárboles. Esa diferencia de orden produce secuencias completamente distintas y tiene aplicaciones específicas cada una.
+    </p>
+  </div>
+
+  <div class="traversal-grid">
+    <div class="tv-card inorder">
+      <div class="tv-name">InOrder</div>
+      <div class="tv-pattern">Izq → Nodo → Der</div>
+      <div class="tv-desc">Se procesa el nodo entre los dos subárboles. En un BST siempre produce los valores en orden ascendente. Uso típico: listar o exportar datos ordenados.</div>
+      <div class="tv-result">20 30 40 50 60 70 80</div>
+    </div>
+    <div class="tv-card preorder">
+      <div class="tv-name">PreOrder</div>
+      <div class="tv-pattern">Nodo → Izq → Der</div>
+      <div class="tv-desc">Se procesa el nodo antes de bajar a los subárboles. El primer valor impreso siempre es la raíz. Uso típico: copiar o serializar la estructura del árbol.</div>
+      <div class="tv-result">50 30 20 40 70 60 80</div>
+    </div>
+    <div class="tv-card postorder">
+      <div class="tv-name">PostOrder</div>
+      <div class="tv-pattern">Izq → Der → Nodo</div>
+      <div class="tv-desc">Se procesa el nodo después de ambos subárboles. El último valor impreso siempre es la raíz. Uso típico: liberar memoria, eliminar el árbol nodo a nodo de forma segura.</div>
+      <div class="tv-result">20 40 30 60 80 70 50</div>
+    </div>
+  </div>
+
+  <div class="callout co-a">
+    <span class="callout-icon">Clave de memoria</span>
+    <span>El prefijo indica cuándo se procesa el nodo: <strong>Pre</strong>-Order = antes (<em>before</em>) de los hijos. <strong>In</strong>-Order = entre los hijos. <strong>Post</strong>-Order = después de los hijos. El subárbol izquierdo siempre se visita antes que el derecho en los tres casos.</span>
+  </div>
+
+  <!-- INORDER SEQUENCE VISUAL -->
+  <p style="font-size:13px;color:var(--tx3);margin-bottom:6px;font-family:'Inter',sans-serif;text-transform:uppercase;letter-spacing:.08em">InOrder — Izq → Nodo → Der</p>
+  <div class="order-seq">
+    <div class="os-node in">20<span class="os-num">1°</span></div><div class="os-arrow">→</div>
+    <div class="os-node in">30<span class="os-num">2°</span></div><div class="os-arrow">→</div>
+    <div class="os-node in">40<span class="os-num">3°</span></div><div class="os-arrow">→</div>
+    <div class="os-node in">50<span class="os-num">4°</span></div><div class="os-arrow">→</div>
+    <div class="os-node in">60<span class="os-num">5°</span></div><div class="os-arrow">→</div>
+    <div class="os-node in">70<span class="os-num">6°</span></div><div class="os-arrow">→</div>
+    <div class="os-node in">80<span class="os-num">7°</span></div>
+  </div>
+
+  <p style="font-size:13px;color:var(--tx3);margin-bottom:6px;margin-top:14px;font-family:'Inter',sans-serif;text-transform:uppercase;letter-spacing:.08em">PreOrder — Nodo → Izq → Der</p>
+  <div class="order-seq">
+    <div class="os-node pre">50<span class="os-num">1°</span></div><div class="os-arrow">→</div>
+    <div class="os-node pre">30<span class="os-num">2°</span></div><div class="os-arrow">→</div>
+    <div class="os-node pre">20<span class="os-num">3°</span></div><div class="os-arrow">→</div>
+    <div class="os-node pre">40<span class="os-num">4°</span></div><div class="os-arrow">→</div>
+    <div class="os-node pre">70<span class="os-num">5°</span></div><div class="os-arrow">→</div>
+    <div class="os-node pre">60<span class="os-num">6°</span></div><div class="os-arrow">→</div>
+    <div class="os-node pre">80<span class="os-num">7°</span></div>
+  </div>
+
+  <p style="font-size:13px;color:var(--tx3);margin-bottom:6px;margin-top:14px;font-family:'Inter',sans-serif;text-transform:uppercase;letter-spacing:.08em">PostOrder — Izq → Der → Nodo</p>
+  <div class="order-seq">
+    <div class="os-node post">20<span class="os-num">1°</span></div><div class="os-arrow">→</div>
+    <div class="os-node post">40<span class="os-num">2°</span></div><div class="os-arrow">→</div>
+    <div class="os-node post">30<span class="os-num">3°</span></div><div class="os-arrow">→</div>
+    <div class="os-node post">60<span class="os-num">4°</span></div><div class="os-arrow">→</div>
+    <div class="os-node post">80<span class="os-num">5°</span></div><div class="os-arrow">→</div>
+    <div class="os-node post">70<span class="os-num">6°</span></div><div class="os-arrow">→</div>
+    <div class="os-node post">50<span class="os-num">7°</span></div>
+  </div>
+</div>
+
+<!-- CODIGO RECORRIDOS -->
+<div class="section-block">
+  <div class="sec-label">Código en C#</div>
+  <div class="sec-title">Ejemplo 2 — PreOrder y PostOrder</div>
+
+  <div class="cb">
+    <div class="cb-bar">
+      <div class="cb-dots"><div class="cb-dot"></div><div class="cb-dot"></div><div class="cb-dot"></div></div>
+      <span class="cb-fname">BST.cs — PreOrder y PostOrder</span>
+      <span class="cb-lang">C#</span>
+    </div>
+    <div class="cb-body"><pre><span class="cm">// Agrega estos cuatro métodos a la clase BST</span>
+
+<span class="kw">public</span> <span class="kw">void</span> <span class="mt">PreOrder</span>()
+{
+    <span class="mt">PreRec</span>(<span class="vr">raiz</span>);
+    <span class="tp">Console</span>.<span class="mt">WriteLine</span>();
+}
+
+<span class="kw">private</span> <span class="kw">void</span> <span class="mt">PreRec</span>(<span class="tp">Nodo</span> <span class="vr">n</span>)
+{
+    <span class="kw">if</span> (<span class="vr">n</span> == <span class="kw">null</span>) <span class="kw">return</span>;
+    <span class="tp">Console</span>.<span class="mt">Write</span>(<span class="vr">n</span>.<span class="vr">Valor</span> + <span class="st">" "</span>); <span class="cm">// 1. proceso el nodo ANTES de bajar</span>
+    <span class="mt">PreRec</span>(<span class="vr">n</span>.<span class="vr">Izquierdo</span>);              <span class="cm">// 2. subárbol izquierdo</span>
+    <span class="mt">PreRec</span>(<span class="vr">n</span>.<span class="vr">Derecho</span>);               <span class="cm">// 3. subárbol derecho</span>
+}
+
+<span class="kw">public</span> <span class="kw">void</span> <span class="mt">PostOrder</span>()
+{
+    <span class="mt">PostRec</span>(<span class="vr">raiz</span>);
+    <span class="tp">Console</span>.<span class="mt">WriteLine</span>();
+}
+
+<span class="kw">private</span> <span class="kw">void</span> <span class="mt">PostRec</span>(<span class="tp">Nodo</span> <span class="vr">n</span>)
+{
+    <span class="kw">if</span> (<span class="vr">n</span> == <span class="kw">null</span>) <span class="kw">return</span>;
+    <span class="mt">PostRec</span>(<span class="vr">n</span>.<span class="vr">Izquierdo</span>);             <span class="cm">// 1. subárbol izquierdo</span>
+    <span class="mt">PostRec</span>(<span class="vr">n</span>.<span class="vr">Derecho</span>);              <span class="cm">// 2. subárbol derecho</span>
+    <span class="tp">Console</span>.<span class="mt">Write</span>(<span class="vr">n</span>.<span class="vr">Valor</span> + <span class="st">" "</span>); <span class="cm">// 3. proceso el nodo DESPUÉS de subir</span>
+}</pre></div>
+  </div>
+</div>
+
+<!-- CODIGO PROGRAMA COMPLETO -->
+<div class="section-block">
+  <div class="sec-label">Código en C#</div>
+  <div class="sec-title">Ejemplo 3 — Programa completo con los cuatro métodos</div>
+
+  <div class="cb">
+    <div class="cb-bar">
+      <div class="cb-dots"><div class="cb-dot"></div><div class="cb-dot"></div><div class="cb-dot"></div></div>
+      <span class="cb-fname">Program.cs — BST completo</span>
+      <span class="cb-lang">C#</span>
+    </div>
+    <div class="cb-body"><pre><span class="kw">using</span> <span class="tp">System</span>;
+
+<span class="kw">class</span> <span class="tp">Nodo</span>
+{
+    <span class="kw">public</span> <span class="tp">int</span>  <span class="vr">Valor</span>;
+    <span class="kw">public</span> <span class="tp">Nodo</span> <span class="vr">Izquierdo</span>, <span class="vr">Derecho</span>;
+    <span class="kw">public</span> <span class="mt">Nodo</span>(<span class="tp">int</span> <span class="vr">v</span>) { <span class="vr">Valor</span> = <span class="vr">v</span>; }
+}
+
+<span class="kw">class</span> <span class="tp">BST</span>
+{
+    <span class="kw">private</span> <span class="tp">Nodo</span> <span class="vr">raiz</span>;
+
+    <span class="cm">// ── Inserción ────────────────────────────────────────────────────</span>
+    <span class="kw">public</span> <span class="kw">void</span>  <span class="mt">Insertar</span>(<span class="tp">int</span> <span class="vr">v</span>) =&gt; <span class="vr">raiz</span> = <span class="mt">InsRec</span>(<span class="vr">raiz</span>, <span class="vr">v</span>);
+    <span class="kw">private</span> <span class="tp">Nodo</span> <span class="mt">InsRec</span>(<span class="tp">Nodo</span> <span class="vr">n</span>, <span class="tp">int</span> <span class="vr">v</span>)
+    {
+        <span class="kw">if</span> (<span class="vr">n</span> == <span class="kw">null</span>) <span class="kw">return</span> <span class="kw">new</span> <span class="tp">Nodo</span>(<span class="vr">v</span>);
+        <span class="kw">if</span> (<span class="vr">v</span> &lt; <span class="vr">n</span>.<span class="vr">Valor</span>) <span class="vr">n</span>.<span class="vr">Izquierdo</span> = <span class="mt">InsRec</span>(<span class="vr">n</span>.<span class="vr">Izquierdo</span>, <span class="vr">v</span>);
+        <span class="kw">else</span> <span class="kw">if</span> (<span class="vr">v</span> &gt; <span class="vr">n</span>.<span class="vr">Valor</span>) <span class="vr">n</span>.<span class="vr">Derecho</span>   = <span class="mt">InsRec</span>(<span class="vr">n</span>.<span class="vr">Derecho</span>,   <span class="vr">v</span>);
+        <span class="kw">return</span> <span class="vr">n</span>;
+    }
+
+    <span class="cm">// ── Búsqueda ─────────────────────────────────────────────────────</span>
+    <span class="kw">public</span> <span class="tp">bool</span> <span class="mt">Buscar</span>(<span class="tp">int</span> <span class="vr">v</span>) =&gt; <span class="mt">BusRec</span>(<span class="vr">raiz</span>, <span class="vr">v</span>);
+    <span class="kw">private</span> <span class="tp">bool</span> <span class="mt">BusRec</span>(<span class="tp">Nodo</span> <span class="vr">n</span>, <span class="tp">int</span> <span class="vr">v</span>)
+    {
+        <span class="kw">if</span> (<span class="vr">n</span> == <span class="kw">null</span>)          <span class="kw">return</span> <span class="kw">false</span>;
+        <span class="kw">if</span> (<span class="vr">v</span> == <span class="vr">n</span>.<span class="vr">Valor</span>)       <span class="kw">return</span> <span class="kw">true</span>;
+        <span class="kw">return</span> <span class="vr">v</span> &lt; <span class="vr">n</span>.<span class="vr">Valor</span>
+            ? <span class="mt">BusRec</span>(<span class="vr">n</span>.<span class="vr">Izquierdo</span>, <span class="vr">v</span>)
+            : <span class="mt">BusRec</span>(<span class="vr">n</span>.<span class="vr">Derecho</span>,   <span class="vr">v</span>);
+    }
+
+    <span class="cm">// ── Recorridos ───────────────────────────────────────────────────</span>
+    <span class="kw">public</span> <span class="kw">void</span> <span class="mt">InOrder</span>()   { <span class="mt">InRec</span>(<span class="vr">raiz</span>);   <span class="tp">Console</span>.<span class="mt">WriteLine</span>(); }
+    <span class="kw">public</span> <span class="kw">void</span> <span class="mt">PreOrder</span>()  { <span class="mt">PreRec</span>(<span class="vr">raiz</span>);  <span class="tp">Console</span>.<span class="mt">WriteLine</span>(); }
+    <span class="kw">public</span> <span class="kw">void</span> <span class="mt">PostOrder</span>() { <span class="mt">PostRec</span>(<span class="vr">raiz</span>); <span class="tp">Console</span>.<span class="mt">WriteLine</span>(); }
+
+    <span class="kw">private</span> <span class="kw">void</span> <span class="mt">InRec</span>(<span class="tp">Nodo</span> <span class="vr">n</span>)
+    { <span class="kw">if</span>(<span class="vr">n</span>==<span class="kw">null</span>)<span class="kw">return</span>; <span class="mt">InRec</span>(<span class="vr">n</span>.<span class="vr">Izquierdo</span>); <span class="tp">Console</span>.<span class="mt">Write</span>(<span class="vr">n</span>.<span class="vr">Valor</span>+<span class="st">" "</span>); <span class="mt">InRec</span>(<span class="vr">n</span>.<span class="vr">Derecho</span>); }
+
+    <span class="kw">private</span> <span class="kw">void</span> <span class="mt">PreRec</span>(<span class="tp">Nodo</span> <span class="vr">n</span>)
+    { <span class="kw">if</span>(<span class="vr">n</span>==<span class="kw">null</span>)<span class="kw">return</span>; <span class="tp">Console</span>.<span class="mt">Write</span>(<span class="vr">n</span>.<span class="vr">Valor</span>+<span class="st">" "</span>); <span class="mt">PreRec</span>(<span class="vr">n</span>.<span class="vr">Izquierdo</span>); <span class="mt">PreRec</span>(<span class="vr">n</span>.<span class="vr">Derecho</span>); }
+
+    <span class="kw">private</span> <span class="kw">void</span> <span class="mt">PostRec</span>(<span class="tp">Nodo</span> <span class="vr">n</span>)
+    { <span class="kw">if</span>(<span class="vr">n</span>==<span class="kw">null</span>)<span class="kw">return</span>; <span class="mt">PostRec</span>(<span class="vr">n</span>.<span class="vr">Izquierdo</span>); <span class="mt">PostRec</span>(<span class="vr">n</span>.<span class="vr">Derecho</span>); <span class="tp">Console</span>.<span class="mt">Write</span>(<span class="vr">n</span>.<span class="vr">Valor</span>+<span class="st">" "</span>); }
+}
+
+<span class="kw">class</span> <span class="tp">Program</span>
+{
+    <span class="kw">static</span> <span class="kw">void</span> <span class="mt">Main</span>()
+    {
+        <span class="tp">BST</span> <span class="vr">arbol</span> = <span class="kw">new</span> <span class="tp">BST</span>();
+        <span class="kw">foreach</span> (<span class="tp">int</span> <span class="vr">v</span> <span class="kw">in</span> <span class="kw">new</span>[] { <span class="nm">50</span>,<span class="nm">30</span>,<span class="nm">70</span>,<span class="nm">20</span>,<span class="nm">40</span>,<span class="nm">60</span>,<span class="nm">80</span> })
+            <span class="vr">arbol</span>.<span class="mt">Insertar</span>(<span class="vr">v</span>);
+
+        <span class="tp">Console</span>.<span class="mt">Write</span>(<span class="st">"InOrder:   "</span>); <span class="vr">arbol</span>.<span class="mt">InOrder</span>();
+        <span class="cm">// 20 30 40 50 60 70 80</span>
+
+        <span class="tp">Console</span>.<span class="mt">Write</span>(<span class="st">"PreOrder:  "</span>); <span class="vr">arbol</span>.<span class="mt">PreOrder</span>();
+        <span class="cm">// 50 30 20 40 70 60 80</span>
+
+        <span class="tp">Console</span>.<span class="mt">Write</span>(<span class="st">"PostOrder: "</span>); <span class="vr">arbol</span>.<span class="mt">PostOrder</span>();
+        <span class="cm">// 20 40 30 60 80 70 50</span>
+
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"Buscar(40): {</span><span class="vr">arbol</span>.<span class="mt">Buscar</span>(<span class="nm">40</span>)<span class="st">}"</span>);  <span class="cm">// True</span>
+        <span class="tp">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"Buscar(99): {</span><span class="vr">arbol</span>.<span class="mt">Buscar</span>(<span class="nm">99</span>)<span class="st">}"</span>);  <span class="cm">// False</span>
+    }
+}</pre></div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ACTIVIDADES -->
+<div class="section-block">
+  <div class="sec-label">Durante la sesión</div>
+  <div class="sec-title">Actividades</div>
+
+  <!-- ACT 1 -->
+  <div class="activity">
+    <div class="activity-head">
+      <span class="activity-title">Actividad 1 — Traza de los tres recorridos</span>
+      <span class="activity-time">15 min</span>
+    </div>
+    <div class="activity-body">
+      <p>Dado el árbol construido con la secuencia <strong>45, 25, 65, 15, 35, 55, 75</strong> (el mismo de la Actividad 1 de la sesión anterior), completa la tabla con el resultado de cada recorrido. Trázalo en papel nodo por nodo antes de escribir la respuesta.</p>
+
+      <table class="trace-table">
+        <thead>
+          <tr>
+            <th style="text-align:left">Recorrido</th>
+            <th>Patrón</th>
+            <th>Secuencia de salida</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="trace-code">InOrder</td>
+            <td style="text-align:center;font-family:'Courier New',monospace;font-size:12px">Izq→Nodo→Der</td>
+            <td><input class="trace-inp" id="r1" placeholder="?" oninput="chk('r1','15 25 35 45 55 65 75')"></td>
+          </tr>
+          <tr>
+            <td class="trace-code">PreOrder</td>
+            <td style="text-align:center;font-family:'Courier New',monospace;font-size:12px">Nodo→Izq→Der</td>
+            <td><input class="trace-inp" id="r2" placeholder="?" oninput="chk('r2','45 25 15 35 65 55 75')"></td>
+          </tr>
+          <tr>
+            <td class="trace-code">PostOrder</td>
+            <td style="text-align:center;font-family:'Courier New',monospace;font-size:12px">Izq→Der→Nodo</td>
+            <td><input class="trace-inp" id="r3" placeholder="?" oninput="chk('r3','15 35 25 55 75 65 45')"></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p style="margin-top:12px">Una vez completada la traza, ejecuta el programa del Ejemplo 3 modificado con estos valores para verificar tus respuestas.</p>
+    </div>
+  </div>
+
+  <!-- ACT 2 -->
+  <div class="activity">
+    <div class="activity-head">
+      <span class="activity-title">Actividad 2 — Análisis de búsqueda</span>
+      <span class="activity-time">15 min</span>
+    </div>
+    <div class="activity-body">
+      <p>Sobre el árbol de referencia de la sesión (50, 30, 70, 20, 40, 60, 80), responde:</p>
+
+      <p style="margin-top:4px"><strong>Pregunta 1.</strong> ¿Cuántas comparaciones necesita <code style="font-family:Courier New;color:var(--guinda)">Buscar(20)</code>? Indica el camino nodo por nodo.</p>
+
+      <div class="mcq" id="mcq1">
+        <div class="mcq-opt" onclick="mcq('mcq1',0,'er','fb1','20 &lt; 50 → izq; 20 &lt; 30 → izq; 20 == 20 → encontrado. Son 3 comparaciones.')">
+          <span class="mcq-letter">A</span><span>2 comparaciones: 50 → 20</span>
+        </div>
+        <div class="mcq-opt" onclick="mcq('mcq1',1,'ok','fb1','Correcto. El camino es: 20 &lt; 50 → izquierda; 20 &lt; 30 → izquierda; 20 == 20 → encontrado. Tres niveles, tres comparaciones.')">
+          <span class="mcq-letter">B</span><span>3 comparaciones: 50 → 30 → 20</span>
+        </div>
+        <div class="mcq-opt" onclick="mcq('mcq1',2,'er','fb1','20 &lt; 50 → izq; 20 &lt; 30 → izq; 20 == 20 → encontrado. Son 3 comparaciones.')">
+          <span class="mcq-letter">C</span><span>4 comparaciones: recorre todos los nodos izquierdos</span>
+        </div>
+        <div class="mcq-opt" onclick="mcq('mcq1',3,'er','fb1','20 &lt; 50 → izq; 20 &lt; 30 → izq; 20 == 20 → encontrado. Son 3 comparaciones.')">
+          <span class="mcq-letter">D</span><span>7 comparaciones: revisa todo el árbol</span>
+        </div>
+      </div>
+      <div class="mcq-fb" id="fb1"></div>
+
+      <p style="margin-top:18px"><strong>Pregunta 2.</strong> ¿Qué devuelve <code style="font-family:Courier New;color:var(--guinda)">Buscar(35)</code> y cuántas comparaciones hace antes de devolver ese resultado?</p>
+
+      <div class="mcq" id="mcq2">
+        <div class="mcq-opt" onclick="mcq('mcq2',0,'er','fb2','35 &lt; 50 → izq a 30; 35 &gt; 30 → der a 40; 40 != 35 y 35 &lt; 40 → izq que es null → false. Son 4 comparaciones.')">
+          <span class="mcq-letter">A</span><span>true — existe en el árbol con 2 comparaciones</span>
+        </div>
+        <div class="mcq-opt" onclick="mcq('mcq2',1,'er','fb2','35 &lt; 50 → izq a 30; 35 &gt; 30 → der a 40; 40 != 35 y 35 &lt; 40 → izq que es null → false. Son 4 comparaciones.')">
+          <span class="mcq-letter">B</span><span>true — existe en el árbol con 3 comparaciones</span>
+        </div>
+        <div class="mcq-opt" onclick="mcq('mcq2',2,'ok','fb2','Correcto. 35 &lt; 50 → izq; 35 &gt; 30 → der a 40; 35 &lt; 40 → izq de 40 que es null → devuelve false. Cuatro comparaciones para confirmar ausencia.')">
+          <span class="mcq-letter">C</span><span>false — no existe en el árbol; 4 comparaciones hasta llegar a null</span>
+        </div>
+        <div class="mcq-opt" onclick="mcq('mcq2',3,'er','fb2','35 &lt; 50 → izq a 30; 35 &gt; 30 → der a 40; 40 != 35 y 35 &lt; 40 → izq que es null → false. Son 4 comparaciones.')">
+          <span class="mcq-letter">D</span><span>false — no existe; recorre todo el árbol (7 comparaciones)</span>
+        </div>
+      </div>
+      <div class="mcq-fb" id="fb2"></div>
+    </div>
+  </div>
+
+  <!-- ACT 3 -->
+  <div class="activity">
+    <div class="activity-head">
+      <span class="activity-title">Actividad 3 — BST completo en Codespaces</span>
+      <span class="activity-time">30 min</span>
+    </div>
+    <div class="activity-body">
+      <p>Abre el archivo del tema anterior en tu Codespace y extiéndelo con los métodos nuevos de esta sesión:</p>
+      <ol class="act-steps">
+        <li><div class="step-n">1</div><span>Agrega los métodos <code style="font-family:Courier New;color:var(--guinda)">Buscar</code>, <code style="font-family:Courier New;color:var(--guinda)">PreOrder</code> y <code style="font-family:Courier New;color:var(--guinda)">PostOrder</code> a la clase BST. Usa el Ejemplo 3 como referencia completa.</span></li>
+        <li><div class="step-n">2</div><span>Inserta la secuencia <strong>45, 25, 65, 15, 35, 55, 75</strong> en un segundo árbol llamado <code style="font-family:Courier New;color:var(--guinda)">arbol2</code> y llama a los tres recorridos. Confirma que coinciden con tu traza de la Actividad 1.</span></li>
+        <li><div class="step-n">3</div><span>Prueba <code style="font-family:Courier New;color:var(--guinda)">arbol2.Buscar(35)</code> y <code style="font-family:Courier New;color:var(--guinda)">arbol2.Buscar(45)</code>. Imprime los resultados con un mensaje descriptivo.</span></li>
+        <li><div class="step-n">4</div><span>Reflexiona en un comentario dentro del código: ¿por qué el primer valor del PreOrder siempre es la raíz? ¿Y por qué el último valor del PostOrder siempre es también la raíz?</span></li>
+      </ol>
+      <p style="margin-top:14px">Al terminar, haz commit con el mensaje: <code style="font-family:Courier New;color:var(--guinda)">feat: bst-buscar-preorder-postorder</code>.</p>
+    </div>
+  </div>
+
+</div>
+
+<hr class="divider">
+
+<!-- REFERENCIAS -->
+<div class="section-block">
+  <div class="sec-label">Fuentes de consulta</div>
+  <div class="sec-title">Referencias bibliográficas</div>
+  <ul class="bib-list">
+    <li class="bib-item">
+      <div class="bib-type">Libro de texto principal</div>
+      Weiss, M. A. (2013). <em>Data Structures and Algorithm Analysis in C++</em> (4.a ed.). Pearson. Capítulo 4: Trees — secciones 4.2 Binary Trees y 4.3 Binary Search Trees.
+    </li>
+    <li class="bib-item">
+      <div class="bib-type">Referencia de algoritmos</div>
+      Cormen, T. H., Leiserson, C. E., Rivest, R. L., &amp; Stein, C. (2014). <em>Introduction to Algorithms</em> (3.a ed.). MIT Press. Capítulo 12: Binary Search Trees — sección 12.1 What is a binary search tree.
+    </li>
+    <li class="bib-item">
+      <div class="bib-type">Documentación oficial — Microsoft</div>
+      Microsoft. (2024). <em>Recursion in C# — Methods</em>. Microsoft Learn. <a href="https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/methods" target="_blank" rel="noopener">learn.microsoft.com/dotnet/csharp/programming-guide/classes-and-structs/methods</a>
+    </li>
+    <li class="bib-item">
+      <div class="bib-type">Documentación oficial — Microsoft</div>
+      Microsoft. (2024). <em>Selecting a Collection Class</em>. Microsoft Learn. <a href="https://learn.microsoft.com/en-us/dotnet/standard/collections/selecting-a-collection-class" target="_blank" rel="noopener">learn.microsoft.com/dotnet/standard/collections/selecting-a-collection-class</a>
+    </li>
+    <li class="bib-item">
+      <div class="bib-type">Recurso complementario</div>
+      Aliat Universidades. (s.f.). <em>Análisis y diseño de algoritmos</em>. Bibliotecas Digitales Aliat. <a href="http://www.aliat.org.mx/BibliotecasDigitales/sistemas/Analisis_y_disenio_de_algoritmos.pdf" target="_blank" rel="noopener">aliat.org.mx — Análisis y diseño de algoritmos (PDF)</a>
+    </li>
+  </ul>
+</div>
+
+<div style="border-top:1px solid var(--border);padding-top:24px;margin-top:48px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--tx3);font-family:'Inter',sans-serif">
+  <span>Mtro. José Armando Vera Rodríguez</span>
+  <span>Estructura de Datos &nbsp;&mdash;&nbsp; Unidad 2 &nbsp;&mdash;&nbsp; Tema 2.2</span>
+</div>
+
+</div>
+
+<script>
+/* Progress bar */
+window.addEventListener('scroll',()=>{
+  const h=document.documentElement.scrollHeight-window.innerHeight;
+  if(h>0) document.getElementById('pFill').style.width=(window.scrollY/h*100)+'%';
+});
+
+/* Trace inputs */
+function norm(s){ return s.trim().toLowerCase().replace(/\s+/g,' '); }
+function chk(id, correct){
+  const el=document.getElementById(id);
+  const v=el.value.trim();
+  if(!v){el.className='trace-inp';return;}
+  el.className='trace-inp '+(norm(v)===norm(correct)?'ok':'er');
+}
+
+/* MCQ */
+const MCQ_CORRECT={mcq1:1, mcq2:2};
+function mcq(groupId, idx, result, fbId, fbText){
+  const g=document.getElementById(groupId);
+  if(g.dataset.answered) return;
+  g.dataset.answered='1';
+  g.querySelectorAll('.mcq-opt').forEach((o,i)=>{
+    o.style.pointerEvents='none';
+    if(i===idx) o.classList.add(result==='ok'?'ok':'er');
+    else if(result==='er' && i===MCQ_CORRECT[groupId]) o.classList.add('show-ok');
+  });
+  const fb=document.getElementById(fbId);
+  fb.className='mcq-fb show '+(result==='ok'?'ok':'er');
+  fb.textContent=fbText;
+}
+
+/* Section reveal */
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){e.target.style.opacity='1';e.target.style.transform='translateY(0)';}
+  });
+},{threshold:.06});
+document.querySelectorAll('.section-block').forEach(el=>{
+  el.style.cssText='opacity:0;transform:translateY(16px);transition:opacity .5s ease,transform .5s ease';
+  obs.observe(el);
+});
+</script>
+</body>
+</html>
