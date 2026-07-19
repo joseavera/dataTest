@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evaluación Final — Estructuras de Datos</title>
+<link rel="stylesheet" href="base.css">
+<style>
+:root{
+  --guinda:#5e162e; --guinda-l:#F5E8EE; --guinda-rule:#C85070;
+  --tx:#2A1218; --tx2:#6B4050; --tx3:#A07080;
+  --border:#DEC8CE; --white:#FFFFFF; --off:#FAF6F7;
+  --ok:#14532D; --ok-bg:#F0FDF4; --ok-bd:#86EFAC;
+  --er:#7F1D1D; --er-bg:#FFF1F2; --er-bd:#FCA5A5;
+  --am:#78350F; --am-bg:#FFFBEB; --am-bd:#FDE68A;
+  --blue:#1E40AF; --blue-bg:#EFF6FF; --blue-bd:#93C5FD;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--white);color:var(--tx);font-family:'Source Serif 4',Georgia,serif;line-height:1.7;font-size:16px}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--off)}
+::-webkit-scrollbar-thumb{background:var(--guinda-rule)}
+
+/* HEADER */
+.site-header{background:var(--guinda);box-shadow:0 2px 12px rgba(94,22,46,.25)}
+.header-inner{max-width:1040px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:14px 32px;gap:20px}
+.header-logo img{height:44px;width:auto;filter:brightness(0) invert(1)}
+.header-center{text-align:center;flex:1}
+.header-course{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:2px;font-family:'Inter',sans-serif}
+.header-title{font-size:15px;font-weight:600;color:#fff;font-family:'Inter',sans-serif}
+.header-logo2 img{height:36px;width:auto;filter:brightness(0) invert(1);opacity:.75}
+
+.wrap{max-width:820px;margin:0 auto;padding:40px 28px 100px}
+
+/* SCREENS */
+.screen{display:none}
+.screen.active{display:block;animation:fadeUp .35s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+/* STAMP */
+.stamp{border:1px solid var(--border);border-left:5px solid var(--guinda);background:var(--guinda-l);padding:22px 26px;margin-bottom:24px}
+.stamp-tag{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--guinda-rule);margin-bottom:4px;font-family:'Inter',sans-serif;font-weight:600}
+.stamp-name{font-size:clamp(18px,3vw,26px);font-weight:700;color:var(--guinda);font-family:'Cormorant Garamond',Georgia,serif;margin-bottom:4px}
+.stamp-sub{font-size:13px;color:var(--tx2);font-family:'Inter',sans-serif}
+
+/* ID FORM */
+.id-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.id-label{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--tx3);font-family:'Inter',sans-serif;font-weight:600;display:block;margin-bottom:4px}
+.id-input{width:100%;padding:10px 14px;border:1px solid var(--border);background:var(--off);font-family:'Inter',sans-serif;font-size:14px;color:var(--tx);outline:none;transition:border-color .2s}
+.id-input:focus{border-color:var(--guinda-rule)}
+.id-input::placeholder{color:var(--tx3)}
+
+/* VISUAL COMPARISON PANEL */
+.comp-panel{margin-bottom:24px}
+.comp-title{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--tx3);font-family:'Inter',sans-serif;font-weight:600;margin-bottom:10px}
+.comp-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.comp-card{border:1px solid var(--border);padding:12px 10px;background:var(--off);text-align:center}
+.comp-card.c-array{border-top:3px solid #92400E;background:var(--am-bg)}
+.comp-card.c-linked{border-top:3px solid #1E40AF;background:var(--blue-bg)}
+.comp-card.c-stack{border-top:3px solid #5e162e;background:var(--guinda-l)}
+.comp-card.c-queue{border-top:3px solid #14532D;background:var(--ok-bg)}
+.comp-card.c-tree{border-top:3px solid #6D28D9;background:#F5F3FF}
+.comp-icon{font-size:22px;margin-bottom:4px}
+.comp-name{font-family:'Inter',sans-serif;font-size:11px;font-weight:700;margin-bottom:6px;letter-spacing:.04em}
+.comp-card.c-array  .comp-name{color:#92400E}
+.comp-card.c-linked .comp-name{color:#1E40AF}
+.comp-card.c-stack  .comp-name{color:#5e162e}
+.comp-card.c-queue  .comp-name{color:#14532D}
+.comp-card.c-tree   .comp-name{color:#6D28D9}
+.comp-prop{font-size:10.5px;color:var(--tx2);line-height:1.5;font-family:'Inter',sans-serif}
+.comp-rule{font-size:10px;font-weight:700;margin-top:6px;padding:3px 6px;display:inline-block;font-family:'Inter',sans-serif}
+.comp-card.c-array  .comp-rule{background:#92400E15;color:#92400E}
+.comp-card.c-linked .comp-rule{background:#1E40AF15;color:#1E40AF}
+.comp-card.c-stack  .comp-rule{background:#5e162e15;color:#5e162e}
+.comp-card.c-queue  .comp-rule{background:#14532D15;color:#14532D}
+.comp-card.c-tree   .comp-rule{background:#6D28D915;color:#6D28D9}
+
+/* VISUAL MINI DIAGRAMS */
+.mini-diag{display:flex;flex-direction:column;align-items:center;gap:2px;margin:6px 0}
+.md-node{font-size:10px;font-family:'Courier New',monospace;padding:3px 8px;border:1px solid;border-radius:2px;line-height:1}
+.md-arr{font-size:9px;color:var(--tx3)}
+/* array row */
+.arr-row{display:flex;gap:0;align-items:center;margin:6px auto}
+.arr-cell{width:28px;height:22px;border:1px solid #92400E;background:#FFF8F0;font-size:10px;font-family:'Courier New',monospace;display:flex;align-items:center;justify-content:center;color:#92400E;font-weight:700}
+
+/* WARN */
+.warn-box{background:var(--am-bg);border:1px solid var(--am-bd);border-left:4px solid var(--am);padding:12px 16px;font-size:13px;color:var(--am);line-height:1.65;margin-bottom:20px;font-family:'Inter',sans-serif}
+
+/* QUESTION */
+.q-block{border:1px solid var(--border);margin-bottom:14px;background:var(--white)}
+.q-head{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:var(--off);border-bottom:1px solid var(--border)}
+.q-num{font-family:'Inter',sans-serif;font-size:10px;font-weight:600;color:var(--tx3);letter-spacing:.08em;text-transform:uppercase}
+.q-pts{font-family:'Inter',sans-serif;font-size:10px;color:var(--am);border:1px solid var(--am-bd);background:var(--am-bg);padding:1px 8px}
+.q-text{padding:12px 16px 8px;font-size:14px;color:var(--tx);line-height:1.65;font-weight:500}
+.q-opts{padding:0 16px 14px;display:flex;flex-direction:column;gap:7px}
+.opt{display:flex;align-items:flex-start;gap:11px;padding:9px 13px;border:1px solid var(--border);cursor:pointer;font-size:13px;color:var(--tx2);transition:all .15s;background:var(--off)}
+.opt:hover{border-color:var(--guinda-rule);background:var(--guinda-l);color:var(--guinda)}
+.opt.ok{border-color:var(--ok-bd)!important;background:var(--ok-bg)!important;color:var(--ok)!important;pointer-events:none}
+.opt.er{border-color:var(--er-bd)!important;background:var(--er-bg)!important;color:var(--er)!important;pointer-events:none}
+.opt.reveal{border-color:var(--ok-bd);background:var(--ok-bg);color:var(--ok);opacity:.55;pointer-events:none}
+.opt.locked{pointer-events:none;opacity:.6}
+.opt-letter{flex-shrink:0;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;border:1px solid var(--border);font-family:'Inter',sans-serif;color:var(--tx3);margin-top:1px}
+.q-fb{display:none;margin:0 16px 12px;padding:10px 14px;font-size:12.5px;line-height:1.6;border-left:3px solid}
+.q-fb.show{display:block}
+.q-fb.ok{background:var(--ok-bg);border-color:var(--ok-bd);color:var(--ok)}
+.q-fb.er{background:var(--er-bg);border-color:var(--er-bd);color:var(--er)}
+
+/* PROGRESS */
+.prog-wrap{margin-bottom:16px}
+.prog-label{display:flex;justify-content:space-between;font-size:11px;color:var(--tx3);margin-bottom:5px;font-family:'Inter',sans-serif}
+.prog-track{height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--guinda),var(--guinda-rule));transition:width .4s ease;width:0%}
+
+/* BTN */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 22px;font-family:'Inter',sans-serif;font-size:13px;font-weight:500;border:1px solid;cursor:pointer;transition:all .15s;background:transparent;text-transform:uppercase;letter-spacing:.04em}
+.btn-primary{border-color:var(--guinda);color:var(--guinda)}
+.btn-primary:hover{background:var(--guinda);color:#fff}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed}
+.btn-row{display:flex;gap:12px;justify-content:flex-end;margin-top:20px}
+
+/* RESULTS */
+.result-top{text-align:center;padding:32px 20px 24px;border:1px solid var(--border);background:var(--off);margin-bottom:16px}
+.result-ring{width:120px;height:120px;border-radius:50%;margin:0 auto 16px;border:2px solid var(--guinda);background:var(--white);display:flex;flex-direction:column;align-items:center;justify-content:center}
+.result-big{font-family:'Cormorant Garamond',Georgia,serif;font-size:44px;font-weight:700;color:var(--guinda);line-height:1}
+.result-den{font-size:11px;color:var(--tx3);font-family:'Inter',sans-serif}
+.result-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:22px;font-weight:700;color:var(--guinda);margin-bottom:8px}
+.result-fb{font-size:13.5px;color:var(--tx2);max-width:480px;margin:0 auto;line-height:1.7}
+
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--border);margin-bottom:14px}
+.info-cell{padding:10px 14px;border-bottom:1px solid var(--border);border-right:1px solid var(--border)}
+.info-cell:nth-child(even){border-right:none}
+.info-cell:nth-last-child(-n+2){border-bottom:none}
+.info-key{font-family:'Inter',sans-serif;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx3);margin-bottom:2px;font-weight:600}
+.info-val{font-size:14px;color:var(--tx);font-weight:500}
+
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.stat-box{border:1px solid var(--border);padding:12px 8px;text-align:center;background:var(--off)}
+.stat-num{font-family:'Cormorant Garamond',Georgia,serif;font-size:28px;font-weight:700;margin-bottom:2px}
+.stat-lbl{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--tx3);font-family:'Inter',sans-serif}
+.c-ok{color:var(--ok)} .c-er{color:var(--er)} .c-am{color:var(--am)} .c-guinda{color:var(--guinda)}
+
+.inf-list{display:flex;flex-direction:column;gap:7px;margin-bottom:16px}
+.inf-item{display:flex;gap:10px;padding:9px 13px;background:var(--er-bg);border:1px solid var(--er-bd);border-left:4px solid var(--er);font-size:12.5px;color:var(--er);font-family:'Inter',sans-serif;line-height:1.5}
+.no-inf{padding:11px 14px;background:var(--ok-bg);border:1px solid var(--ok-bd);border-left:4px solid var(--ok-bd);font-size:12.5px;color:var(--ok);font-family:'Inter',sans-serif;margin-bottom:14px}
+
+.rev-list{display:flex;flex-direction:column;gap:10px}
+.rev-item{border:1px solid var(--border);padding:13px 15px}
+.rev-q{font-size:13px;font-weight:500;color:var(--tx);margin-bottom:7px;line-height:1.5}
+.rev-row{display:flex;gap:8px;font-size:12px;font-family:'Inter',sans-serif;line-height:1.5;margin-bottom:3px}
+.rev-row:last-child{margin-bottom:0}
+.rlbl{font-weight:700;min-width:82px;flex-shrink:0}
+.r-ok{color:var(--ok)} .r-er{color:var(--er)} .r-right{color:var(--ok)} .r-exp{color:var(--tx3)}
+
+.sec-label{font-family:'Inter',sans-serif;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--tx3);margin-bottom:8px;font-weight:600}
+
+@media(max-width:600px){
+  .header-inner{padding:12px 18px}
+  .wrap{padding:24px 16px 80px}
+  .id-grid{grid-template-columns:1fr}
+  .comp-grid{grid-template-columns:repeat(3,1fr)}
+  .stats-row{grid-template-columns:1fr 1fr}
+  .info-grid{grid-template-columns:1fr}
+  .info-cell{border-right:none}
+  .info-cell:nth-last-child(-n+2){border-bottom:1px solid var(--border)}
+  .info-cell:last-child{border-bottom:none}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-logo"><img src="imagen1.png" alt="Logo institucional"></div>
+    <div class="header-center">
+      <div class="header-course">Estructura de Datos &nbsp;|&nbsp; Licenciatura en Sistemas Computacionales</div>
+      <div class="header-title">Evaluación final — Estructuras de datos</div>
+    </div>
+    <div class="header-logo2"><img src="imagen2.png" alt="Logo de apoyo"></div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<!-- ══ PANTALLA 0: IDENTIFICACIÓN ══ -->
+<div class="screen active" id="s0">
+
+  <div class="stamp">
+    <div class="stamp-tag">Evaluación &nbsp;·&nbsp; Unidades 1 y 2</div>
+    <div class="stamp-name">Estructuras de datos lineales y árboles BST</div>
+    <div class="stamp-sub">10 preguntas &nbsp;·&nbsp; 10 puntos &nbsp;·&nbsp; Opción múltiple</div>
+  </div>
+
+  <div class="id-grid">
+    <div>
+      <label class="id-label" for="fN">Nombre completo</label>
+      <input type="text" id="fN" class="id-input" placeholder="Tu nombre completo">
+    </div>
+    <div>
+      <label class="id-label" for="fG">Grupo</label>
+      <input type="text" id="fG" class="id-input" placeholder="Ej. LSC 2° cuatrimestre">
+    </div>
+    <div>
+      <label class="id-label" for="fM">Materia</label>
+      <input type="text" id="fM" class="id-input" value="Estructura de Datos">
+    </div>
+    <div>
+      <label class="id-label" for="fF">Fecha</label>
+      <input type="date" id="fF" class="id-input">
+    </div>
+  </div>
+
+  <!-- VISUAL DE REFERENCIA -->
+  <div class="comp-panel">
+    <div class="comp-title">Referencia visual — estructuras vistas en el curso</div>
+    <div class="comp-grid">
+
+      <div class="comp-card c-array">
+        <div class="comp-icon">📐</div>
+        <div class="comp-name">Array</div>
+        <div class="arr-row">
+          <div class="arr-cell">A</div><div class="arr-cell">B</div>
+          <div class="arr-cell">C</div><div class="arr-cell">D</div>
+        </div>
+        <div class="comp-prop">Tamaño fijo<br>Acceso por índice [i]</div>
+        <div class="comp-rule">Sin orden</div>
+      </div>
+
+      <div class="comp-card c-linked">
+        <div class="comp-icon">🔗</div>
+        <div class="comp-name">LinkedList</div>
+        <div class="mini-diag">
+          <div style="display:flex;align-items:center;gap:2px">
+            <div class="md-node" style="border-color:#1E40AF;color:#1E40AF">A</div>
+            <div class="md-arr">→</div>
+            <div class="md-node" style="border-color:#1E40AF;color:#1E40AF">B</div>
+            <div class="md-arr">→</div>
+            <div class="md-node" style="border-color:#1E40AF;color:#1E40AF">C</div>
+          </div>
+        </div>
+        <div class="comp-prop">Tamaño flexible<br>Nodos con punteros</div>
+        <div class="comp-rule">Sin orden</div>
+      </div>
+
+      <div class="comp-card c-stack">
+        <div class="comp-icon">🥞</div>
+        <div class="comp-name">Stack</div>
+        <div class="mini-diag">
+          <div class="md-node" style="border-color:#5e162e;color:#5e162e;font-size:9px">C ← tope</div>
+          <div class="md-arr">↕</div>
+          <div class="md-node" style="border-color:#DEC8CE;color:#A07080;font-size:9px">B</div>
+          <div class="md-arr">↕</div>
+          <div class="md-node" style="border-color:#DEC8CE;color:#A07080;font-size:9px">A ← fondo</div>
+        </div>
+        <div class="comp-prop">Push / Pop / Peek</div>
+        <div class="comp-rule">LIFO</div>
+      </div>
+
+      <div class="comp-card c-queue">
+        <div class="comp-icon">🎟️</div>
+        <div class="comp-name">Queue</div>
+        <div class="mini-diag">
+          <div style="display:flex;align-items:center;gap:1px;font-size:9px;font-family:'Courier New',monospace">
+            <span style="color:#14532D;font-size:8px">sal→</span>
+            <div class="md-node" style="border-color:#14532D;color:#14532D;font-size:9px">A</div>
+            <div class="md-node" style="border-color:#DEC8CE;color:#A07080;font-size:9px">B</div>
+            <div class="md-node" style="border-color:#DEC8CE;color:#A07080;font-size:9px">C</div>
+            <span style="color:#14532D;font-size:8px">→ent</span>
+          </div>
+        </div>
+        <div class="comp-prop">Enqueue / Dequeue</div>
+        <div class="comp-rule">FIFO</div>
+      </div>
+
+      <div class="comp-card c-tree">
+        <div class="comp-icon">🌳</div>
+        <div class="comp-name">BST</div>
+        <div class="mini-diag" style="gap:1px">
+          <div class="md-node" style="border-color:#6D28D9;color:#6D28D9;font-size:9px">50</div>
+          <div style="display:flex;gap:10px">
+            <div class="md-arr" style="font-size:9px">↙</div>
+            <div class="md-arr" style="font-size:9px">↘</div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <div class="md-node" style="border-color:#A78BFA;color:#6D28D9;font-size:9px">30</div>
+            <div class="md-node" style="border-color:#A78BFA;color:#6D28D9;font-size:9px">70</div>
+          </div>
+        </div>
+        <div class="comp-prop">Izq &lt; Nodo &lt; Der<br>Búsqueda O(log n)</div>
+        <div class="comp-rule">BST</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="warn-box">
+    <strong>Instrucciones:</strong> Lee cada pregunta con cuidado. Las preguntas y opciones aparecen en orden distinto para cada alumno. Una vez elegida una respuesta no puede modificarse. El sistema detecta cambios de pestaña y pérdida de foco durante el examen.
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="startExam()">Iniciar evaluación</button>
+  </div>
+</div>
+
+<!-- ══ PANTALLA 1: EVALUACIÓN ══ -->
+<div class="screen" id="s1">
+  <div class="prog-wrap">
+    <div class="prog-label">
+      <span>Progreso</span>
+      <span id="progTxt">0 / 10 respondidas</span>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+  </div>
+  <div id="qContainer"></div>
+  <div class="btn-row">
+    <button class="btn btn-primary" id="btnSubmit" onclick="submitExam()" disabled>Entregar evaluación</button>
+  </div>
+</div>
+
+<!-- ══ PANTALLA 2: RESULTADOS ══ -->
+<div class="screen" id="s2">
+
+  <div class="result-top">
+    <div class="result-ring">
+      <div class="result-big" id="rScore">0</div>
+      <div class="result-den">/ 10 pts</div>
+    </div>
+    <div class="result-title" id="rTitle">—</div>
+    <div class="result-fb" id="rFb">—</div>
+  </div>
+
+  <div class="info-grid">
+    <div class="info-cell"><div class="info-key">Nombre</div><div class="info-val" id="rNombre">—</div></div>
+    <div class="info-cell"><div class="info-key">Grupo</div><div class="info-val" id="rGrupo">—</div></div>
+    <div class="info-cell"><div class="info-key">Materia</div><div class="info-val" id="rMateria">—</div></div>
+    <div class="info-cell"><div class="info-key">Fecha</div><div class="info-val" id="rFecha">—</div></div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-num c-ok"     id="rOk">0</div><div class="stat-lbl">Correctas</div></div>
+    <div class="stat-box"><div class="stat-num c-er"     id="rEr">0</div><div class="stat-lbl">Incorrectas</div></div>
+    <div class="stat-box"><div class="stat-num c-guinda" id="rPts">0</div><div class="stat-lbl">Puntos</div></div>
+    <div class="stat-box"><div class="stat-num c-am"     id="rInf">0</div><div class="stat-lbl">Infracciones</div></div>
+  </div>
+
+  <div class="sec-label">Infracciones detectadas</div>
+  <div id="rInfList"></div>
+
+  <div class="sec-label" style="margin-top:18px">Revisión de respuestas</div>
+  <div class="rev-list" id="rReview"></div>
+
+  <div style="border-top:1px solid var(--border);padding-top:16px;margin-top:28px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--tx3);font-family:'Inter',sans-serif">
+    <span>Mtro. José Armando Vera Rodríguez</span>
+    <span>Estructura de Datos &nbsp;·&nbsp; Evaluación final</span>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+/* ══════════════════════════════════════
+   BANCO — 16 preguntas, se usan 10
+══════════════════════════════════════ */
+const BANK = [
+  {
+    text:"¿Cuál es la principal ventaja de un arreglo (Array) sobre una LinkedList?",
+    opts:[
+      {t:"Permite agregar y quitar elementos sin límite",c:false},
+      {t:"Acceso directo a cualquier posición en O(1) usando el índice",c:true},
+      {t:"No ocupa memoria adicional para punteros",c:false},
+      {t:"Puede crecer automáticamente cuando se llena",c:false},
+    ],
+    fb:"El arreglo permite acceder a cualquier elemento con arr[i] en tiempo constante O(1). Su desventaja es el tamaño fijo: no puede crecer ni encogerse en tiempo de ejecución."
+  },
+  {
+    text:"¿Cuándo es preferible usar LinkedList en lugar de un arreglo?",
+    opts:[
+      {t:"Cuando el tamaño de los datos es fijo y nunca cambia",c:false},
+      {t:"Cuando se necesita acceso frecuente por índice",c:false},
+      {t:"Cuando se insertan y eliminan elementos frecuentemente y el tamaño cambia",c:true},
+      {t:"Cuando se requiere el principio LIFO",c:false},
+    ],
+    fb:"LinkedList es ideal cuando la cantidad de elementos cambia constantemente. Insertar o eliminar solo redirige punteros en O(1), sin mover ni recrear toda la estructura como haría un arreglo."
+  },
+  {
+    text:"¿Qué significa el principio LIFO de la pila (Stack)?",
+    opts:[
+      {t:"El primer elemento en entrar es el primero en salir",c:false},
+      {t:"Los elementos se organizan de mayor a menor",c:false},
+      {t:"El último elemento en entrar es el primero en salir",c:true},
+      {t:"Solo se puede acceder al elemento del centro",c:false},
+    ],
+    fb:"LIFO: Last In, First Out. El último elemento agregado con Push() es el primero en ser extraído con Pop(). Ejemplo real: el botón Ctrl+Z siempre deshace la última acción realizada."
+  },
+  {
+    text:"¿Qué operación de Stack devuelve el elemento del tope SIN quitarlo de la pila?",
+    opts:[
+      {t:"Pop()",c:false},
+      {t:"Peek()",c:true},
+      {t:"Push()",c:false},
+      {t:"Dequeue()",c:false},
+    ],
+    fb:"Peek() mira el tope sin modificar la pila — Count no cambia. Pop() también devuelve el tope pero lo extrae, reduciendo Count en 1. Push() agrega. Dequeue() es de Queue, no de Stack."
+  },
+  {
+    text:"¿Qué significa el principio FIFO de la cola (Queue)?",
+    opts:[
+      {t:"El último elemento en entrar es el primero en salir",c:false},
+      {t:"El primer elemento en entrar es el primero en salir",c:true},
+      {t:"Los elementos se organizan de menor a mayor",c:false},
+      {t:"Solo se puede acceder al elemento del fondo",c:false},
+    ],
+    fb:"FIFO: First In, First Out. El primero en llegar es el primero en ser atendido. Ejemplo real: la fila de la cafetería — el alumno que llega primero es el primero en ser atendido."
+  },
+  {
+    text:"¿Cuál es la diferencia entre Enqueue() y Dequeue() en una Queue?",
+    opts:[
+      {t:"Enqueue agrega al frente, Dequeue quita del fondo",c:false},
+      {t:"Enqueue agrega al fondo, Dequeue quita del frente",c:true},
+      {t:"Ambas operaciones agregan elementos en extremos distintos",c:false},
+      {t:"Enqueue quita el elemento del tope, Dequeue lo agrega",c:false},
+    ],
+    fb:"En una Queue los elementos entran por el fondo con Enqueue() y salen por el frente con Dequeue(). Esto garantiza el orden FIFO: el primero en entrar es el primero en salir."
+  },
+  {
+    text:"¿Qué error lanza C# al llamar Pop() sobre una Stack vacía o Dequeue() sobre una Queue vacía?",
+    opts:[
+      {t:"IndexOutOfRangeException",c:false},
+      {t:"NullReferenceException",c:false},
+      {t:"InvalidOperationException",c:true},
+      {t:"StackOverflowException",c:false},
+    ],
+    fb:"InvalidOperationException es el error específico que lanza C# cuando se intenta extraer o consultar el tope/frente de una colección vacía. Se previene verificando Count > 0 antes de operar."
+  },
+  {
+    text:"¿Cuál es la propiedad fundamental que define a un Árbol Binario de Búsqueda (BST)?",
+    opts:[
+      {t:"Todos los nodos tienen exactamente dos hijos",c:false},
+      {t:"La raíz siempre contiene el valor más grande",c:false},
+      {t:"Para cada nodo N: todos los valores a su izquierda son menores y todos a su derecha son mayores",c:true},
+      {t:"El árbol siempre tiene el mismo número de nodos en cada nivel",c:false},
+    ],
+    fb:"La propiedad BST aplica a cada nodo individualmente, no solo a la raíz. Es lo que permite la búsqueda eficiente: en cada nodo se descarta la mitad del árbol según si el valor buscado es menor o mayor."
+  },
+  {
+    text:"¿Cuál es el resultado del recorrido InOrder sobre el árbol BST construido con: 50, 30, 70, 20, 40, 60, 80?",
+    opts:[
+      {t:"50 30 20 40 70 60 80",c:false},
+      {t:"20 40 30 60 80 70 50",c:false},
+      {t:"20 30 40 50 60 70 80",c:true},
+      {t:"50 20 30 40 60 70 80",c:false},
+    ],
+    fb:"InOrder sigue Izquierdo → Nodo → Derecho. En un BST ese patrón siempre produce los valores en orden ascendente porque visita primero todo lo menor, luego el nodo, luego todo lo mayor."
+  },
+  {
+    text:"¿En qué se diferencia el nodo de un BST del nodo de una LinkedList?",
+    opts:[
+      {t:"El nodo BST solo guarda números; el de LinkedList guarda cualquier tipo",c:false},
+      {t:"El nodo BST tiene dos referencias (Izquierdo y Derecho); el de LinkedList tiene una sola (Siguiente)",c:true},
+      {t:"No hay diferencia, son exactamente iguales",c:false},
+      {t:"El nodo de LinkedList tiene dos referencias; el de BST solo una",c:false},
+    ],
+    fb:"La lógica de punteros es la misma en ambos. La diferencia es la cantidad: LinkedList apunta solo al siguiente nodo, BST apunta a dos hijos. El BST es una extensión natural de la lista enlazada."
+  },
+  {
+    text:"¿Cuál es el costo de búsqueda en un BST equilibrado comparado con una LinkedList?",
+    opts:[
+      {t:"Son iguales: O(n) en ambos casos",c:false},
+      {t:"BST: O(log n) — LinkedList: O(n)",c:true},
+      {t:"BST: O(n) — LinkedList: O(log n)",c:false},
+      {t:"BST: O(1) porque accede directo por índice",c:false},
+    ],
+    fb:"En LinkedList hay que recorrer nodo por nodo hasta encontrar el valor: O(n). En BST cada comparación descarta la mitad del árbol: O(log n). Para un millón de datos: LinkedList hasta 1 000 000 comparaciones, BST máximo 20."
+  },
+  {
+    text:"¿Qué estructura de datos es la más adecuada para implementar el historial de acciones Ctrl+Z en un editor de texto?",
+    opts:[
+      {t:"Queue — porque atiende en orden de llegada",c:false},
+      {t:"Array — porque permite acceso directo por índice",c:false},
+      {t:"Stack — porque siempre deshace la última acción (LIFO)",c:true},
+      {t:"LinkedList — porque puede crecer y encogerse libremente",c:false},
+    ],
+    fb:"Ctrl+Z siempre deshace la última acción realizada. Eso es exactamente LIFO: el último en entrar (la última acción) es el primero en salir (el primero en deshacerse). Stack es la estructura correcta."
+  },
+  {
+    text:"¿Qué estructura de datos es la más adecuada para un sistema de impresión donde los documentos se imprimen en el orden en que fueron enviados?",
+    opts:[
+      {t:"Stack — porque el último documento enviado se imprime primero",c:false},
+      {t:"Queue — porque el primero en llegar es el primero en imprimirse (FIFO)",c:true},
+      {t:"Array — porque permite acceder a cualquier documento directamente",c:false},
+      {t:"BST — porque organiza los documentos en orden alfabético",c:false},
+    ],
+    fb:"Un sistema de impresión respeta el orden de llegada: el primer documento enviado debe imprimirse primero. Eso es FIFO — exactamente lo que garantiza Queue con Enqueue y Dequeue."
+  },
+  {
+    text:"¿Qué ocurre con la eficiencia de búsqueda en un BST si se insertan los valores 10, 20, 30, 40, 50 en ese orden?",
+    opts:[
+      {t:"El árbol queda perfectamente equilibrado y la búsqueda es O(log n)",c:false},
+      {t:"El árbol degenera en una lista hacia la derecha y la búsqueda vuelve a ser O(n)",c:true},
+      {t:"El BST rechaza valores insertados en orden ascendente",c:false},
+      {t:"La búsqueda mejora porque los valores ya están ordenados",c:false},
+    ],
+    fb:"Cada valor es mayor que el anterior, así que siempre va a la derecha. El árbol queda como una cadena lineal hacia la derecha con altura n. La búsqueda pierde su ventaja logarítmica. Esto se resuelve con árboles AVL."
+  },
+  {
+    text:"¿Cuál es la declaración correcta en C# para una pila de cadenas de texto?",
+    opts:[
+      {t:"Queue<string> pila = new Queue<string>();",c:false},
+      {t:"LinkedList<string> pila = new LinkedList<string>();",c:false},
+      {t:"Stack<string> pila = new Stack<string>();",c:true},
+      {t:"string[] pila = new Stack<string>();",c:false},
+    ],
+    fb:"Stack<T> es la clase genérica de C# para pilas. Se declara con el tipo de datos entre <> y se instancia con new Stack<string>(). Pertenece al espacio de nombres System.Collections.Generic."
+  },
+  {
+    text:"¿Cuál recorrido de un BST produce siempre los valores en orden ascendente?",
+    opts:[
+      {t:"PreOrder — Nodo → Izquierdo → Derecho",c:false},
+      {t:"PostOrder — Izquierdo → Derecho → Nodo",c:false},
+      {t:"InOrder — Izquierdo → Nodo → Derecho",c:true},
+      {t:"LevelOrder — nivel por nivel de arriba a abajo",c:false},
+    ],
+    fb:"InOrder visita primero todo el subárbol izquierdo (valores menores), luego el nodo actual, luego el subárbol derecho (valores mayores). La propiedad BST garantiza que ese patrón produce siempre orden ascendente."
+  },
+];
+
+/* ══════════════════════════════════════
+   ESTADO
+══════════════════════════════════════ */
+let questions  = [];
+let answers    = {};
+let infractions = [];
+let examActive  = false;
+
+/* ══════════════════════════════════════
+   UTILIDADES
+══════════════════════════════════════ */
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+/* ══════════════════════════════════════
+   START
+══════════════════════════════════════ */
+function startExam(){
+  const n=document.getElementById('fN').value.trim();
+  const g=document.getElementById('fG').value.trim();
+  if(!n||!g){alert('Completa tu nombre y grupo antes de continuar.');return;}
+
+  // Seleccionar 10 de 16 y mezclar opciones
+  questions = shuffle(BANK).slice(0,10).map(q=>({
+    ...q,
+    sOpts: shuffle(q.opts.map((o,i)=>({...o,orig:i})))
+  }));
+
+  document.getElementById('s0').classList.remove('active');
+  document.getElementById('s1').classList.add('active');
+  renderQ();
+  setupAntiCheat();
+  examActive=true;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ══════════════════════════════════════
+   RENDER QUESTIONS
+══════════════════════════════════════ */
+function renderQ(){
+  const c=document.getElementById('qContainer');
+  c.innerHTML='';
+  const letters=['A','B','C','D'];
+  questions.forEach((q,qi)=>{
+    const d=document.createElement('div');
+    d.className='q-block';
+    d.id=`qb${qi}`;
+    d.innerHTML=`
+      <div class="q-head">
+        <span class="q-num">Pregunta ${qi+1} de ${questions.length}</span>
+        <span class="q-pts">1 punto</span>
+      </div>
+      <div class="q-text">${q.text}</div>
+      <div class="q-opts" id="qo${qi}">
+        ${q.sOpts.map((o,oi)=>`
+          <div class="opt" id="op${qi}_${oi}" onclick="pick(${qi},${oi})">
+            <span class="opt-letter">${letters[oi]}</span>
+            <span>${o.t}</span>
+          </div>`).join('')}
+      </div>
+      <div class="q-fb" id="fb${qi}"></div>`;
+    c.appendChild(d);
+  });
+  updateBtn();
+}
+
+/* ══════════════════════════════════════
+   PICK
+══════════════════════════════════════ */
+function pick(qi,oi){
+  if(answers[qi]!==undefined)return;
+  answers[qi]=oi;
+  const q=questions[qi];
+  const isOk=q.sOpts[oi].c;
+
+  document.querySelectorAll(`#qo${qi} .opt`).forEach(el=>el.classList.add('locked'));
+  const chosen=document.getElementById(`op${qi}_${oi}`);
+  chosen.classList.remove('locked');
+  chosen.classList.add(isOk?'ok':'er');
+
+  if(!isOk){
+    const ri=q.sOpts.findIndex(o=>o.c);
+    const rev=document.getElementById(`op${qi}_${ri}`);
+    if(rev){rev.classList.remove('locked');rev.classList.add('reveal');}
+  }
+
+  const fb=document.getElementById(`fb${qi}`);
+  fb.className='q-fb show '+(isOk?'ok':'er');
+  fb.textContent=q.fb;
+
+  updateBtn();
+  updateProg();
+}
+
+function updateBtn(){
+  const done=Object.keys(answers).length;
+  const btn=document.getElementById('btnSubmit');
+  btn.disabled=done<questions.length;
+  btn.textContent=btn.disabled
+    ?`Entregar (${done}/${questions.length} respondidas)`
+    :'Entregar evaluación';
+}
+
+function updateProg(){
+  const done=Object.keys(answers).length;
+  const pct=done/questions.length*100;
+  document.getElementById('progFill').style.width=pct+'%';
+  document.getElementById('progTxt').textContent=`${done} / ${questions.length} respondidas`;
+}
+
+/* ══════════════════════════════════════
+   ANTI-CHEAT
+══════════════════════════════════════ */
+function setupAntiCheat(){
+  document.addEventListener('visibilitychange',()=>{
+    if(!examActive||!document.hidden)return;
+    infractions.push(`Cambio de pestaña detectado a las ${new Date().toLocaleTimeString('es-MX')}.`);
+  });
+  window.addEventListener('blur',()=>{
+    if(!examActive)return;
+    infractions.push(`Pérdida de foco de la ventana a las ${new Date().toLocaleTimeString('es-MX')}.`);
+  });
+  document.addEventListener('contextmenu',e=>{if(examActive)e.preventDefault();});
+  document.addEventListener('keydown',e=>{
+    if(!examActive)return;
+    if((e.ctrlKey||e.metaKey)&&['c','v','u'].includes(e.key.toLowerCase())){
+      e.preventDefault();
+      if(['c','v'].includes(e.key.toLowerCase()))
+        infractions.push(`Intento de copiar/pegar a las ${new Date().toLocaleTimeString('es-MX')}.`);
+    }
+  });
+}
+
+/* ══════════════════════════════════════
+   SUBMIT
+══════════════════════════════════════ */
+function submitExam(){
+  examActive=false;
+  let ok=0;
+  questions.forEach((q,qi)=>{
+    const a=answers[qi];
+    if(a!==undefined&&q.sOpts[a].c)ok++;
+  });
+  showResults(ok);
+}
+
+/* ══════════════════════════════════════
+   RESULTS
+══════════════════════════════════════ */
+function showResults(ok){
+  document.getElementById('s1').classList.remove('active');
+  document.getElementById('s2').classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+
+  document.getElementById('rScore').textContent=ok;
+  document.getElementById('rNombre').textContent=document.getElementById('fN').value||'—';
+  document.getElementById('rGrupo').textContent=document.getElementById('fG').value||'—';
+  document.getElementById('rMateria').textContent=document.getElementById('fM').value||'Estructura de Datos';
+  document.getElementById('rFecha').textContent=document.getElementById('fF').value||new Date().toLocaleDateString('es-MX');
+  document.getElementById('rOk').textContent=ok;
+  document.getElementById('rEr').textContent=questions.length-ok;
+  document.getElementById('rPts').textContent=ok;
+  document.getElementById('rInf').textContent=infractions.length;
+
+  const pct=ok/questions.length;
+  let title,msg;
+  if(pct>=.9){title='Excelente dominio';msg='Tienes un manejo sólido de las cinco estructuras de datos. Diferencias LIFO/FIFO, propiedades del BST, recorridos y casos de uso — todo bien asimilado.';}
+  else if(pct>=.7){title='Buen desempeño';msg='Buen resultado. Revisa los ítems incorrectos, especialmente la diferencia entre Stack y Queue, y los recorridos del BST.';}
+  else if(pct>=.5){title='En proceso';msg='Tienes la base. Repasa los diagramas visuales de cada estructura, enfocándote en LIFO vs FIFO y en la propiedad del BST.';}
+  else{title='Requiere refuerzo';msg='Vuelve a los apuntes de clase. Trabaja primero las diferencias entre Array, LinkedList, Stack y Queue, y luego los conceptos de BST.';}
+
+  document.getElementById('rTitle').textContent=title;
+  document.getElementById('rFb').textContent=msg;
+
+  // Infracciones
+  const infEl=document.getElementById('rInfList');
+  infEl.innerHTML=infractions.length===0
+    ?'<div class="no-inf">Sin infracciones detectadas durante la evaluación.</div>'
+    :infractions.map(i=>`<div class="infraction-item inf-item"><span style="font-weight:700;flex-shrink:0">!</span><span>${i}</span></div>`).join('');
+
+  // Revisión
+  const rev=document.getElementById('rReview');
+  rev.innerHTML='';
+  questions.forEach((q,qi)=>{
+    const a=answers[qi];
+    const isOk=a!==undefined&&q.sOpts[a].c;
+    const chosenTxt=a!==undefined?q.sOpts[a].t:'Sin responder';
+    const rightTxt=q.sOpts.find(o=>o.c).t;
+    const d=document.createElement('div');
+    d.className='rev-item';
+    d.innerHTML=`
+      <div class="rev-q">${qi+1}. ${q.text}</div>
+      <div class="rev-row ${isOk?'r-ok':'r-er'}">
+        <span class="rlbl">Tu respuesta:</span><span>${chosenTxt}</span>
+      </div>
+      ${!isOk?`<div class="rev-row r-right"><span class="rlbl">Correcta:</span><span>${rightTxt}</span></div>`:''}
+      <div class="rev-row r-exp"><span class="rlbl">Explicación:</span><span>${q.fb}</span></div>`;
+    rev.appendChild(d);
+  });
+}
+
+/* ══════════════════════════════════════
+   INIT
+══════════════════════════════════════ */
+document.getElementById('fF').value=new Date().toISOString().split('T')[0];
+</script>
+</body>
+</html>
