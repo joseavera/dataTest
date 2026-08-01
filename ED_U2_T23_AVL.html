@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Árboles AVL — Estructura de Datos</title>
+<link rel="stylesheet" href="base.css">
+<style>
+:root{
+  --g:#5e162e;--gl:#F5E8EE;--gr:#C85070;--gm:#8B2040;
+  --tx:#2A1218;--tx2:#6B4050;--tx3:#A07080;
+  --bd:#DEC8CE;--wh:#FFFFFF;--off:#FAF6F7;
+  --cbg:#1A0E12;--cbd:#3D1F28;
+  --kw:#F4A5B8;--tp:#93C5FD;--st:#86EFAC;--cm:#6B5060;--nm:#FCA5A5;--mt:#67E8F9;--vr:#F0E6EA;
+  --ok:#14532D;--okb:#F0FDF4;--okd:#86EFAC;
+  --er:#7F1D1D;--erb:#FFF1F2;--erd:#FCA5A5;
+  --am:#78350F;--amb:#FFFBEB;--amd:#FDE68A;
+  --pu:#5B21B6;--pub:#F5F3FF;--pud:#A78BFA;
+  --bl:#1E40AF;--blb:#EFF6FF;--bld:#93C5FD;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--wh);color:var(--tx);font-family:'Source Serif 4',Georgia,serif;line-height:1.7;font-size:16px;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--off)}::-webkit-scrollbar-thumb{background:var(--gr)}
+
+/* ── HEADER ── */
+.site-header{background:var(--g);position:sticky;top:0;z-index:200;box-shadow:0 2px 16px rgba(94,22,46,.35)}
+.header-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:12px 28px;gap:16px}
+.header-logo img{height:40px;filter:brightness(0) invert(1)}
+.header-center{text-align:center;flex:1}
+.header-course{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.5);font-family:'Inter',sans-serif;margin-bottom:1px}
+.header-title{font-size:14px;font-weight:600;color:#fff;font-family:'Inter',sans-serif}
+.header-logo2 img{height:32px;filter:brightness(0) invert(1);opacity:.7}
+.prog-bar{height:3px;background:rgba(255,255,255,.1)}
+.prog-fill{height:100%;background:var(--gr);width:0%;transition:width .25s}
+
+/* ── NAV PILLS ── */
+.nav-pills{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;padding:16px 28px;background:var(--off);border-bottom:1px solid var(--bd);position:sticky;top:68px;z-index:100}
+.pill{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;padding:5px 14px;border:1px solid var(--bd);cursor:pointer;color:var(--tx3);background:var(--wh);transition:all .2s;letter-spacing:.03em;text-transform:uppercase;text-decoration:none}
+.pill:hover,.pill.active{background:var(--g);color:#fff;border-color:var(--g)}
+
+.wrap{max-width:920px;margin:0 auto;padding:48px 28px 120px}
+
+/* ── SLIDE-STYLE SECTIONS ── */
+.slide{min-height:70vh;display:flex;flex-direction:column;justify-content:center;padding:48px 0;border-bottom:2px solid var(--bd);margin-bottom:0;scroll-margin-top:120px}
+.slide:last-child{border-bottom:none}
+
+/* ── BIG HERO SLIDE ── */
+.hero-slide{background:linear-gradient(135deg,var(--g) 0%,var(--gm) 60%,#B04060 100%);color:#fff;padding:64px 40px;margin:-48px -28px 0;min-height:50vh;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;position:relative;overflow:hidden}
+.hero-slide::before{content:'AVL';position:absolute;right:-30px;top:-20px;font-size:260px;font-weight:900;font-family:'Cormorant Garamond',Georgia,serif;color:rgba(255,255,255,.05);line-height:1;pointer-events:none;user-select:none}
+.hero-eyebrow{font-family:'Inter',sans-serif;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:12px}
+.hero-h1{font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(36px,6vw,72px);font-weight:700;line-height:1.05;margin-bottom:16px;max-width:700px}
+.hero-sub{font-family:'Inter',sans-serif;font-size:15px;color:rgba(255,255,255,.75);max-width:520px;line-height:1.65;margin-bottom:28px}
+.hero-tags{display:flex;gap:10px;flex-wrap:wrap}
+.hero-tag{font-family:'Inter',sans-serif;font-size:11px;padding:4px 12px;border:1px solid rgba(255,255,255,.3);color:rgba(255,255,255,.85)}
+
+/* ── SEC LABELS ── */
+.sec-eyebrow{font-family:'Inter',sans-serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--tx3);margin-bottom:10px;font-weight:600}
+.sec-h2{font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(24px,4vw,40px);font-weight:700;color:var(--g);margin-bottom:20px;line-height:1.15}
+.sec-h3{font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(18px,2.5vw,26px);font-weight:700;color:var(--g);margin-bottom:12px}
+
+/* ── PROBLEM SETUP ── */
+.problem-split{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:16px 0}
+.prob-card{border:1px solid var(--bd);padding:20px;background:var(--wh)}
+.prob-card.bad{border-top:4px solid var(--er);background:var(--erb)}
+.prob-card.good{border-top:4px solid var(--ok);background:var(--okb)}
+.prob-label{font-family:'Inter',sans-serif;font-size:9px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;margin-bottom:10px}
+.prob-card.bad .prob-label{color:var(--er)}
+.prob-card.good .prob-label{color:var(--ok)}
+
+/* ── CALLOUTS ── */
+.callout{display:flex;gap:13px;padding:13px 18px;margin:14px 0;font-size:13.5px;line-height:1.65;border-left:4px solid}
+.co-p{background:var(--gl);border-color:var(--gr);color:var(--g)}
+.co-g{background:var(--okb);border-color:var(--okd);color:var(--ok)}
+.co-a{background:var(--amb);border-color:var(--amd);color:var(--am)}
+.co-r{background:var(--erb);border-color:var(--erd);color:var(--er)}
+.co-pu{background:var(--pub);border-color:var(--pud);color:var(--pu)}
+.co-bl{background:var(--blb);border-color:var(--bld);color:var(--bl)}
+.callout-icon{flex-shrink:0;font-style:normal}
+
+/* ── BALANCE FACTOR VISUAL ── */
+.bf-explain{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:16px 0}
+.bf-card{border:1px solid var(--bd);padding:16px 14px;text-align:center;background:var(--wh)}
+.bf-card.ok-c{border-top:4px solid var(--okd);background:var(--okb)}
+.bf-card.er-c{border-top:4px solid var(--erd);background:var(--erb)}
+.bf-num{font-family:'Cormorant Garamond',Georgia,serif;font-size:48px;font-weight:700;line-height:1;margin-bottom:6px}
+.bf-card.ok-c .bf-num{color:var(--ok)}
+.bf-card.er-c .bf-num{color:var(--er)}
+.bf-lbl{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.bf-card.ok-c .bf-lbl{color:var(--ok)}
+.bf-card.er-c .bf-lbl{color:var(--er)}
+.bf-desc{font-size:12px;color:var(--tx2);line-height:1.5;font-family:'Inter',sans-serif}
+
+/* ── ROTATION STEPPER ── */
+.rot-stepper{border:1px solid var(--bd);background:var(--wh);overflow:hidden;margin:16px 0}
+.rot-tabs{display:flex;border-bottom:1px solid var(--bd)}
+.rot-tab{flex:1;padding:10px 8px;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;text-align:center;cursor:pointer;color:var(--tx3);border-right:1px solid var(--bd);transition:all .2s;text-transform:uppercase;letter-spacing:.04em}
+.rot-tab:last-child{border-right:none}
+.rot-tab.active{background:var(--g);color:#fff}
+.rot-tab:hover:not(.active){background:var(--gl);color:var(--g)}
+.rot-panel{display:none;padding:24px}
+.rot-panel.active{display:block;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.rot-split{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+.rot-before,.rot-after{text-align:center}
+.rot-badge{font-family:'Inter',sans-serif;font-size:9px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;padding:3px 10px;display:inline-block;margin-bottom:10px}
+.rot-before .rot-badge{background:var(--erb);color:var(--er);border:1px solid var(--erd)}
+.rot-after  .rot-badge{background:var(--okb);color:var(--ok);border:1px solid var(--okd)}
+.rot-arrow{display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--gr);padding-top:40px}
+.rot-explain{font-size:13px;color:var(--tx2);line-height:1.65;font-family:'Inter',sans-serif;margin-top:14px;border-top:1px solid var(--bd);padding-top:14px}
+.rot-explain strong{color:var(--g)}
+
+/* ── INTERACTIVE SIMULATOR ── */
+.sim-shell{border:1px solid var(--bd);background:var(--wh);overflow:hidden;margin:16px 0}
+.sim-topbar{background:var(--cbg);padding:10px 16px;display:flex;align-items:center;gap:8px}
+.sim-dots{display:flex;gap:5px}
+.sim-dot{width:10px;height:10px;border-radius:50%}
+.sim-dot:nth-child(1){background:#FF5F57}.sim-dot:nth-child(2){background:#FFBD2E}.sim-dot:nth-child(3){background:#28C840}
+.sim-title-bar{font-family:'Courier New',monospace;font-size:10px;color:#6B5060;margin-left:8px}
+.sim-body{padding:20px}
+.sim-controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.sim-input{flex:1;min-width:100px;padding:9px 13px;border:1px solid var(--bd);background:var(--off);font-family:'Inter',sans-serif;font-size:14px;color:var(--tx);outline:none;transition:border-color .2s}
+.sim-input:focus{border-color:var(--gr)}
+.sim-btn{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;padding:9px 16px;border:1px solid var(--bd);background:var(--wh);color:var(--tx2);cursor:pointer;transition:all .15s;text-transform:uppercase;letter-spacing:.04em}
+.sim-btn:hover{border-color:var(--gr);color:var(--g)}
+.sim-btn-p{background:var(--g);color:#fff;border-color:var(--g)}
+.sim-btn-p:hover{background:var(--gm);color:#fff}
+.sim-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.ss{border:1px solid var(--bd);padding:10px 12px;background:var(--off)}
+.ss-lbl{font-family:'Inter',sans-serif;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--tx3);margin-bottom:3px}
+.ss-val{font-family:'Courier New',monospace;font-size:18px;font-weight:700;color:var(--g)}
+.sim-split{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.sim-tree-box{background:var(--off);border:1px solid var(--bd);min-height:200px;display:flex;align-items:center;justify-content:center;overflow:auto;padding:12px}
+.sim-log-box{font-family:'Courier New',monospace;font-size:11.5px;background:var(--cbg);color:#EEFFFF;padding:12px 14px;max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:4px}
+.log-ok{color:#86EFAC}.log-er{color:#FCA5A5}.log-info{color:#93C5FD}.log-am{color:#FDE68A}
+
+/* ── CODE BLOCKS ── */
+.cb{background:var(--cbg);border:1px solid var(--cbd);margin:14px 0;overflow:hidden}
+.cb-bar{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid var(--cbd);background:#120810}
+.cb-dots{display:flex;gap:5px}
+.cb-dot{width:8px;height:8px;border-radius:50%}
+.cb-dot:nth-child(1){background:#FF5F57}.cb-dot:nth-child(2){background:#FFBD2E}.cb-dot:nth-child(3){background:#28C840}
+.cb-fname{font-family:'Courier New',monospace;font-size:10px;color:#6B5060}
+.cb-lang{font-size:9px;color:var(--gr);padding:1px 6px;border:1px solid var(--cbd)}
+.cb-body{padding:16px 18px;font-family:'Courier New',monospace;font-size:12.5px;line-height:1.9;overflow-x:auto}
+.cb-body pre{white-space:pre-wrap;word-break:break-word}
+.kw{color:var(--kw)}.tp{color:var(--tp)}.st{color:var(--st)}.cm{color:var(--cm);font-style:italic}.nm{color:var(--nm)}.mt{color:var(--mt)}.vr{color:var(--vr)}
+
+/* ── COMPARISON TABLE ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:13px;margin:14px 0}
+.cmp-table th{padding:10px 14px;background:var(--g);color:#fff;font-family:'Inter',sans-serif;font-size:9px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;border-right:1px solid var(--gm);text-align:left}
+.cmp-table td{padding:11px 14px;border-bottom:1px solid var(--bd);border-right:1px solid var(--bd);font-size:13px;vertical-align:middle}
+.cmp-table tr:nth-child(even) td{background:var(--off)}
+.cmp-table td:first-child{font-weight:600;font-family:'Inter',sans-serif;color:var(--tx)}
+.c-ok{color:var(--ok);font-weight:600}.c-er{color:var(--er)}.c-am{color:var(--am)}
+.tag{font-family:'Courier New',monospace;font-size:11.5px}
+
+/* ── ACTIVITY ── */
+.act-card{border:1px solid var(--bd);margin:24px 0;background:var(--wh)}
+.act-head{background:var(--g);padding:12px 20px;display:flex;justify-content:space-between;align-items:center}
+.act-title{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#fff;letter-spacing:.06em;text-transform:uppercase}
+.act-pts{font-family:'Inter',sans-serif;font-size:11px;color:rgba(255,255,255,.65)}
+.act-body{padding:20px 22px}
+.act-body p{font-size:13.5px;color:var(--tx);line-height:1.7;margin-bottom:10px}
+.act-steps{list-style:none;display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.act-steps li{display:flex;gap:12px;align-items:flex-start;font-size:13.5px;color:var(--tx2);line-height:1.6}
+.sn{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--g);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;margin-top:2px;font-family:'Inter',sans-serif}
+
+/* ── TREE SVG ── */
+.tree-wrap{display:flex;justify-content:center;padding:8px 0}
+
+/* ── BIB ── */
+.bib-list{list-style:none;display:flex;flex-direction:column;gap:10px}
+.bib-item{border-left:3px solid var(--bd);padding:10px 14px;background:var(--off);font-size:13.5px;color:var(--tx2);line-height:1.7}
+.bib-type{font-family:'Inter',sans-serif;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--gr);margin-bottom:3px;font-weight:600}
+.bib-item a{color:var(--g);text-decoration:underline;word-break:break-all}
+
+@media(max-width:640px){
+  .header-inner{padding:10px 14px}
+  .wrap{padding:28px 16px 80px}
+  .hero-slide{padding:40px 20px;margin:-48px -16px 0}
+  .problem-split,.rot-split,.sim-split,.bf-explain{grid-template-columns:1fr}
+  .sim-stats{grid-template-columns:1fr 1fr}
+  .rot-arrow{padding-top:0;font-size:20px;transform:rotate(90deg)}
+  .nav-pills{gap:5px;padding:10px 14px}
+  .pill{font-size:10px;padding:4px 10px}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-logo"><img src="imagen1.png" alt="Logo institucional"></div>
+    <div class="header-center">
+      <div class="header-course">Estructura de Datos &nbsp;·&nbsp; Licenciatura en Sistemas Computacionales</div>
+      <div class="header-title">Unidad 2 — Tema 2.3 &nbsp;·&nbsp; Árboles AVL</div>
+    </div>
+    <div class="header-logo2"><img src="imagen2.png" alt="Logo de apoyo"></div>
+  </div>
+  <div class="prog-bar"><div class="prog-fill" id="pFill"></div></div>
+</header>
+
+<nav class="nav-pills">
+  <a class="pill" href="#s0">Problema</a>
+  <a class="pill" href="#s1">Factor de Balance</a>
+  <a class="pill" href="#s2">Rotaciones</a>
+  <a class="pill" href="#s3">Código</a>
+  <a class="pill" href="#s4">Simulador</a>
+  <a class="pill" href="#s5">Actividades</a>
+</nav>
+
+<div class="wrap">
+
+<!-- ══ HERO ══ -->
+<div class="hero-slide" id="s_hero">
+  <div class="hero-eyebrow">Unidad 2 &nbsp;·&nbsp; Tema 2.3 &nbsp;·&nbsp; 1 de agosto de 2026</div>
+  <div class="hero-h1">Árboles AVL</div>
+  <div class="hero-sub">El BST que se equilibra solo. Adelson-Velsky y Landis resolvieron en 1962 el problema que dejamos abierto la clase pasada: árboles que degeneran en listas.</div>
+  <div class="hero-tags">
+    <span class="hero-tag">Factor de balance</span>
+    <span class="hero-tag">Rotación simple</span>
+    <span class="hero-tag">Rotación doble</span>
+    <span class="hero-tag">O(log n) garantizado</span>
+  </div>
+</div>
+
+<!-- ══ SLIDE 0: EL PROBLEMA ══ -->
+<div class="slide" id="s0">
+  <div class="sec-eyebrow">El problema que dejamos abierto</div>
+  <div class="sec-h2">¿Por qué el BST no siempre es eficiente?</div>
+
+  <div class="problem-split">
+    <div class="prob-card bad">
+      <div class="prob-label">BST degenerado — O(n)</div>
+      <div class="tree-wrap">
+        <svg width="130" height="230" viewBox="0 0 130 230" xmlns="http://www.w3.org/2000/svg" style="font-family:'Courier New',monospace">
+          <line x1="40" y1="26" x2="65" y2="66" stroke="#FCA5A5" stroke-width="1.5"/>
+          <line x1="65" y1="86" x2="90" y2="126" stroke="#FCA5A5" stroke-width="1.5"/>
+          <line x1="90" y1="146" x2="110" y2="186" stroke="#FCA5A5" stroke-width="1.5"/>
+          <circle cx="40" cy="20" r="18" fill="#FFF1F2" stroke="#FCA5A5" stroke-width="2"/><text x="40" y="25" text-anchor="middle" fill="#7F1D1D" font-size="12" font-weight="700">10</text>
+          <circle cx="65" cy="80" r="18" fill="#FFF1F2" stroke="#FCA5A5" stroke-width="2"/><text x="65" y="85" text-anchor="middle" fill="#7F1D1D" font-size="12" font-weight="700">20</text>
+          <circle cx="90" cy="140" r="18" fill="#FFF1F2" stroke="#FCA5A5" stroke-width="2"/><text x="90" y="145" text-anchor="middle" fill="#7F1D1D" font-size="12" font-weight="700">30</text>
+          <circle cx="110" cy="200" r="18" fill="#FFF1F2" stroke="#FCA5A5" stroke-width="2"/><text x="110" y="205" text-anchor="middle" fill="#7F1D1D" font-size="12" font-weight="700">40</text>
+          <text x="5" y="25" fill="#FCA5A5" font-size="9" font-family="'Inter',sans-serif">h=4</text>
+        </svg>
+      </div>
+      <p style="font-size:12.5px;color:var(--er);font-family:'Inter',sans-serif;line-height:1.5;margin-top:8px">Insertar 10,20,30,40 en orden: el árbol se convierte en lista. Buscar(40) necesita 4 comparaciones — O(n).</p>
+    </div>
+
+    <div class="prob-card good">
+      <div class="prob-label">AVL equilibrado — O(log n)</div>
+      <div class="tree-wrap">
+        <svg width="180" height="150" viewBox="0 0 180 150" xmlns="http://www.w3.org/2000/svg" style="font-family:'Courier New',monospace">
+          <line x1="90" y1="26" x2="45"  y2="76" stroke="#86EFAC" stroke-width="1.5"/>
+          <line x1="90" y1="26" x2="135" y2="76" stroke="#86EFAC" stroke-width="1.5"/>
+          <line x1="45" y1="96" x2="22"  y2="130" stroke="#86EFAC" stroke-width="1.5"/>
+          <circle cx="90"  cy="20"  r="20" fill="#14532D" stroke="#14532D"/><text x="90"  y="26"  text-anchor="middle" fill="white" font-size="13" font-weight="700">20</text>
+          <circle cx="45"  cy="90"  r="18" fill="#F0FDF4" stroke="#86EFAC" stroke-width="2"/><text x="45"  y="96"  text-anchor="middle" fill="#14532D" font-size="12" font-weight="700">10</text>
+          <circle cx="135" cy="90"  r="18" fill="#F0FDF4" stroke="#86EFAC" stroke-width="2"/><text x="135" y="96"  text-anchor="middle" fill="#14532D" font-size="12" font-weight="700">30</text>
+          <circle cx="22"  cy="130" r="14" fill="#DCFCE7" stroke="#86EFAC"/><text x="22"  y="135" text-anchor="middle" fill="#14532D" font-size="11">5</text>
+          <text x="5" y="25" fill="#86EFAC" font-size="9" font-family="'Inter',sans-serif">h=3</text>
+        </svg>
+      </div>
+      <p style="font-size:12.5px;color:var(--ok);font-family:'Inter',sans-serif;line-height:1.5;margin-top:8px">AVL mantiene el árbol equilibrado automáticamente con rotaciones. Buscar(40) siempre ≤ log₂(n) comparaciones.</p>
+    </div>
+  </div>
+
+  <div class="callout co-p">
+    <span class="callout-icon">Dato histórico</span>
+    <span>AVL son las iniciales de <strong>Adelson-Velsky y Landis</strong>, los dos matemáticos soviéticos que publicaron este algoritmo en 1962. Fue el primer árbol de búsqueda auto-balanceable de la historia.</span>
+  </div>
+</div>
+
+<!-- ══ SLIDE 1: FACTOR DE BALANCE ══ -->
+<div class="slide" id="s1">
+  <div class="sec-eyebrow">Concepto central</div>
+  <div class="sec-h2">El Factor de Balance (FB)</div>
+
+  <p style="font-size:14.5px;color:var(--tx2);margin-bottom:20px;line-height:1.8">El Factor de Balance de un nodo es la diferencia entre la altura de su subárbol izquierdo y la del derecho:</p>
+
+  <div style="background:var(--g);color:#fff;padding:18px 24px;text-align:center;margin:0 0 20px;font-family:'Cormorant Garamond',Georgia,serif;font-size:28px;font-weight:700;letter-spacing:.02em">
+    FB(nodo) = altura(izquierdo) − altura(derecho)
+  </div>
+
+  <div class="bf-explain">
+    <div class="bf-card ok-c">
+      <div class="bf-num">−1</div>
+      <div class="bf-lbl">Equilibrado</div>
+      <div class="bf-desc">El subárbol derecho es un nivel más alto que el izquierdo. El nodo está en equilibrio AVL.</div>
+    </div>
+    <div class="bf-card ok-c">
+      <div class="bf-num">0</div>
+      <div class="bf-lbl">Perfectamente equilibrado</div>
+      <div class="bf-desc">Ambos subárboles tienen la misma altura. Situación ideal.</div>
+    </div>
+    <div class="bf-card ok-c">
+      <div class="bf-num">+1</div>
+      <div class="bf-lbl">Equilibrado</div>
+      <div class="bf-desc">El subárbol izquierdo es un nivel más alto que el derecho. El nodo está en equilibrio AVL.</div>
+    </div>
+  </div>
+
+  <div class="bf-explain" style="margin-top:8px">
+    <div class="bf-card er-c">
+      <div class="bf-num">−2</div>
+      <div class="bf-lbl">Desbalanceado a la derecha</div>
+      <div class="bf-desc">Se requiere rotación hacia la izquierda para restaurar el equilibrio.</div>
+    </div>
+    <div class="bf-card er-c" style="border-top-color:transparent;background:var(--off)">
+      <div class="bf-num" style="color:var(--tx3)">|FB|≤1</div>
+      <div class="bf-lbl" style="color:var(--tx3)">Regla AVL</div>
+      <div class="bf-desc">Un árbol es AVL si y solo si el FB de cada nodo está entre −1 y +1.</div>
+    </div>
+    <div class="bf-card er-c">
+      <div class="bf-num">+2</div>
+      <div class="bf-lbl">Desbalanceado a la izquierda</div>
+      <div class="bf-desc">Se requiere rotación hacia la derecha para restaurar el equilibrio.</div>
+    </div>
+  </div>
+
+  <!-- FB visual sobre un árbol -->
+  <div style="background:var(--off);border:1px solid var(--bd);padding:20px;margin:16px 0">
+    <div style="font-family:'Inter',sans-serif;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx3);margin-bottom:12px;text-align:center">Factor de balance en cada nodo — árbol AVL válido</div>
+    <div class="tree-wrap">
+      <svg width="360" height="200" viewBox="0 0 360 200" xmlns="http://www.w3.org/2000/svg" style="font-family:'Courier New',monospace;overflow:visible">
+        <line x1="180" y1="36" x2="100" y2="96"  stroke="#DEC8CE" stroke-width="1.5"/>
+        <line x1="180" y1="36" x2="260" y2="96"  stroke="#DEC8CE" stroke-width="1.5"/>
+        <line x1="100" y1="116" x2="60"  y2="166" stroke="#DEC8CE" stroke-width="1.5"/>
+        <line x1="100" y1="116" x2="140" y2="166" stroke="#DEC8CE" stroke-width="1.5"/>
+        <line x1="260" y1="116" x2="300" y2="166" stroke="#DEC8CE" stroke-width="1.5"/>
+        <!-- raíz -->
+        <circle cx="180" cy="26" r="22" fill="#5e162e" stroke="#5e162e"/>
+        <text x="180" y="31" text-anchor="middle" fill="white" font-size="13" font-weight="700">50</text>
+        <text x="210" y="18" fill="#86EFAC" font-size="10" font-family="'Inter',sans-serif" font-weight="700">FB=+1</text>
+        <!-- nivel 2 -->
+        <circle cx="100" cy="106" r="20" fill="#F5E8EE" stroke="#C85070" stroke-width="2"/>
+        <text x="100" y="112" text-anchor="middle" fill="#5e162e" font-size="12" font-weight="600">30</text>
+        <text x="50"  y="98" fill="#86EFAC" font-size="10" font-family="'Inter',sans-serif" font-weight="700">FB=0</text>
+        <circle cx="260" cy="106" r="20" fill="#F5E8EE" stroke="#C85070" stroke-width="2"/>
+        <text x="260" y="112" text-anchor="middle" fill="#5e162e" font-size="12" font-weight="600">70</text>
+        <text x="285" y="98" fill="#86EFAC" font-size="10" font-family="'Inter',sans-serif" font-weight="700">FB=−1</text>
+        <!-- nivel 3 -->
+        <circle cx="60"  cy="166" r="17" fill="#FAF6F7" stroke="#DEC8CE"/>
+        <text x="60"  y="172" text-anchor="middle" fill="#6B4050" font-size="11">20</text>
+        <text x="20"  y="158" fill="#86EFAC" font-size="10" font-family="'Inter',sans-serif" font-weight="700">FB=0</text>
+        <circle cx="140" cy="166" r="17" fill="#FAF6F7" stroke="#DEC8CE"/>
+        <text x="140" y="172" text-anchor="middle" fill="#6B4050" font-size="11">40</text>
+        <text x="160" y="158" fill="#86EFAC" font-size="10" font-family="'Inter',sans-serif" font-weight="700">FB=0</text>
+        <circle cx="300" cy="166" r="17" fill="#FAF6F7" stroke="#DEC8CE"/>
+        <text x="300" y="172" text-anchor="middle" fill="#6B4050" font-size="11">60</text>
+        <text x="320" y="158" fill="#86EFAC" font-size="10" font-family="'Inter',sans-serif" font-weight="700">FB=0</text>
+        <text x="180" y="198" text-anchor="middle" fill="#A07080" font-size="9" font-family="'Inter',sans-serif">Todos los FB están entre −1 y +1 → árbol AVL válido</text>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 2: ROTACIONES ══ -->
+<div class="slide" id="s2">
+  <div class="sec-eyebrow">La solución</div>
+  <div class="sec-h2">Las cuatro rotaciones AVL</div>
+
+  <div class="callout co-a">
+    <span class="callout-icon">Regla</span>
+    <span>Cuando una inserción hace que el FB de algún nodo llegue a ±2, se aplica <strong>una rotación</strong> — simple o doble — para restaurar el equilibrio. La rotación es O(1): solo redirige punteros.</span>
+  </div>
+
+  <div class="rot-stepper">
+    <div class="rot-tabs">
+      <div class="rot-tab active" onclick="showRot('rr')">Derecha simple</div>
+      <div class="rot-tab" onclick="showRot('ll')">Izquierda simple</div>
+      <div class="rot-tab" onclick="showRot('rl')">Der-Izq doble</div>
+      <div class="rot-tab" onclick="showRot('lr')">Izq-Der doble</div>
+    </div>
+
+    <!-- ROT DERECHA (LL case) -->
+    <div class="rot-panel active" id="rot_rr">
+      <div class="rot-split">
+        <div class="rot-before">
+          <span class="rot-badge">Antes — FB = +2</span>
+          <div class="tree-wrap">
+            <svg width="150" height="170" viewBox="0 0 150 170" xmlns="http://www.w3.org/2000/svg" style="font-family:'Courier New',monospace;overflow:visible">
+              <line x1="110" y1="30" x2="70" y2="80"  stroke="#FCA5A5" stroke-width="1.5"/>
+              <line x1="70"  y1="100" x2="40" y2="148" stroke="#FCA5A5" stroke-width="1.5"/>
+              <circle cx="110" cy="22"  r="20" fill="#FFF1F2" stroke="#FCA5A5" stroke-width="2.5"/>
+              <text x="110" y="28"  text-anchor="middle" fill="#7F1D1D" font-size="13" font-weight="700">30</text>
+              <text x="132" y="16"  fill="#FCA5A5" font-size="10" font-family="'Inter',sans-serif" font-weight="700">FB+2</text>
+              <circle cx="70"  cy="92"  r="18" fill="#FFF1F2" stroke="#FCA5A5" stroke-width="1.5"/>
+              <text x="70"  y="98"  text-anchor="middle" fill="#7F1D1D" font-size="12">20</text>
+              <text x="8" y="87" fill="#FCA5A5" font-size="10" font-family="'Inter',sans-serif" font-weight="700">FB+1</text>
+              <circle cx="40"  cy="152" r="16" fill="#FFF1F2" stroke="#FCA5A5" stroke-width="1.5"/>
+              <text x="40"  y="157" text-anchor="middle" fill="#7F1D1D" font-size="11">10</text>
+              <text x="5" y="148" fill="#FCA5A5" font-size="10" font-family="'Inter',sans-serif" font-weight="700">FB=0</text>
+            </svg>
+          </div>
+        </div>
+        <div class="rot-arrow">→</div>
+        <div class="rot-after">
+          <span class="rot-badge">Después — equilibrado</span>
+          <div class="tree-wrap">
+            <svg width="160" height="130" viewBox="0 0 160 130" xmlns="http://www.w3.org/2000/svg" style="font-family:'Courier New',monospace;overflow:visible">
+              <line x1="80"  y1="26" x2="40"  y2="76" stroke="#86EFAC" stroke-width="1.5"/>
+              <line x1="80"  y1="26" x2="120" y2="76" stroke="#86EFAC" stroke-width="1.5"/>
+              <circle cx="80"  cy="18" r="20" fill="#14532D" stroke="#14532D"/>
+              <text x="80"  y="24" text-anchor="middle" fill="white" font-size="13" font-weight="700">20</text>
+              <text x="102" y="12" fill="#86EFAC" font-size="10" font-family="'Inter',sans-serif" font-weight="700">FB=0</text>
+              <circle cx="40"  cy="88" r="18" fill="#F0FDF4" stroke="#86EFAC" stroke-width="2"/>
+              <text x="40"  y="94" text-anchor="middle" fill="#14532D" font-size="12">10</text>
+              <circle cx="120" cy="88" r="18" fill="#F0FDF4" stroke="#86EFAC" stroke-width="2"/>
+              <text x="120" y="94" text-anchor="middle" fill="#14532D" font-size="12">30</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="rot-explain">
+        <strong>Rotación simple derecha (caso LL)</strong> — ocurre cuando FB = +2 y el hijo izquierdo tiene FB = +1 o 0.<br>
+        El nodo desbalanceado (30) baja a la derecha. Su hijo izquierdo (20) sube y toma su lugar como nueva raíz del subárbol.
+        El hijo derecho de 20 (si existiera) se convierte en el nuevo hijo izquierdo de 30.
+      </div>
+    </div>
+
+    <!-- ROT IZQUIERDA (RR case) -->
+    <div class="rot-panel" id="rot_ll">
+      <div class="rot-split">
+        <div class="rot-before">
+          <span class="rot-badge">Antes — FB = −2</span>
+          <div class="tree-wrap">
+            <svg width="150" height="170" viewBox="0 0 150 170" xmlns="http://www.w3.org/2000/svg" style="font-family:'Courier New',monospace;overflow:visible">
+              <line x1="40"  y1="30" x2="80"  y2="80" stroke="#FCA5A5" stroke-width="1.5"/>
+              <line x1="80"  y1="100" x2="110" y2="148" stroke="#FCA5A5" stroke-width="1.5"/>
+              <circle cx="40"  cy="22"  r="20" fill="#FFF1F2" stroke="#FCA5A5" stroke-width="2.5"/>
+              <text x="40"  y="28"  text-anchor="middle" fill="#7F1D1D" font-size="13" font-weight="700">10</text>
+              <text x="2"   y="16"  fill="#FCA5A5" font-size="10" font-family="'Inter',sans-serif" font-weight="700">FB−2</text>
+              <circle cx="80"  cy="92"  r="18" fill="#FFF1F2" stroke="#FCA5A5" stroke-width="1.5"/>
+              <text x="80"  y="98"  text-anchor="middle" fill="#7F1D1D" font-size="12">20</text>
+              <text x="100" y="87" fill="#FCA5A5" font-size="10" font-family="'Inter',sans-serif" font-weight="700">FB−1</text>
+              <circle cx="110" cy="152" r="16" fill="#FFF1F2" stroke="#FCA5A5" stroke-width="1.5"/>
+              <text x="110" y="157" text-anchor="middle" fill="#7F1D1D" font-size="11">30</text>
+              <text x="128" y="148" fill="#FCA5A5" font-size="10" font-family="'Inter',sans-serif" font-weight="700">FB=0</text>
+            </svg>
+          </div>
+        </div>
+        <div class="rot-arrow">→</div>
+        <div class="rot-after">
+          <span class="rot-badge">Después — equilibrado</span>
+          <div class="tree-wrap">
+            <svg width="160" height="130" viewBox="0 0 160 130" xmlns="http://www.w3.org/2000/svg" style="font-family:'Courier New',monospace;overflow:visible">
+              <line x1="80"  y1="26" x2="40"  y2="76" stroke="#86EFAC" stroke-width="1.5"/>
+              <line x1="80"  y1="26" x2="120" y2="76" stroke="#86EFAC" stroke-width="1.5"/>
+              <circle cx="80"  cy="18" r="20" fill="#14532D" stroke="#14532D"/>
+              <text x="80"  y="24" text-anchor="middle" fill="white" font-size="13" font-weight="700">20</text>
+              <text x="102" y="12" fill="#86EFAC" font-size="10" font-family="'Inter',sans-serif" font-weight="700">FB=0</text>
+              <circle cx="40"  cy="88" r="18" fill="#F0FDF4" stroke="#86EFAC" stroke-width="2"/>
+              <text x="40"  y="94" text-anchor="middle" fill="#14532D" font-size="12">10</text>
+              <circle cx="120" cy="88" r="18" fill="#F0FDF4" stroke="#86EFAC" stroke-width="2"/>
+              <text x="120" y="94" text-anchor="middle" fill="#14532D" font-size="12">30</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="rot-explain">
+        <strong>Rotación simple izquierda (caso RR)</strong> — ocurre cuando FB = −2 y el hijo derecho tiene FB = −1 o 0.<br>
+        El nodo desbalanceado (10) baja a la izquierda. Su hijo derecho (20) sube y toma su lugar. El hijo izquierdo de 20 (si existiera) se convierte en el nuevo hijo derecho de 10.
+      </div>
+    </div>
+
+    <!-- ROT DER-IZQ (RL case) -->
+    <div class="rot-panel" id="rot_rl">
+      <div class="rot-split">
+        <div class="rot-before">
+          <span class="rot-badge">Antes — FB = −2, hijo FB = +1</span>
+          <div class="tree-wrap">
+            <svg width="180" height="180" viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg" style="font-family:'Courier New',monospace;overflow:visible">
+              <line x1="40"  y1="30" x2="100" y2="80" stroke="#FCA5A5" stroke-width="1.5"/>
+              <line x1="100" y1="100" x2="70"  y2="150" stroke="#FCA5A5" stroke-width="1.5"/>
+              <circle cx="40"  cy="22"  r="20" fill="#FFF1F2" stroke="#FCA5A5" stroke-width="2.5"/>
+              <text x="40"  y="28"  text-anchor="middle" fill="#7F1D1D" font-size="13" font-weight="700">10</text>
+              <text x="2"   y="16"  fill="#FCA5A5" font-size="10" font-family="'Inter',sans-serif" font-weight="700">FB−2</text>
+              <circle cx="100" cy="92"  r="18" fill="#FFF1F2" stroke="#FCA5A5" stroke-width="1.5"/>
+              <text x="100" y="98"  text-anchor="middle" fill="#7F1D1D" font-size="12">30</text>
+              <text x="122" y="87" fill="#FCA5A5" font-size="10" font-family="'Inter',sans-serif" font-weight="700">FB+1</text>
+              <circle cx="70"  cy="158" r="16" fill="#FFF1F2" stroke="#FCA5A5" stroke-width="1.5"/>
+              <text x="70"  y="163" text-anchor="middle" fill="#7F1D1D" font-size="11">20</text>
+              <text x="90"  y="154" fill="#FCA5A5" font-size="10" font-family="'Inter',sans-serif" font-weight="700">FB=0</text>
+            </svg>
+          </div>
+        </div>
+        <div class="rot-arrow">→</div>
+        <div class="rot-after">
+          <span class="rot-badge">Después — 2 rotaciones</span>
+          <div class="tree-wrap">
+            <svg width="160" height="130" viewBox="0 0 160 130" xmlns="http://www.w3.org/2000/svg" style="font-family:'Courier New',monospace;overflow:visible">
+              <line x1="80"  y1="26" x2="40"  y2="76" stroke="#86EFAC" stroke-width="1.5"/>
+              <line x1="80"  y1="26" x2="120" y2="76" stroke="#86EFAC" stroke-width="1.5"/>
+              <circle cx="80"  cy="18" r="20" fill="#14532D" stroke="#14532D"/>
+              <text x="80"  y="24" text-anchor="middle" fill="white" font-size="13" font-weight="700">20</text>
+              <text x="102" y="12" fill="#86EFAC" font-size="10" font-family="'Inter',sans-serif" font-weight="700">FB=0</text>
+              <circle cx="40"  cy="88" r="18" fill="#F0FDF4" stroke="#86EFAC" stroke-width="2"/>
+              <text x="40"  y="94" text-anchor="middle" fill="#14532D" font-size="12">10</text>
+              <circle cx="120" cy="88" r="18" fill="#F0FDF4" stroke="#86EFAC" stroke-width="2"/>
+              <text x="120" y="94" text-anchor="middle" fill="#14532D" font-size="12">30</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="rot-explain">
+        <strong>Rotación doble Derecha-Izquierda (caso RL)</strong> — ocurre cuando FB = −2 y el hijo derecho tiene FB = +1.<br>
+        Paso 1: rotación derecha sobre el hijo derecho (30 → 20 sube).<br>
+        Paso 2: rotación izquierda sobre el nodo desbalanceado (10 → 20 sube como nueva raíz).<br>
+        El resultado es el mismo árbol equilibrado pero requirió dos rotaciones.
+      </div>
+    </div>
+
+    <!-- ROT IZQ-DER (LR case) -->
+    <div class="rot-panel" id="rot_lr">
+      <div class="rot-split">
+        <div class="rot-before">
+          <span class="rot-badge">Antes — FB = +2, hijo FB = −1</span>
+          <div class="tree-wrap">
+            <svg width="180" height="180" viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg" style="font-family:'Courier New',monospace;overflow:visible">
+              <line x1="140" y1="30" x2="80"  y2="80" stroke="#FCA5A5" stroke-width="1.5"/>
+              <line x1="80"  y1="100" x2="110" y2="150" stroke="#FCA5A5" stroke-width="1.5"/>
+              <circle cx="140" cy="22"  r="20" fill="#FFF1F2" stroke="#FCA5A5" stroke-width="2.5"/>
+              <text x="140" y="28"  text-anchor="middle" fill="#7F1D1D" font-size="13" font-weight="700">30</text>
+              <text x="162" y="16"  fill="#FCA5A5" font-size="10" font-family="'Inter',sans-serif" font-weight="700">FB+2</text>
+              <circle cx="80"  cy="92"  r="18" fill="#FFF1F2" stroke="#FCA5A5" stroke-width="1.5"/>
+              <text x="80"  y="98"  text-anchor="middle" fill="#7F1D1D" font-size="12">10</text>
+              <text x="20"  y="87" fill="#FCA5A5" font-size="10" font-family="'Inter',sans-serif" font-weight="700">FB−1</text>
+              <circle cx="110" cy="158" r="16" fill="#FFF1F2" stroke="#FCA5A5" stroke-width="1.5"/>
+              <text x="110" y="163" text-anchor="middle" fill="#7F1D1D" font-size="11">20</text>
+              <text x="128" y="154" fill="#FCA5A5" font-size="10" font-family="'Inter',sans-serif" font-weight="700">FB=0</text>
+            </svg>
+          </div>
+        </div>
+        <div class="rot-arrow">→</div>
+        <div class="rot-after">
+          <span class="rot-badge">Después — 2 rotaciones</span>
+          <div class="tree-wrap">
+            <svg width="160" height="130" viewBox="0 0 160 130" xmlns="http://www.w3.org/2000/svg" style="font-family:'Courier New',monospace;overflow:visible">
+              <line x1="80"  y1="26" x2="40"  y2="76" stroke="#86EFAC" stroke-width="1.5"/>
+              <line x1="80"  y1="26" x2="120" y2="76" stroke="#86EFAC" stroke-width="1.5"/>
+              <circle cx="80"  cy="18" r="20" fill="#14532D" stroke="#14532D"/>
+              <text x="80"  y="24" text-anchor="middle" fill="white" font-size="13" font-weight="700">20</text>
+              <text x="102" y="12" fill="#86EFAC" font-size="10" font-family="'Inter',sans-serif" font-weight="700">FB=0</text>
+              <circle cx="40"  cy="88" r="18" fill="#F0FDF4" stroke="#86EFAC" stroke-width="2"/>
+              <text x="40"  y="94" text-anchor="middle" fill="#14532D" font-size="12">10</text>
+              <circle cx="120" cy="88" r="18" fill="#F0FDF4" stroke="#86EFAC" stroke-width="2"/>
+              <text x="120" y="94" text-anchor="middle" fill="#14532D" font-size="12">30</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="rot-explain">
+        <strong>Rotación doble Izquierda-Derecha (caso LR)</strong> — ocurre cuando FB = +2 y el hijo izquierdo tiene FB = −1.<br>
+        Paso 1: rotación izquierda sobre el hijo izquierdo (10 → 20 sube).<br>
+        Paso 2: rotación derecha sobre el nodo desbalanceado (30 → 20 sube como nueva raíz).<br>
+        El resultado es el mismo árbol equilibrado con dos rotaciones.
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla de decisión -->
+  <div class="sec-h3" style="margin-top:28px">¿Qué rotación aplicar?</div>
+  <table class="cmp-table">
+    <thead>
+      <tr><th>FB del nodo desbalanceado</th><th>FB del hijo problemático</th><th>Caso</th><th>Rotación a aplicar</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>+2</td><td>+1 o 0</td><td>LL</td><td class="c-ok">Simple derecha</td></tr>
+      <tr><td>−2</td><td>−1 o 0</td><td>RR</td><td class="c-ok">Simple izquierda</td></tr>
+      <tr><td>+2</td><td>−1</td><td>LR</td><td class="c-am">Doble: izq sobre hijo → der sobre nodo</td></tr>
+      <tr><td>−2</td><td>+1</td><td>RL</td><td class="c-am">Doble: der sobre hijo → izq sobre nodo</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══ SLIDE 3: CÓDIGO ══ -->
+<div class="slide" id="s3">
+  <div class="sec-eyebrow">Código en C#</div>
+  <div class="sec-h2">Implementación del AVL</div>
+
+  <div class="callout co-bl">
+    <span class="callout-icon">Nota</span>
+    <span>El AVL extiende el BST. La clase <code style="font-family:'Courier New',monospace">Nodo</code> necesita un campo <code style="font-family:'Courier New',monospace">Altura</code>. Insertar llama al mismo <code style="font-family:'Courier New',monospace">InsRec</code> del BST pero agrega: recalcular altura, calcular FB y aplicar la rotación correspondiente.</span>
+  </div>
+
+  <div class="cb">
+    <div class="cb-bar">
+      <div class="cb-dots"><div class="cb-dot"></div><div class="cb-dot"></div><div class="cb-dot"></div></div>
+      <span class="cb-fname">AVL.cs — clase Nodo extendida</span><span class="cb-lang">C#</span>
+    </div>
+    <div class="cb-body"><pre><span class="cm">// El nodo de AVL agrega un campo Altura respecto al nodo de BST</span>
+<span class="kw">class</span> <span class="tp">Nodo</span>
+{
+    <span class="kw">public</span> <span class="tp">int</span>  <span class="vr">Valor</span>;
+    <span class="kw">public</span> <span class="tp">Nodo</span> <span class="vr">Izquierdo</span>, <span class="vr">Derecho</span>;
+    <span class="kw">public</span> <span class="tp">int</span>  <span class="vr">Altura</span>;  <span class="cm">// ← nuevo: necesario para calcular el FB</span>
+    <span class="kw">public</span> <span class="mt">Nodo</span>(<span class="tp">int</span> <span class="vr">v</span>) { <span class="vr">Valor</span> = <span class="vr">v</span>; <span class="vr">Altura</span> = <span class="nm">1</span>; } <span class="cm">// toda hoja tiene altura 1</span>
+}</pre></div>
+  </div>
+
+  <div class="cb">
+    <div class="cb-bar">
+      <div class="cb-dots"><div class="cb-dot"></div><div class="cb-dot"></div><div class="cb-dot"></div></div>
+      <span class="cb-fname">AVL.cs — funciones auxiliares</span><span class="cb-lang">C#</span>
+    </div>
+    <div class="cb-body"><pre><span class="cm">// Altura de un nodo (null = 0)</span>
+<span class="kw">int</span> <span class="mt">Alt</span>(<span class="tp">Nodo</span> <span class="vr">n</span>) =&gt; <span class="vr">n</span> == <span class="kw">null</span> ? <span class="nm">0</span> : <span class="vr">n</span>.<span class="vr">Altura</span>;
+
+<span class="cm">// Factor de Balance: izquierda - derecha</span>
+<span class="kw">int</span> <span class="mt">FB</span>(<span class="tp">Nodo</span> <span class="vr">n</span>) =&gt; <span class="mt">Alt</span>(<span class="vr">n</span>.<span class="vr">Izquierdo</span>) - <span class="mt">Alt</span>(<span class="vr">n</span>.<span class="vr">Derecho</span>);
+
+<span class="cm">// Actualizar la altura del nodo tras una modificación</span>
+<span class="kw">void</span> <span class="mt">ActualizarAltura</span>(<span class="tp">Nodo</span> <span class="vr">n</span>) =&gt;
+    <span class="vr">n</span>.<span class="vr">Altura</span> = <span class="nm">1</span> + <span class="tp">Math</span>.<span class="mt">Max</span>(<span class="mt">Alt</span>(<span class="vr">n</span>.<span class="vr">Izquierdo</span>), <span class="mt">Alt</span>(<span class="vr">n</span>.<span class="vr">Derecho</span>));</pre></div>
+  </div>
+
+  <div class="cb">
+    <div class="cb-bar">
+      <div class="cb-dots"><div class="cb-dot"></div><div class="cb-dot"></div><div class="cb-dot"></div></div>
+      <span class="cb-fname">AVL.cs — rotaciones</span><span class="cb-lang">C#</span>
+    </div>
+    <div class="cb-body"><pre><span class="cm">// ── Rotación simple derecha (caso LL) ────────────────────────</span>
+<span class="tp">Nodo</span> <span class="mt">RotDer</span>(<span class="tp">Nodo</span> <span class="vr">y</span>)
+{
+    <span class="tp">Nodo</span> <span class="vr">x</span>  = <span class="vr">y</span>.<span class="vr">Izquierdo</span>;   <span class="cm">// x sube</span>
+    <span class="tp">Nodo</span> <span class="vr">T2</span> = <span class="vr">x</span>.<span class="vr">Derecho</span>;      <span class="cm">// hijo derecho de x se mueve</span>
+    <span class="vr">x</span>.<span class="vr">Derecho</span>    = <span class="vr">y</span>;          <span class="cm">// y baja a la derecha de x</span>
+    <span class="vr">y</span>.<span class="vr">Izquierdo</span>  = <span class="vr">T2</span>;         <span class="cm">// T2 pasa a ser hijo izquierdo de y</span>
+    <span class="mt">ActualizarAltura</span>(<span class="vr">y</span>);
+    <span class="mt">ActualizarAltura</span>(<span class="vr">x</span>);
+    <span class="kw">return</span> <span class="vr">x</span>;                  <span class="cm">// x es la nueva raíz del subárbol</span>
+}
+
+<span class="cm">// ── Rotación simple izquierda (caso RR) ──────────────────────</span>
+<span class="tp">Nodo</span> <span class="mt">RotIzq</span>(<span class="tp">Nodo</span> <span class="vr">x</span>)
+{
+    <span class="tp">Nodo</span> <span class="vr">y</span>  = <span class="vr">x</span>.<span class="vr">Derecho</span>;      <span class="cm">// y sube</span>
+    <span class="tp">Nodo</span> <span class="vr">T2</span> = <span class="vr">y</span>.<span class="vr">Izquierdo</span>;    <span class="cm">// hijo izquierdo de y se mueve</span>
+    <span class="vr">y</span>.<span class="vr">Izquierdo</span>  = <span class="vr">x</span>;          <span class="cm">// x baja a la izquierda de y</span>
+    <span class="vr">x</span>.<span class="vr">Derecho</span>    = <span class="vr">T2</span>;         <span class="cm">// T2 pasa a ser hijo derecho de x</span>
+    <span class="mt">ActualizarAltura</span>(<span class="vr">x</span>);
+    <span class="mt">ActualizarAltura</span>(<span class="vr">y</span>);
+    <span class="kw">return</span> <span class="vr">y</span>;                  <span class="cm">// y es la nueva raíz del subárbol</span>
+}</pre></div>
+  </div>
+
+  <div class="cb">
+    <div class="cb-bar">
+      <div class="cb-dots"><div class="cb-dot"></div><div class="cb-dot"></div><div class="cb-dot"></div></div>
+      <span class="cb-fname">AVL.cs — inserción con balanceo</span><span class="cb-lang">C#</span>
+    </div>
+    <div class="cb-body"><pre><span class="tp">Nodo</span> <span class="mt">Insertar</span>(<span class="tp">Nodo</span> <span class="vr">n</span>, <span class="tp">int</span> <span class="vr">v</span>)
+{
+    <span class="cm">// 1. Inserción BST normal ─────────────────────────────────</span>
+    <span class="kw">if</span> (<span class="vr">n</span> == <span class="kw">null</span>) <span class="kw">return</span> <span class="kw">new</span> <span class="tp">Nodo</span>(<span class="vr">v</span>);
+    <span class="kw">if</span> (<span class="vr">v</span> &lt; <span class="vr">n</span>.<span class="vr">Valor</span>) <span class="vr">n</span>.<span class="vr">Izquierdo</span> = <span class="mt">Insertar</span>(<span class="vr">n</span>.<span class="vr">Izquierdo</span>, <span class="vr">v</span>);
+    <span class="kw">else</span> <span class="kw">if</span> (<span class="vr">v</span> &gt; <span class="vr">n</span>.<span class="vr">Valor</span>) <span class="vr">n</span>.<span class="vr">Derecho</span> = <span class="mt">Insertar</span>(<span class="vr">n</span>.<span class="vr">Derecho</span>, <span class="vr">v</span>);
+    <span class="kw">else</span> <span class="kw">return</span> <span class="vr">n</span>; <span class="cm">// duplicado: no insertar</span>
+
+    <span class="cm">// 2. Actualizar la altura del nodo actual ─────────────────</span>
+    <span class="mt">ActualizarAltura</span>(<span class="vr">n</span>);
+
+    <span class="cm">// 3. Calcular el Factor de Balance ────────────────────────</span>
+    <span class="kw">int</span> <span class="vr">fb</span> = <span class="mt">FB</span>(<span class="vr">n</span>);
+
+    <span class="cm">// 4. Aplicar la rotación correcta si |FB| > 1 ─────────────</span>
+
+    <span class="cm">// Caso LL: desbalanceado a la izquierda, hijo también izquierdo</span>
+    <span class="kw">if</span> (<span class="vr">fb</span> &gt; <span class="nm">1</span> &amp;&amp; <span class="vr">v</span> &lt; <span class="vr">n</span>.<span class="vr">Izquierdo</span>.<span class="vr">Valor</span>)
+        <span class="kw">return</span> <span class="mt">RotDer</span>(<span class="vr">n</span>);
+
+    <span class="cm">// Caso RR: desbalanceado a la derecha, hijo también derecho</span>
+    <span class="kw">if</span> (<span class="vr">fb</span> &lt; -<span class="nm">1</span> &amp;&amp; <span class="vr">v</span> &gt; <span class="vr">n</span>.<span class="vr">Derecho</span>.<span class="vr">Valor</span>)
+        <span class="kw">return</span> <span class="mt">RotIzq</span>(<span class="vr">n</span>);
+
+    <span class="cm">// Caso LR: desbalanceado izq, pero el nuevo nodo es hijo derecho</span>
+    <span class="kw">if</span> (<span class="vr">fb</span> &gt; <span class="nm">1</span> &amp;&amp; <span class="vr">v</span> &gt; <span class="vr">n</span>.<span class="vr">Izquierdo</span>.<span class="vr">Valor</span>)
+    {
+        <span class="vr">n</span>.<span class="vr">Izquierdo</span> = <span class="mt">RotIzq</span>(<span class="vr">n</span>.<span class="vr">Izquierdo</span>); <span class="cm">// rotación izq sobre hijo</span>
+        <span class="kw">return</span> <span class="mt">RotDer</span>(<span class="vr">n</span>);               <span class="cm">// rotación der sobre nodo</span>
+    }
+
+    <span class="cm">// Caso RL: desbalanceado der, pero el nuevo nodo es hijo izquierdo</span>
+    <span class="kw">if</span> (<span class="vr">fb</span> &lt; -<span class="nm">1</span> &amp;&amp; <span class="vr">v</span> &lt; <span class="vr">n</span>.<span class="vr">Derecho</span>.<span class="vr">Valor</span>)
+    {
+        <span class="vr">n</span>.<span class="vr">Derecho</span> = <span class="mt">RotDer</span>(<span class="vr">n</span>.<span class="vr">Derecho</span>); <span class="cm">// rotación der sobre hijo</span>
+        <span class="kw">return</span> <span class="mt">RotIzq</span>(<span class="vr">n</span>);              <span class="cm">// rotación izq sobre nodo</span>
+    }
+
+    <span class="kw">return</span> <span class="vr">n</span>; <span class="cm">// nodo equilibrado, no se necesita rotación</span>
+}</pre></div>
+  </div>
+
+  <div class="callout co-g">
+    <span class="callout-icon">Clave</span>
+    <span>Los pasos 1 a 4 de <code style="font-family:'Courier New',monospace">Insertar</code> son siempre los mismos, en ese orden: inserción BST → actualizar altura → calcular FB → rotar si necesario. La recursión hace que el balanceo suba automáticamente desde el nodo insertado hasta la raíz.</span>
+  </div>
+</div>
+
+<!-- ══ SLIDE 4: SIMULADOR ══ -->
+<div class="slide" id="s4">
+  <div class="sec-eyebrow">Práctica interactiva</div>
+  <div class="sec-h2">Simulador AVL en vivo</div>
+
+  <div class="sim-shell">
+    <div class="sim-topbar">
+      <div class="sim-dots"><div class="sim-dot"></div><div class="sim-dot"></div><div class="sim-dot"></div></div>
+      <span class="sim-title-bar">AVL Simulator — inserta valores y observa el auto-balanceo</span>
+    </div>
+    <div class="sim-body">
+      <div class="sim-controls">
+        <input type="number" id="avlVal" class="sim-input" placeholder="Valor (1-999)" min="1" max="999">
+        <button class="sim-btn sim-btn-p" onclick="avlInsert()">Insertar</button>
+        <button class="sim-btn" onclick="avlInOrder()">InOrder</button>
+        <button class="sim-btn" onclick="avlReset()">Reset</button>
+        <button class="sim-btn" onclick="avlDemo()">Demo: 10,20,30</button>
+      </div>
+      <div class="sim-stats">
+        <div class="ss"><div class="ss-lbl">Nodos</div><div class="ss-val" id="avlCount">0</div></div>
+        <div class="ss"><div class="ss-lbl">Raíz</div><div class="ss-val" id="avlRoot">—</div></div>
+        <div class="ss"><div class="ss-lbl">Altura</div><div class="ss-val" id="avlH">0</div></div>
+        <div class="ss"><div class="ss-lbl">Rotaciones</div><div class="ss-val" id="avlRots">0</div></div>
+      </div>
+      <div class="sim-split">
+        <div class="sim-tree-box" id="avlTreeBox">
+          <span style="font-family:'Inter',sans-serif;font-size:12px;color:var(--tx3)">Presiona "Demo: 10,20,30" para ver la primera rotación</span>
+        </div>
+        <div class="sim-log-box" id="avlLog">
+          <span class="log-info">Simulador AVL listo.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 5: ACTIVIDADES ══ -->
+<div class="slide" id="s5">
+  <div class="sec-eyebrow">Durante la sesión</div>
+  <div class="sec-h2">Actividades</div>
+
+  <div class="act-card">
+    <div class="act-head">
+      <span class="act-title">Actividad 1 — Traza manual de balanceo</span>
+      <span class="act-pts">15 min</span>
+    </div>
+    <div class="act-body">
+      <p>Inserta los valores <strong>10, 20, 30, 15, 25</strong> en un AVL en papel. Para cada inserción calcula el FB de cada nodo e indica si se necesita rotación y de qué tipo.</p>
+      <ol class="act-steps">
+        <li><div class="sn">1</div><span>Dibuja el árbol después de insertar 10 y 20. ¿Cuál es el FB de la raíz?</span></li>
+        <li><div class="sn">2</div><span>Inserta 30. ¿Qué FB tiene el nodo 10 ahora? ¿Qué rotación se aplica? Dibuja el resultado.</span></li>
+        <li><div class="sn">3</div><span>Inserta 15. ¿Sigue equilibrado? ¿Qué FB tiene el nodo 20?</span></li>
+        <li><div class="sn">4</div><span>Inserta 25 y verifica que todos los FB estén en {−1, 0, +1}.</span></li>
+      </ol>
+      <p style="margin-top:12px">Verifica tu traza usando el simulador de la sección anterior.</p>
+    </div>
+  </div>
+
+  <div class="act-card">
+    <div class="act-head">
+      <span class="act-title">Actividad 2 — Identificar la rotación</span>
+      <span class="act-pts">10 min</span>
+    </div>
+    <div class="act-body">
+      <p>Para cada situación, indica qué rotación se aplica (simple derecha, simple izquierda, doble LR, doble RL):</p>
+      <ol class="act-steps">
+        <li><div class="sn">A</div><span>Nodo con FB = +2, su hijo izquierdo tiene FB = +1.</span></li>
+        <li><div class="sn">B</div><span>Nodo con FB = −2, su hijo derecho tiene FB = −1.</span></li>
+        <li><div class="sn">C</div><span>Nodo con FB = +2, su hijo izquierdo tiene FB = −1.</span></li>
+        <li><div class="sn">D</div><span>Nodo con FB = −2, su hijo derecho tiene FB = +1.</span></li>
+      </ol>
+      <p style="margin-top:10px"><strong>Respuestas:</strong> A → Simple derecha &nbsp;·&nbsp; B → Simple izquierda &nbsp;·&nbsp; C → Doble LR &nbsp;·&nbsp; D → Doble RL</p>
+    </div>
+  </div>
+
+  <div class="act-card">
+    <div class="act-head">
+      <span class="act-title">Actividad 3 — Comparativa BST vs AVL en Codespaces</span>
+      <span class="act-pts">25 min</span>
+    </div>
+    <div class="act-body">
+      <p>En tu Codespace implementa el AVL completo con las funciones de la Sección 3. Luego:</p>
+      <ol class="act-steps">
+        <li><div class="sn">1</div><span>Inserta <strong>10, 20, 30, 40, 50</strong> en un BST normal y llama <code style="font-family:'Courier New',monospace;color:var(--g)">InOrder()</code>. Observa la altura.</span></li>
+        <li><div class="sn">2</div><span>Inserta los mismos valores en un AVL y llama <code style="font-family:'Courier New',monospace;color:var(--g)">InOrder()</code>. Compara la altura con el BST del paso anterior.</span></li>
+        <li><div class="sn">3</div><span>Agrega un método <code style="font-family:'Courier New',monospace;color:var(--g)">Altura()</code> que devuelva la altura del árbol e imprímela para ambos. ¿Cuánto reduce el AVL la altura?</span></li>
+        <li><div class="sn">4</div><span>Haz commit: <code style="font-family:'Courier New',monospace;color:var(--g)">feat: avl-insercion-balanceo</code></span></li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- BST vs AVL table -->
+  <div class="sec-h3" style="margin-top:28px">BST vs AVL — resumen</div>
+  <table class="cmp-table">
+    <thead>
+      <tr><th>Característica</th><th>BST</th><th>AVL</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Búsqueda promedio</td><td class="c-am">O(log n)</td><td class="c-ok">O(log n) garantizado</td></tr>
+      <tr><td>Búsqueda peor caso</td><td class="c-er">O(n) — árbol degenerado</td><td class="c-ok">O(log n) siempre</td></tr>
+      <tr><td>Inserción</td><td class="c-am">O(log n) promedio</td><td class="c-ok">O(log n) + rotación O(1)</td></tr>
+      <tr><td>Espacio extra por nodo</td><td class="c-ok">Ninguno</td><td class="c-am">+1 campo: Altura (int)</td></tr>
+      <tr><td>Complejidad de implementación</td><td class="c-ok">Simple</td><td class="c-am">Moderada</td></tr>
+      <tr><td>Orden inserción secuencial</td><td class="c-er">Degenera</td><td class="c-ok">Rota y mantiene equilibrio</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- BIB -->
+<div style="margin-top:48px;padding-top:28px;border-top:1px solid var(--bd)">
+  <div style="font-family:'Inter',sans-serif;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--tx3);margin-bottom:12px;font-weight:600">Referencias bibliográficas</div>
+  <ul class="bib-list">
+    <li class="bib-item">
+      <div class="bib-type">Libro principal</div>
+      Weiss, M. A. (2013). <em>Data Structures and Algorithm Analysis in C++</em> (4.a ed.). Pearson. Cap. 4.4: AVL Trees.
+    </li>
+    <li class="bib-item">
+      <div class="bib-type">Algoritmos</div>
+      Cormen, T. H. et al. (2014). <em>Introduction to Algorithms</em> (3.a ed.). MIT Press. Cap. 13: Red-Black Trees (concepto de árbol auto-balanceable).
+    </li>
+    <li class="bib-item">
+      <div class="bib-type">Artículo original</div>
+      Adelson-Velsky, G. M. &amp; Landis, E. M. (1962). <em>An algorithm for the organization of information</em>. Proceedings of the USSR Academy of Sciences, 146, 263–266.
+    </li>
+    <li class="bib-item">
+      <div class="bib-type">Documentación</div>
+      Microsoft. (2024). <em>C# — Recursion and tree structures</em>. <a href="https://learn.microsoft.com/en-us/dotnet/csharp/" target="_blank" rel="noopener">learn.microsoft.com/dotnet/csharp</a>
+    </li>
+  </ul>
+</div>
+
+<div style="border-top:1px solid var(--bd);padding-top:16px;margin-top:32px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--tx3);font-family:'Inter',sans-serif">
+  <span>Mtro. José Armando Vera Rodríguez</span>
+  <span>Estructura de Datos &nbsp;·&nbsp; Unidad 2 &nbsp;·&nbsp; Tema 2.3</span>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+/* ══ NAV PILLS ══════════════════════════════════ */
+const pills=document.querySelectorAll('.pill');
+const slides=document.querySelectorAll('.slide');
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const id=e.target.id;
+      pills.forEach(p=>{p.classList.toggle('active',p.getAttribute('href')==='#'+id);});
+    }
+  });
+},{rootMargin:'-30% 0px -60% 0px'});
+slides.forEach(s=>obs.observe(s));
+
+/* ══ PROGRESS BAR ═══════════════════════════════ */
+window.addEventListener('scroll',()=>{
+  const h=document.documentElement.scrollHeight-window.innerHeight;
+  if(h>0) document.getElementById('pFill').style.width=(window.scrollY/h*100)+'%';
+});
+
+/* ══ ROTATION TABS ══════════════════════════════ */
+function showRot(id){
+  document.querySelectorAll('.rot-tab').forEach((t,i)=>{
+    const ids=['rr','ll','rl','lr'];
+    t.classList.toggle('active',ids[i]===id);
+  });
+  document.querySelectorAll('.rot-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('rot_'+id).classList.add('active');
+}
+
+/* ══ AVL SIMULATOR ══════════════════════════════ */
+let avlRoot=null;
+let rotCount=0;
+
+function h(n){return n?n.h:0;}
+function upH(n){if(n)n.h=1+Math.max(h(n.l),h(n.r));}
+function fb(n){return n?h(n.l)-h(n.r):0;}
+function mkN(v){return{v,l:null,r:null,h:1};}
+
+function rotR(y){
+  const x=y.l,T=x.r;
+  x.r=y;y.l=T;
+  upH(y);upH(x);
+  rotCount++;
+  avlLog(`Rotación derecha sobre nodo ${y.v} → ${x.v} sube`,'log-am');
+  return x;
+}
+function rotL(x){
+  const y=x.r,T=y.l;
+  y.l=x;x.r=T;
+  upH(x);upH(y);
+  rotCount++;
+  avlLog(`Rotación izquierda sobre nodo ${x.v} → ${y.v} sube`,'log-am');
+  return y;
+}
+
+function ins(n,v){
+  if(!n)return mkN(v);
+  if(v<n.v)n.l=ins(n.l,v);
+  else if(v>n.v)n.r=ins(n.r,v);
+  else return n;
+  upH(n);
+  const f=fb(n);
+  if(f>1&&v<n.l.v)  return rotR(n);
+  if(f<-1&&v>n.r.v) return rotL(n);
+  if(f>1&&v>n.l.v){n.l=rotL(n.l);return rotR(n);}
+  if(f<-1&&v<n.r.v){n.r=rotR(n.r);return rotL(n);}
+  return n;
+}
+
+function countN(n){return n?1+countN(n.l)+countN(n.r):0;}
+function hN(n){return n?n.h:0;}
+function inO(n,a=[]){if(!n)return a;inO(n.l,a);a.push(n.v);inO(n.r,a);return a;}
+
+function avlLog(txt,cls='log-info'){
+  const el=document.getElementById('avlLog');
+  const s=document.createElement('span');
+  s.className=cls;s.textContent=txt;
+  el.appendChild(s);el.scrollTop=el.scrollHeight;
+  while(el.children.length>25)el.removeChild(el.firstChild);
+}
+
+function avlStats(){
+  document.getElementById('avlCount').textContent=countN(avlRoot);
+  document.getElementById('avlRoot').textContent=avlRoot?avlRoot.v:'—';
+  document.getElementById('avlH').textContent=hN(avlRoot);
+  document.getElementById('avlRots').textContent=rotCount;
+}
+
+function avlInsert(){
+  const inp=document.getElementById('avlVal');
+  const v=parseInt(inp.value);
+  if(isNaN(v)||v<1||v>999){avlLog('Ingresa un número entre 1 y 999','log-er');return;}
+  const prev=countN(avlRoot);
+  avlRoot=ins(avlRoot,v);
+  if(countN(avlRoot)===prev){avlLog(`${v} ya existe, no se inserta duplicado`,'log-er');}
+  else{avlLog(`Insertar(${v}) — FB raíz: ${fb(avlRoot)}`,'log-ok');}
+  inp.value='';inp.focus();
+  avlStats();drawAVL();
+}
+
+function avlInOrder(){
+  if(!avlRoot){avlLog('Árbol vacío','log-er');return;}
+  avlLog('InOrder: '+inO(avlRoot).join(' → '),'log-ok');
+}
+
+function avlReset(){
+  avlRoot=null;rotCount=0;avlStats();
+  document.getElementById('avlTreeBox').innerHTML=
+    '<span style="font-family:\'Inter\',sans-serif;font-size:12px;color:var(--tx3)">Árbol vacío</span>';
+  document.getElementById('avlLog').innerHTML='<span class="log-info">Árbol reiniciado.</span>';
+}
+
+function avlDemo(){
+  avlReset();
+  avlLog('Demo: insertando 10, 20, 30 — observa la rotación automática','log-info');
+  [10,20,30].forEach(v=>{
+    avlRoot=ins(avlRoot,v);
+    avlLog(`Insertar(${v}) — FB raíz: ${fb(avlRoot)}`,'log-ok');
+  });
+  avlStats();drawAVL();
+}
+
+function drawAVL(){
+  if(!avlRoot){
+    document.getElementById('avlTreeBox').innerHTML=
+      '<span style="font-family:\'Inter\',sans-serif;font-size:12px;color:var(--tx3)">Árbol vacío</span>';
+    return;
+  }
+  const H=hN(avlRoot);
+  const W=Math.max(360,Math.pow(2,H)*46);
+  const SH=H*70+40;
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('width',W);svg.setAttribute('height',SH);
+  svg.setAttribute('viewBox',`0 0 ${W} ${SH}`);
+  svg.style.fontFamily="'Courier New',monospace";svg.style.overflow='visible';
+
+  function drawN(node,x,y,xOff){
+    if(!node)return;
+    const r=19;
+    const f=fb(node);
+    const balanced=Math.abs(f)<=1;
+    const isRoot=node===avlRoot;
+    const fill=isRoot?'#5e162e':balanced?'#F5E8EE':'#FFF1F2';
+    const stroke=balanced?'#C85070':'#FCA5A5';
+    const sw=balanced?'1.5':'2.5';
+    const tc=isRoot?'white':balanced?'#5e162e':'#7F1D1D';
+
+    const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('cx',x);c.setAttribute('cy',y);c.setAttribute('r',r);
+    c.setAttribute('fill',fill);c.setAttribute('stroke',stroke);c.setAttribute('stroke-width',sw);
+    svg.appendChild(c);
+
+    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x',x);t.setAttribute('y',y+5);
+    t.setAttribute('text-anchor','middle');
+    t.setAttribute('fill',tc);t.setAttribute('font-size','12');t.setAttribute('font-weight','600');
+    t.textContent=node.v;svg.appendChild(t);
+
+    // FB label
+    const fl=document.createElementNS('http://www.w3.org/2000/svg','text');
+    fl.setAttribute('x',x+r+3);fl.setAttribute('y',y-r+6);
+    fl.setAttribute('fill',balanced?'#86EFAC':'#FCA5A5');
+    fl.setAttribute('font-size','9');fl.setAttribute('font-family',"'Inter',sans-serif");fl.setAttribute('font-weight','700');
+    fl.textContent=`FB${f>=0?'+':''}${f}`;
+    svg.appendChild(fl);
+
+    if(node.l){
+      const cx=x-xOff,cy=y+68;
+      const ln=document.createElementNS('http://www.w3.org/2000/svg','line');
+      ln.setAttribute('x1',x);ln.setAttribute('y1',y+r);
+      ln.setAttribute('x2',cx);ln.setAttribute('y2',cy-r);
+      ln.setAttribute('stroke','#DEC8CE');ln.setAttribute('stroke-width','1.5');
+      svg.appendChild(ln);drawN(node.l,cx,cy,xOff/2);
+    }
+    if(node.r){
+      const cx=x+xOff,cy=y+68;
+      const ln=document.createElementNS('http://www.w3.org/2000/svg','line');
+      ln.setAttribute('x1',x);ln.setAttribute('y1',y+r);
+      ln.setAttribute('x2',cx);ln.setAttribute('y2',cy-r);
+      ln.setAttribute('stroke','#DEC8CE');ln.setAttribute('stroke-width','1.5');
+      svg.appendChild(ln);drawN(node.r,cx,cy,xOff/2);
+    }
+  }
+
+  drawN(avlRoot,W/2,28,W/4);
+  const box=document.getElementById('avlTreeBox');
+  box.innerHTML='';box.appendChild(svg);
+}
+
+document.getElementById('avlVal').addEventListener('keydown',e=>{if(e.key==='Enter')avlInsert();});
+</script>
+</body>
+</html>
